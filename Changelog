@@ -1,0 +1,15 @@
+    // TODO: 14/11/2022 add an "all images" filter option
+    // TODO: 14/11/2022 check out astas stable diffusion thing to maybe make better ones
+1.0.b
+Adjusted - !cld tag to image 3
+Fixed - Should now consistently apply images to player owned planets without one
+
+1.0.a
+Added - Initial Release
+
+1.0.2
+Fixed - Crash with Tahlan
+
+1.0.1
+General
+Added - First beta release

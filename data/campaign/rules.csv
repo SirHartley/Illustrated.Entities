@@ -1,0 +1,5 @@
+id,trigger,conditions,script,text,options,notes
+,,,,,,
+illustratedEntities_marketOpen,OpenInteractionDialog,$hasMarket score:2,"ShowDefaultVisualWithSelector
+PrintDescription 3
+FireBest MarketPostOpen",Your $shipOrFleet approaches $entityName.,,
