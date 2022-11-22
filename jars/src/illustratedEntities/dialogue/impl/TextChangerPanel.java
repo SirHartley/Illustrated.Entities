@@ -8,6 +8,7 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.loading.Description;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
+import illustratedEntities.dialogue.panel.FramedCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.InteractionDialogCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.NoFrameCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.VisualCustomPanel;
@@ -26,7 +27,7 @@ public class TextChangerPanel {
     protected static final float PANEL_WIDTH_1 = 580;
     protected static final float BUTTON_HEIGHT = 30;
     protected static final float SELECT_BUTTON_WIDTH = 95f;
-    protected static final float TAG_PANEL_HEGHT = 210f;
+    protected static final float TEXT_FIELD_PANEL_HEIGHT = 300f;
 
     public static final String TEXTFIELD_KEY = "$Illent_textField_";
 
@@ -120,10 +121,10 @@ public class TextChangerPanel {
                     data.apply();
                     dataMemory.set(data.descriptionNum, data);
 
-                    dialogue.getTextPanel().addPara("Description 1");
+                    dialogue.getTextPanel().addPara("Planet Description");
                     dialogue.getTextPanel().addPara(data.parseStringMap(data.stringMap1));
                     dialogue.getTextPanel().addPara("");
-                    dialogue.getTextPanel().addPara("Description 2");
+                    dialogue.getTextPanel().addPara("Colony Description");
                     dialogue.getTextPanel().addPara(data.parseStringMap(data.stringMap2));
                 } else dialogue.getTextPanel().addPara("Enter a description to change to.");
             }
@@ -131,15 +132,22 @@ public class TextChangerPanel {
 
         VisualCustomPanel.getPlugin().addButton(entry);
         selectionPanel.addUIElement(anchor).rightOfMid(lastUsedAnchor, opad);
+        TooltipMakerAPI lastMainPanelAnchor = anchor;
+
         TextDataEntry textDataEntry = TextHandler.getDataForEntity(dialogue.getInteractionTarget());
 
         for (int textNum = 1; textNum <= 2; textNum++) {
-            anchor = selectionPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
+
+            //create new panel
+            final CustomPanelAPI textFieldPanel = selectionPanel.createCustomPanel(PANEL_WIDTH_1, TEXT_FIELD_PANEL_HEIGHT, new FramedCustomPanelPlugin(0.1f, bgColour, false));
+            TooltipMakerAPI textFieldPanelAnchor = selectionPanel.createUIElement(PANEL_WIDTH_1, TEXT_FIELD_PANEL_HEIGHT, true);
+
+            anchor = textFieldPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
 
             String heading = textNum == 1 ? " [displayed on the planet]" : " [displayed when docking]";
 
             anchor.addSectionHeading("Description " + textNum + heading, Alignment.MID, 5f);
-            selectionPanel.addUIElement(anchor).belowLeft(lastUsedAnchor, 10f); //first in row
+            textFieldPanel.addUIElement(anchor).inTL(0f, 0f); //first in row
             lastUsedAnchor = anchor;
 
             Description description = null;
@@ -149,7 +157,7 @@ public class TextChangerPanel {
             if (description == null || (description.getText1().contains(illegalString) && description.getText3().contains(illegalString))) description = Global.getSettings().getDescription(dialogue.getInteractionTarget().getCustomDescriptionId(), Description.Type.CUSTOM);
 
             for (int lineNum = 1; lineNum <= TextDataEntry.LINE_AMT; lineNum++) { //1 to 10
-                anchor = selectionPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
+                anchor = textFieldPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
                 TextFieldAPI t1 = anchor.addTextField(PANEL_WIDTH_1 - 4f, BUTTON_HEIGHT, Fonts.DEFAULT_SMALL, 0f);
                 t1.setHandleCtrlV(true);
 
@@ -181,10 +189,15 @@ public class TextChangerPanel {
 
                 mem.set(TEXTFIELD_KEY + textNum + lineNum, t1, 0f);
 
-                selectionPanel.addUIElement(anchor).belowLeft(lastUsedAnchor, spad); //first in row
+                textFieldPanel.addUIElement(anchor).belowLeft(lastUsedAnchor, spad); //first in row
                 lastUsedAnchor = anchor;
             }
+
+            textFieldPanelAnchor.addCustom(textFieldPanel, 0f);
+            selectionPanel.addUIElement(textFieldPanelAnchor).belowMid(lastMainPanelAnchor, 0f);
+            lastMainPanelAnchor = textFieldPanelAnchor;
         }
+
 
         panelTooltip.addCustom(selectionPanel, 0f); //add panel
         VisualCustomPanel.addTooltipToPanel();

@@ -13,7 +13,7 @@ public class TextDataEntry {
 
     public static final String ID_MEM_KEY = "$Illent_TextMemoryID";
     public static final String DEFAULT_PREFIX = "illent_desc_";
-    public static int LINE_AMT = 7;
+    public static int LINE_AMT = 10;
 
     public int descriptionNum;
     public String entityID;
