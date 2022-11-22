@@ -75,7 +75,7 @@ public class TextDataEntry {
                 s = "\n\n"; //its an empty line and there is one following it
                 out.append(s);
             } else if (!s.isEmpty()){
-                if (stringMap.containsKey(i -1) && !stringMap.get(i - 1).isEmpty()) out.append(" ");
+                if (stringMap.containsKey(i -1) && !stringMap.get(i - 1).isEmpty() && !Character.isWhitespace(out.charAt(out.length()-1))) out.append(" ");
                 out.append(s);
             }
         }

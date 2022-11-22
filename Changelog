@@ -1,5 +1,7 @@
 
     // TODO: 14/11/2022 check out astas stable diffusion thing to maybe make better ones
+1.1.b
+Adjusted - Now removes accidental double spaces on line breaks
 
 1.1.a
 Added - In-game overlay allowing you to change planet and colony descriptions and texts
