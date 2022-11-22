@@ -37,6 +37,10 @@ public class ModPlugin extends BaseModPlugin {
         if(Settings.APPLY_RANDOM) ImageHandler.addRandomImagesToMarketsWithoutImage();
         ImageHandler.loadImagesForCurrentLocation();
 
+        devActions();
+    }
+
+    private void devActions(){
         if (Global.getSettings().isDevMode()) {
             MarketInfoPrinter.register();
 
