@@ -5,7 +5,7 @@
 Added - In-game overlay allowing you to change planet and colony descriptions and texts
 Added - Setting to set the "Display duplicates" button to true by default
 Fixed - Should now consistently apply illustrations to player owned planets without image
-todo Fixed - Removed signature from image 12
+Fixed - Removed signature from image 12
 Fixed - Added !cld tag to image 3
 
 1.0.a
