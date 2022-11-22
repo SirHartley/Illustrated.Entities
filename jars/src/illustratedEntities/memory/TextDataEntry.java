@@ -3,6 +3,7 @@ package illustratedEntities.memory;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.loading.Description;
+import illustratedEntities.helper.Settings;
 import illustratedEntities.helper.TextHandler;
 
 import java.util.HashMap;
@@ -11,7 +12,6 @@ import java.util.Map;
 public class TextDataEntry {
     public static final String ID_MEM_KEY = "$Illent_TextMemoryID";
     public static final String DEFAULT_PREFIX = "illent_desc_";
-    public static int LINE_AMT = 10;
 
     public int descriptionNum;
     public String entityID;
@@ -68,7 +68,7 @@ public class TextDataEntry {
     public String parseStringMap(Map<Integer, String> stringMap){
         StringBuilder out = new StringBuilder();
 
-        for (int i = 1; i <= LINE_AMT; i++){
+        for (int i = 1; i <= Settings.LINE_AMT; i++){
             String s = stringMap.containsKey(i) ? stringMap.get(i) : "";
 
             if (s.isEmpty() && stringMap.containsKey(i +1) && !stringMap.get(i + 1).isEmpty()) {

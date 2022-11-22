@@ -14,6 +14,7 @@ import illustratedEntities.dialogue.panel.VisualCustomPanel;
 import illustratedEntities.helper.ImageHandler;
 import illustratedEntities.helper.ImagePicker;
 import illustratedEntities.helper.ImageTags;
+import illustratedEntities.helper.Settings;
 import illustratedEntities.memory.ImageDataEntry;
 import illustratedEntities.memory.ImageDataMemory;
 
@@ -37,6 +38,7 @@ public class ImageSelectorPanel {
     protected static final String SHOW_FILTER = "$illent_showFilter";
     protected static final String ALLOW_DUPES = "$illent_dupes";
     protected static final String TAG_SET = "$illent_tagList";
+    protected static final String FIRST_DISPLAY = "$illent_firstDisplay";
 
     public void showPanel(InteractionDialogAPI dialogue) {
         VisualCustomPanel.createPanel(dialogue, true);
@@ -61,6 +63,12 @@ public class ImageSelectorPanel {
         InteractionDialogCustomPanelPlugin.ButtonEntry entry;
 
         MemoryAPI mem = Global.getSector().getMemoryWithoutUpdate();
+
+        if (mem.getBoolean(FIRST_DISPLAY)){
+            mem.set(FIRST_DISPLAY, true, 0f);
+            if (Settings.DEFAULT_ENABLE_DUPES) mem.set(ALLOW_DUPES, true, 0f);
+        }
+
         boolean allowDupes = mem.getBoolean(ALLOW_DUPES);
         boolean showFilter = mem.getBoolean(SHOW_FILTER);
 

@@ -13,6 +13,7 @@ import illustratedEntities.dialogue.panel.FramedCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.InteractionDialogCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.NoFrameCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.VisualCustomPanel;
+import illustratedEntities.helper.Settings;
 import illustratedEntities.helper.TextHandler;
 import illustratedEntities.helper.WordUtils;
 import illustratedEntities.memory.TextDataEntry;
@@ -167,7 +168,7 @@ public class TextChangerPanel {
                 }
 
                 for (int textNum = 1; textNum <= 2; textNum++) {
-                    for (int lineNum = 1; lineNum <= TextDataEntry.LINE_AMT; lineNum++) {
+                    for (int lineNum = 1; lineNum <= Settings.LINE_AMT; lineNum++) {
                         TextFieldAPI s = (TextFieldAPI) mem.get(TEXTFIELD_KEY + textNum + lineNum);
                         data.setString(textNum, lineNum, s.getText());
                     }
@@ -212,7 +213,7 @@ public class TextChangerPanel {
             if (textDataEntry == null) description = Global.getSettings().getDescription(dialogue.getInteractionTarget().getCustomDescriptionId(), Description.Type.PLANET);
             if (description == null || (description.getText1().contains(illegalString) && description.getText3().contains(illegalString))) description = Global.getSettings().getDescription(dialogue.getInteractionTarget().getCustomDescriptionId(), Description.Type.CUSTOM);
 
-            for (int lineNum = 1; lineNum <= TextDataEntry.LINE_AMT; lineNum++) { //1 to 10
+            for (int lineNum = 1; lineNum <= Settings.LINE_AMT; lineNum++) { //1 to 10
                 anchor = textFieldPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
                 TextFieldAPI t1 = anchor.addTextField(PANEL_WIDTH_1 - 4f, BUTTON_HEIGHT, Fonts.DEFAULT_SMALL, 0f);
                 t1.setHandleCtrlV(true);
