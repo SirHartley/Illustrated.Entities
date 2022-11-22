@@ -12,6 +12,10 @@ public class TextDataMemory {
     private Map<Integer, TextDataEntry> dataMap = new HashMap<>();
 
     public int getNexFreetNum(){
+        for (int i = 1; i <= dataMap.size(); i++){
+            if (!dataMap.containsKey(i)) return i;
+        }
+
         return dataMap.size() + 1; //nextnum;
     }
 
@@ -22,6 +26,14 @@ public class TextDataMemory {
             TextDataMemory memory = new TextDataMemory();
             mem.set(TEXT_MEMORY, memory);
             return memory;
+        }
+    }
+
+    public boolean remove(int i){
+        if (!dataMap.containsKey(i)) return false;
+        else {
+            dataMap.remove(i);
+            return true;
         }
     }
 

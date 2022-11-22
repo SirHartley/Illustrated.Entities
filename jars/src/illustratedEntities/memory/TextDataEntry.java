@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TextDataEntry {
-    // TODO: 20/11/2022 descriptions get cleared once the game is restarted, so we have to save them, then regenerate and apply on game start
-
     public static final String ID_MEM_KEY = "$Illent_TextMemoryID";
     public static final String DEFAULT_PREFIX = "illent_desc_";
     public static int LINE_AMT = 10;

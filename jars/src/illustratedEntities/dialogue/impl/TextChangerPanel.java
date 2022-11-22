@@ -1,6 +1,7 @@
 package illustratedEntities.dialogue.impl;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.Script;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -16,6 +17,7 @@ import illustratedEntities.helper.TextHandler;
 import illustratedEntities.helper.WordUtils;
 import illustratedEntities.memory.TextDataEntry;
 import illustratedEntities.memory.TextDataMemory;
+import org.lwjgl.opencl.CL;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class TextChangerPanel {
     protected static final float TEXT_FIELD_PANEL_HEIGHT = 300f;
 
     public static final String TEXTFIELD_KEY = "$Illent_textField_";
+    public static final String CLEAR = "$Illent_clearTextfields";
 
     public void showPanel(InteractionDialogAPI dialogue) {
         VisualCustomPanel.createPanel(dialogue, true);
@@ -92,8 +95,61 @@ public class TextChangerPanel {
         selectionPanel.addUIElement(anchor).inTL(spad, opad);
         lastUsedAnchor = anchor;
 
+        buttonId = "clear";
+        bgColour = new Color(200, 160, 10, 255);
+        anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, false);
+        button = anchor.addButton("Clear", buttonId, baseColor, bgColour, Alignment.MID, CutStyle.C2_MENU, SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, 0);
+        entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
+            @Override
+            public void onToggle() {
+                //reset to what it was when the panel was first opened
+                Global.getSector().getMemoryWithoutUpdate().set(CLEAR, true, 0f);
+                new TextChangerPanel().showPanel(dialogue);
+            }
+        };
+
+        VisualCustomPanel.getPlugin().addButton(entry);
+        selectionPanel.addUIElement(anchor).inTL(spad, opad);
+        lastUsedAnchor = anchor;
+
+        buttonId = "delete";
+        bgColour = new Color(160, 30, 20, 255);
+        anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, false);
+        button = anchor.addButton("Delete", buttonId, baseColor, bgColour, Alignment.MID, CutStyle.C2_MENU, SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, 0);
+        entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
+            @Override
+            public void onToggle() {
+                //reset to what it was when the panel was first opened
+                Global.getSector().getCampaignUI().showConfirmDialog(
+                        "Are you sure? This will clear the description and cannot be undone.",
+                        "Confirm",
+                        "Return",
+                        new Script() {
+                            @Override
+                            public void run() {
+                                boolean success = TextHandler.deleteDescription(dialogue.getInteractionTarget());
+
+                                if(success){
+                                    Global.getSector().getMemoryWithoutUpdate().set(CLEAR, true, 0f);
+                                    dialogue.getTextPanel().addPara("Description deleted.", Misc.getHighlightColor());
+                                } else  dialogue.getTextPanel().addPara("There is no description to delete!", Misc.getHighlightColor());
+
+                                new TextChangerPanel().showPanel(dialogue);
+                            }
+                        },
+                        null);
+                Global.getSector().getMemoryWithoutUpdate().set(CLEAR, true, 0f);
+                new TextChangerPanel().showPanel(dialogue);
+            }
+        };
+
+        VisualCustomPanel.getPlugin().addButton(entry);
+        selectionPanel.addUIElement(anchor).inTL(spad, opad);
+        lastUsedAnchor = anchor;
+
         buttonId = "confirm";
         bgColour = new Color(50, 130, 0, 255);
+        baseColor = Color.BLACK;
         anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, false);
         button = anchor.addButton("Apply", buttonId, baseColor, bgColour, Alignment.MID, CutStyle.C2_MENU, SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, 0);
         entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
@@ -161,31 +217,29 @@ public class TextChangerPanel {
                 TextFieldAPI t1 = anchor.addTextField(PANEL_WIDTH_1 - 4f, BUTTON_HEIGHT, Fonts.DEFAULT_SMALL, 0f);
                 t1.setHandleCtrlV(true);
 
-                if (textDataEntry != null) {
-                    String s = textDataEntry.getString(textNum, lineNum);
-                    if (s != null && !s.startsWith("\n")) t1.setText(s);
-                } else if(!description.getText1().contains(illegalString) && !description.getText3().contains(illegalString)){
-                    //80 caracters per line
-                    //70 to make sure it fits
+                if (!mem.getBoolean(CLEAR)){
+                    if (textDataEntry != null) {
+                        String s = textDataEntry.getString(textNum, lineNum);
+                        if (s != null && !s.startsWith("\n")) t1.setText(s);
+                    } else if(!description.getText1().contains(illegalString) && !description.getText3().contains(illegalString)){
+                        int charNum = 80;
+                        String s = textNum == 1 ? description.getText1() : description.getText3();
 
+                        s = WordUtils.wrap(s, charNum);
+                        String[] stringArray = s.split("\\r?\\n");
+                        List<String> cleanedStringList = new ArrayList<>();
 
-                    int charNum = 70;
-                    String s = textNum == 1 ? description.getText1() : description.getText3();
+                        for (String line : stringArray){
+                            StringBuilder builder = new StringBuilder(line);
+                            if (Character.isWhitespace(builder.charAt(0))) builder.deleteCharAt(0);
+                            if (Character.isWhitespace(builder.charAt(builder.toString().length()-1))) builder.deleteCharAt(builder.toString().length()-1);
 
-                    s = WordUtils.wrap(s, charNum);
-                    String[] stringArray = s.split("\\r?\\n");
-                    List<String> cleanedStringList = new ArrayList<>();
+                            cleanedStringList.add(builder.toString());
+                        }
 
-                    for (String line : stringArray){
-                        StringBuilder builder = new StringBuilder(line);
-                        if (Character.isWhitespace(builder.charAt(0))) builder.deleteCharAt(0);
-                        if (Character.isWhitespace(builder.charAt(builder.toString().length()-1))) builder.deleteCharAt(builder.toString().length()-1);
-
-                        cleanedStringList.add(builder.toString());
+                        if (lineNum <= cleanedStringList.size()) t1.setText(cleanedStringList.get(lineNum - 1));
                     }
-
-                    if (lineNum <= cleanedStringList.size()) t1.setText(cleanedStringList.get(lineNum - 1));
-                }
+                } else mem.unset(CLEAR);
 
                 mem.set(TEXTFIELD_KEY + textNum + lineNum, t1, 0f);
 

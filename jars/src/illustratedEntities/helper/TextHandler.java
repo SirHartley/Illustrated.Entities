@@ -20,4 +20,15 @@ public class TextHandler {
             e.apply();
         }
     }
+
+    public static boolean deleteDescription(SectorEntityToken t){
+        TextDataEntry e = getDataForEntity(t);
+        if (e == null) return false;
+
+        t.setCustomDescriptionId(null);
+        t.getMemoryWithoutUpdate().unset(TextDataEntry.ID_MEM_KEY);
+        TextDataMemory.getInstance().remove(e.descriptionNum);
+
+        return true;
+    }
 }
