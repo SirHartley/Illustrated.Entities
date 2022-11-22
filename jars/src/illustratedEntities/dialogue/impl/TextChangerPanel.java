@@ -2,6 +2,7 @@ package illustratedEntities.dialogue.impl;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.loading.Description;
@@ -10,9 +11,15 @@ import com.fs.starfarer.api.util.Misc;
 import illustratedEntities.dialogue.panel.InteractionDialogCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.NoFrameCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.VisualCustomPanel;
+import illustratedEntities.helper.TextHandler;
+import illustratedEntities.helper.WordUtils;
 import illustratedEntities.memory.TextDataEntry;
+import illustratedEntities.memory.TextDataMemory;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TextChangerPanel {
 
@@ -20,6 +27,8 @@ public class TextChangerPanel {
     protected static final float BUTTON_HEIGHT = 30;
     protected static final float SELECT_BUTTON_WIDTH = 95f;
     protected static final float TAG_PANEL_HEGHT = 210f;
+
+    public static final String TEXTFIELD_KEY = "$Illent_textField_";
 
     public void showPanel(InteractionDialogAPI dialogue) {
         VisualCustomPanel.createPanel(dialogue, true);
@@ -66,6 +75,8 @@ public class TextChangerPanel {
         selectionPanel.addUIElement(anchor).inTR(spad, opad); //last in row
 
         buttonId = "reset";
+        baseColor = Color.BLACK;
+        bgColour = Color.GRAY;
         anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, false);
         button = anchor.addButton("Reset", buttonId, baseColor, bgColour, Alignment.MID, CutStyle.C2_MENU, SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, 0);
         entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
@@ -81,45 +92,105 @@ public class TextChangerPanel {
         lastUsedAnchor = anchor;
 
         buttonId = "confirm";
+        bgColour = new Color(50, 130, 0, 255);
         anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, false);
         button = anchor.addButton("Apply", buttonId, baseColor, bgColour, Alignment.MID, CutStyle.C2_MENU, SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, 0);
         entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
             @Override
             public void onToggle() {
                 //save text field contents to planet desc
-                TextDataEntry e = new TextDataEntry();
-                e.descriptionNum = 1;
-                e.entityID = dialogue.getInteractionTarget().getId();
+                SectorEntityToken t = dialogue.getInteractionTarget();
+                TextDataEntry data = TextHandler.getDataForEntity(t);
+                TextDataMemory dataMemory = TextDataMemory.getInstance();
+                MemoryAPI mem = Global.getSector().getMemoryWithoutUpdate();
 
-                e.getDescription().setText1(t1.getText());
-                e.apply();
+                if (data == null) {
+                    int i = dataMemory.getNexFreetNum();
+                    data = new TextDataEntry(i, t.getId());
+                }
+
+                for (int textNum = 1; textNum <= 2; textNum++) {
+                    for (int lineNum = 1; lineNum <= TextDataEntry.LINE_AMT; lineNum++) {
+                        TextFieldAPI s = (TextFieldAPI) mem.get(TEXTFIELD_KEY + textNum + lineNum);
+                        data.setString(textNum, lineNum, s.getText());
+                    }
+                }
+
+                if (data.isValid()){
+                    data.apply();
+                    dataMemory.set(data.descriptionNum, data);
+
+                    dialogue.getTextPanel().addPara("Description 1");
+                    dialogue.getTextPanel().addPara(data.parseStringMap(data.stringMap1));
+                    dialogue.getTextPanel().addPara("");
+                    dialogue.getTextPanel().addPara("Description 2");
+                    dialogue.getTextPanel().addPara(data.parseStringMap(data.stringMap2));
+                } else dialogue.getTextPanel().addPara("Enter a description to change to.");
             }
         };
 
         VisualCustomPanel.getPlugin().addButton(entry);
         selectionPanel.addUIElement(anchor).rightOfMid(lastUsedAnchor, opad);
+        TextDataEntry textDataEntry = TextHandler.getDataForEntity(dialogue.getInteractionTarget());
 
-        // TODO: 20/11/2022 add all text fields as transient memory entry
-        // TODO: 20/11/2022 get description entry for this planet or generate new one, fill it with current text
-        // TODO: 20/11/2022 fill text fields with description text (cut if needed)
-        // TODO: 20/11/2022 on confirm, set new desc id and play back to mem, apply custom id num to this planet
-
-        for (int i = 1; i <= 10; i++){ //1 to 10
+        for (int textNum = 1; textNum <= 2; textNum++) {
             anchor = selectionPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
-            t1 = anchor.addTextField(PANEL_WIDTH_1-4f,BUTTON_HEIGHT, Fonts.DEFAULT_SMALL, 0f);
-            t1.setHandleCtrlV(true);
 
-            selectionPanel.addUIElement(anchor).belowLeft(lastUsedAnchor, i == 0 ? opad : spad); //first in row
+            String heading = textNum == 1 ? " [displayed on the planet]" : " [displayed when docking]";
+
+            anchor.addSectionHeading("Description " + textNum + heading, Alignment.MID, 5f);
+            selectionPanel.addUIElement(anchor).belowLeft(lastUsedAnchor, 10f); //first in row
             lastUsedAnchor = anchor;
+
+            Description description = null;
+            String illegalString = "No description... yet";
+
+            if (textDataEntry == null) description = Global.getSettings().getDescription(dialogue.getInteractionTarget().getCustomDescriptionId(), Description.Type.PLANET);
+            if (description == null || (description.getText1().contains(illegalString) && description.getText3().contains(illegalString))) description = Global.getSettings().getDescription(dialogue.getInteractionTarget().getCustomDescriptionId(), Description.Type.CUSTOM);
+
+            for (int lineNum = 1; lineNum <= TextDataEntry.LINE_AMT; lineNum++) { //1 to 10
+                anchor = selectionPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
+                TextFieldAPI t1 = anchor.addTextField(PANEL_WIDTH_1 - 4f, BUTTON_HEIGHT, Fonts.DEFAULT_SMALL, 0f);
+                t1.setHandleCtrlV(true);
+
+                if (textDataEntry != null) {
+                    String s = textDataEntry.getString(textNum, lineNum);
+                    if (s != null && !s.startsWith("\n")) t1.setText(s);
+                } else if(!description.getText1().contains(illegalString) && !description.getText3().contains(illegalString)){
+                    //80 caracters per line
+                    //70 to make sure it fits
+
+
+                    int charNum = 70;
+                    String s = textNum == 1 ? description.getText1() : description.getText3();
+
+                    s = WordUtils.wrap(s, charNum);
+                    String[] stringArray = s.split("\\r?\\n");
+                    List<String> cleanedStringList = new ArrayList<>();
+
+                    for (String line : stringArray){
+                        StringBuilder builder = new StringBuilder(line);
+                        if (Character.isWhitespace(builder.charAt(0))) builder.deleteCharAt(0);
+                        if (Character.isWhitespace(builder.charAt(builder.toString().length()-1))) builder.deleteCharAt(builder.toString().length()-1);
+
+                        cleanedStringList.add(builder.toString());
+                    }
+
+                    if (lineNum <= cleanedStringList.size()) t1.setText(cleanedStringList.get(lineNum - 1));
+                }
+
+                mem.set(TEXTFIELD_KEY + textNum + lineNum, t1, 0f);
+
+                selectionPanel.addUIElement(anchor).belowLeft(lastUsedAnchor, spad); //first in row
+                lastUsedAnchor = anchor;
+            }
         }
 
         panelTooltip.addCustom(selectionPanel, 0f); //add panel
         VisualCustomPanel.addTooltipToPanel();
     }
 
-    public TextFieldAPI t1 = null;
-
-    private void printDefaultText(InteractionDialogAPI dialogue){
+    private void printDefaultText(InteractionDialogAPI dialogue) {
         Description desc = Global.getSettings().getDescription(dialogue.getInteractionTarget().getCustomDescriptionId(), Description.Type.CUSTOM);
         if (desc.hasText3()) dialogue.getTextPanel().addParagraph(desc.getText3());
 

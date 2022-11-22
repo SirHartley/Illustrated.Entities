@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import illustratedEntities.dev.MarketInfoPrinter;
 import illustratedEntities.helper.ImageHandler;
 import illustratedEntities.helper.Settings;
+import illustratedEntities.helper.TextHandler;
 import illustratedEntities.listeners.DecivImageRemover;
 import illustratedEntities.listeners.ImageOnJumpLoader;
 import illustratedEntities.listeners.NewColonyImageAdder;
@@ -29,6 +30,7 @@ public class ModPlugin extends BaseModPlugin {
 
         ImageHandler.cleanseLeftoverImagesFromRemovedMarkets();
         ImageHandler.reapplyAllImages();
+        TextHandler.applyAllEntries();
 
         ImageHandler.addImagesToPlayerMarkets();
         if(Settings.APPLY_PRESET) ImageHandler.addImagesToSpecifiedMarkets();
