@@ -95,6 +95,7 @@ public class TextChangerPanel {
         VisualCustomPanel.getPlugin().addButton(entry);
         selectionPanel.addUIElement(anchor).inTL(spad, opad);
         lastUsedAnchor = anchor;
+        TooltipMakerAPI firstAnchor = anchor;
 
         buttonId = "clear";
         bgColour = new Color(200, 160, 10, 255);
@@ -110,7 +111,7 @@ public class TextChangerPanel {
         };
 
         VisualCustomPanel.getPlugin().addButton(entry);
-        selectionPanel.addUIElement(anchor).inTL(spad, opad);
+        selectionPanel.addUIElement(anchor).rightOfMid(lastUsedAnchor, opad);
         lastUsedAnchor = anchor;
 
         buttonId = "delete";
@@ -120,32 +121,12 @@ public class TextChangerPanel {
         entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
             @Override
             public void onToggle() {
-                //reset to what it was when the panel was first opened
-                Global.getSector().getCampaignUI().showConfirmDialog(
-                        "Are you sure? This will clear the description and cannot be undone.",
-                        "Confirm",
-                        "Return",
-                        new Script() {
-                            @Override
-                            public void run() {
-                                boolean success = TextHandler.deleteDescription(dialogue.getInteractionTarget());
-
-                                if(success){
-                                    Global.getSector().getMemoryWithoutUpdate().set(CLEAR, true, 0f);
-                                    dialogue.getTextPanel().addPara("Description deleted.", Misc.getHighlightColor());
-                                } else  dialogue.getTextPanel().addPara("There is no description to delete!", Misc.getHighlightColor());
-
-                                new TextChangerPanel().showPanel(dialogue);
-                            }
-                        },
-                        null);
-                Global.getSector().getMemoryWithoutUpdate().set(CLEAR, true, 0f);
-                new TextChangerPanel().showPanel(dialogue);
+                new ConfirmDialoguePanel().showPanel(dialogue);
             }
         };
 
         VisualCustomPanel.getPlugin().addButton(entry);
-        selectionPanel.addUIElement(anchor).inTL(spad, opad);
+        selectionPanel.addUIElement(anchor).rightOfMid(lastUsedAnchor, opad);
         lastUsedAnchor = anchor;
 
         buttonId = "confirm";
@@ -189,22 +170,17 @@ public class TextChangerPanel {
 
         VisualCustomPanel.getPlugin().addButton(entry);
         selectionPanel.addUIElement(anchor).rightOfMid(lastUsedAnchor, opad);
-        TooltipMakerAPI lastMainPanelAnchor = anchor;
-
         TextDataEntry textDataEntry = TextHandler.getDataForEntity(dialogue.getInteractionTarget());
 
+        lastUsedAnchor = firstAnchor;
+
         for (int textNum = 1; textNum <= 2; textNum++) {
-
-            //create new panel
-            final CustomPanelAPI textFieldPanel = selectionPanel.createCustomPanel(PANEL_WIDTH_1, TEXT_FIELD_PANEL_HEIGHT, new FramedCustomPanelPlugin(0.1f, bgColour, false));
-            TooltipMakerAPI textFieldPanelAnchor = selectionPanel.createUIElement(PANEL_WIDTH_1, TEXT_FIELD_PANEL_HEIGHT, true);
-
-            anchor = textFieldPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
+            anchor = selectionPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
 
             String heading = textNum == 1 ? " [displayed on the planet]" : " [displayed when docking]";
 
             anchor.addSectionHeading("Description " + textNum + heading, Alignment.MID, 5f);
-            textFieldPanel.addUIElement(anchor).inTL(0f, 0f); //first in row
+            selectionPanel.addUIElement(anchor).belowLeft(lastUsedAnchor, 10f); //first in row
             lastUsedAnchor = anchor;
 
             Description description = null;
@@ -214,7 +190,7 @@ public class TextChangerPanel {
             if (description == null || (description.getText1().contains(illegalString) && description.getText3().contains(illegalString))) description = Global.getSettings().getDescription(dialogue.getInteractionTarget().getCustomDescriptionId(), Description.Type.CUSTOM);
 
             for (int lineNum = 1; lineNum <= Settings.LINE_AMT; lineNum++) { //1 to 10
-                anchor = textFieldPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
+                anchor = selectionPanel.createUIElement(PANEL_WIDTH_1, BUTTON_HEIGHT, false);
                 TextFieldAPI t1 = anchor.addTextField(PANEL_WIDTH_1 - 4f, BUTTON_HEIGHT, Fonts.DEFAULT_SMALL, 0f);
                 t1.setHandleCtrlV(true);
 
@@ -240,20 +216,16 @@ public class TextChangerPanel {
 
                         if (lineNum <= cleanedStringList.size()) t1.setText(cleanedStringList.get(lineNum - 1));
                     }
-                } else mem.unset(CLEAR);
+                }
 
                 mem.set(TEXTFIELD_KEY + textNum + lineNum, t1, 0f);
 
-                textFieldPanel.addUIElement(anchor).belowLeft(lastUsedAnchor, spad); //first in row
+                selectionPanel.addUIElement(anchor).belowLeft(lastUsedAnchor, spad); //first in row
                 lastUsedAnchor = anchor;
             }
-
-            textFieldPanelAnchor.addCustom(textFieldPanel, 0f);
-            selectionPanel.addUIElement(textFieldPanelAnchor).belowMid(lastMainPanelAnchor, 0f);
-            lastMainPanelAnchor = textFieldPanelAnchor;
         }
 
-
+        mem.unset(CLEAR);
         panelTooltip.addCustom(selectionPanel, 0f); //add panel
         VisualCustomPanel.addTooltipToPanel();
     }

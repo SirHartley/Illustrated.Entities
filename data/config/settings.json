@@ -9,7 +9,7 @@
   "illent_allow_change_on_NPC_market": false, #False = Do not display "change image" button on NPC colonies. True = Display selector at every planet. Devmode displays it regardless of setting.
   "illent_dupe_selection_default_on": false, #False = set the "Display duplicates" button to False by default. True = set the "Display duplicates" button to True by default
   "illent_allow_text_edits": true, #True = display the option to edit planet/colony text
-  "illent_text_line_num": 10, #number of lines in the text change panel
+  "illent_text_line_num": 7, #number of lines in the text change panel - more than 7 does not properly display
 
   "ruleCommandPackages":[
     "illustratedEntities.dialogue.rules"

@@ -1,54 +1,14 @@
 package illustratedEntities.helper;
 
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WordUtils {
 
-    /**
-     * {@link WordUtils} instances should NOT be constructed in
-     * standard programming. Instead, the class should be used as
-     * {@code WordUtils.wrap("foo bar", 20);}.
-     *
-     * <p>This constructor is public to permit tools that require a JavaBean
-     * instance to operate.</p>
-     */
-    public WordUtils() {
-    }
-
-    /**
-     * Wraps a single line of text, identifying words by {@code ' '}.
-     *
-     * <p>New lines will be separated by the system property line separator.
-     * Very long words, such as URLs will <i>not</i> be wrapped.</p>
-     *
-     * <p>Leading spaces on a new line are stripped.
-     * Trailing spaces are not stripped.</p>
-     *
-     * (assuming that '\n' is the systems line separator)
-     *
-     * @param str  the String to be word wrapped, may be null
-     * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1
-     * @return a line with newlines inserted, {@code null} if null input
-     */
     public static String wrap(final String str, final int wrapLength) {
         return wrap(str, wrapLength, null, false);
     }
 
-    /**
-     * Wraps a single line of text, identifying words by {@code ' '}.
-     *
-     * <p>Leading spaces on a new line are stripped.
-     * Trailing spaces are not stripped.</p>
-
-     * @param str  the String to be word wrapped, may be null
-     * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1
-     * @param newLineStr  the string to insert for a new line,
-     *  {@code null} uses the system property line separator
-     * @param wrapLongWords  true if long words (such as URLs) should be wrapped
-     * @return a line with newlines inserted, {@code null} if null input
-     */
     public static String wrap(final String str, final int wrapLength, final String newLineStr, final boolean wrapLongWords) {
         return wrap(str, wrapLength, newLineStr, wrapLongWords, " ");
     }
@@ -66,20 +26,6 @@ public class WordUtils {
         return true;
     }
 
-    /**
-     * Wraps a single line of text, identifying words by {@code wrapOn}.
-     *
-     * <p>Leading spaces on a new line are stripped.
-     * Trailing spaces are not stripped.</p>
-     * @param str  the String to be word wrapped, may be null
-     * @param wrapLength  the column to wrap the words at, less than 1 is treated as 1
-     * @param newLineStr  the string to insert for a new line,
-     *  {@code null} uses the system property line separator
-     * @param wrapLongWords  true if long words (such as URLs) should be wrapped
-     * @param wrapOn regex expression to be used as a breakable characters,
-     *               if blank string is provided a space character will be used
-     * @return a line with newlines inserted, {@code null} if null input
-     */
     public static String wrap(final String str, int wrapLength, String newLineStr, final boolean wrapLongWords, String wrapOn) {
         if (str == null) {
             return null;
