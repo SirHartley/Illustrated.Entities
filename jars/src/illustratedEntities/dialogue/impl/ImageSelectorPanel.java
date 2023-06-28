@@ -2,6 +2,7 @@ package illustratedEntities.dialogue.impl;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
 import com.fs.starfarer.api.loading.Description;
@@ -284,7 +285,8 @@ public class ImageSelectorPanel {
                 entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
                     @Override
                     public void onToggle() {
-                        ImageHandler.setImage(dialogue.getInteractionTarget(), imageData);
+                        SectorEntityToken primary = dialogue.getInteractionTarget().getMarket().getPrimaryEntity();
+                        ImageHandler.setImage(primary, imageData);
                         dialogue.getTextPanel().clear();
                         printDefaultText(dialogue);
                         new ImageDisplayPanel().showPanel(dialogue);

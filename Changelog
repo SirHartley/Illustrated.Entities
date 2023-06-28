@@ -1,5 +1,10 @@
 
-    // TODO: 14/11/2022 check out astas stable diffusion thing to maybe make better ones
+1.2.a
+Added - setting specifying if the pre-set images overwrite the existing vanilla illustrations. off by default.
+Adjusted - 0.96 compatibility
+Fixed - Crash when abandoning a colony
+Fixed - Images not getting saved properly if applied via orbital station
+
 1.1.b
 Adjusted - Now removes accidental double spaces on line breaks
 

@@ -14,4 +14,5 @@ public class Settings {
     public static final boolean DEFAULT_ENABLE_DUPES = Global.getSettings().getBoolean("illent_dupe_selection_default_on");
     public static final boolean ENABLE_TEXT_CHANGER = Global.getSettings().getBoolean("illent_allow_text_edits");
     public static final int LINE_AMT = Global.getSettings().getInt("illent_text_line_num");
+    public static final boolean PRESET_OVERWRITE = Global.getSettings().getBoolean("illent_pre_set_images_overwrite");
 }

@@ -9,7 +9,6 @@ import com.fs.starfarer.api.util.Misc;
 import illustratedEntities.memory.ImageDataEntry;
 import illustratedEntities.memory.ImageDataMemory;
 import illustratedEntities.plugins.ModPlugin;
-import org.codehaus.janino.Mod;
 
 import java.util.ArrayList;
 
@@ -31,6 +30,8 @@ public class ImageHandler {
 
     public static void removeImageFrom(SectorEntityToken t){
         ModPlugin.log.info("removing image from " + t.getName());
+
+        if (!hasImage(t)) return;
 
         int num = getImageId(t);
         ImageDataMemory.getInstance().get(num).removeFromEntity(t);
@@ -92,7 +93,7 @@ public class ImageHandler {
         }
     }
 
-    public static void addImagesToSpecifiedMarkets(){
+    public static void addPresetImagesToMarkets(){
         ImageDataMemory memory = ImageDataMemory.getInstance();
 
         for (ImageDataEntry data : new ArrayList<>(memory.getDataMap().values())){
@@ -105,7 +106,8 @@ public class ImageHandler {
                         && t.getMarket() != null
                         && !t.getMarket().isPlanetConditionMarketOnly()) {
 
-                    ImageHandler.setImage(t, data);
+                    //the default pirate station visual will always get overridden
+                    if (Settings.PRESET_OVERWRITE || t.getCustomInteractionDialogImageVisual() == null || t.getCustomInteractionDialogImageVisual().getSpriteName().contains("pirate_station")) ImageHandler.setImage(t, data);
                 }
             }
         }
@@ -113,7 +115,7 @@ public class ImageHandler {
 
     public static void addImagesToPlayerMarkets(){
         for (MarketAPI m : Global.getSector().getEconomy().getMarketsCopy()){
-            if (!m.isPlayerOwned()) continue;
+            if (!m.isPlayerOwned() || hasImage(m.getPrimaryEntity())) continue;
 
             SectorEntityToken t = m.getPrimaryEntity();
 

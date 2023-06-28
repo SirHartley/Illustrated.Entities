@@ -33,7 +33,7 @@ public class ModPlugin extends BaseModPlugin {
         TextHandler.applyAllEntries();
 
         ImageHandler.addImagesToPlayerMarkets();
-        if(Settings.APPLY_PRESET) ImageHandler.addImagesToSpecifiedMarkets();
+        if(Settings.APPLY_PRESET) ImageHandler.addPresetImagesToMarkets();
         if(Settings.APPLY_RANDOM) ImageHandler.addRandomImagesToMarketsWithoutImage();
         ImageHandler.loadImagesForCurrentLocation();
 
