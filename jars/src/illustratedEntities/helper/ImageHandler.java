@@ -17,15 +17,16 @@ import static illustratedEntities.plugins.ModPlugin.HAS_INTERACTION_IMAGE;
 public class ImageHandler {
 
     public static boolean hasImage(SectorEntityToken t){
-        return t.hasTag(HAS_INTERACTION_IMAGE);
+        return t.hasTag(HAS_INTERACTION_IMAGE) || (Entities.STATION_BUILT_FROM_INDUSTRY.equals(t.getCustomEntityType()) && t.hasTag(ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE));
     }
 
     public static int getImageId(SectorEntityToken t){
         return t.getMemoryWithoutUpdate().getInt(HAS_INTERACTION_IMAGE);
     }
 
-    public static void setImage(SectorEntityToken t, ImageDataEntry entry){
-        entry.addToEntity(t);
+    public static void setImage(SectorEntityToken t, ImageDataEntry entry, boolean orbitalStation){
+        if(orbitalStation) entry.addToOrbitalStation(t);
+        else entry.addToEntity(t);
     }
 
     public static void removeImageFrom(SectorEntityToken t){
@@ -74,9 +75,9 @@ public class ImageHandler {
             for (SectorEntityToken t : m.getConnectedEntities()){
                 if (t == primary) continue;
 
-                if (t.getCustomEntityType().equals(Entities.STATION_BUILT_FROM_INDUSTRY) && t.getCustomInteractionDialogImageVisual() == null) {
+                if (t.getCustomEntityType().equals(Entities.STATION_BUILT_FROM_INDUSTRY) && (t.getCustomInteractionDialogImageVisual() == null || hasImage(t))) {
                     int id = getImageId(primary);
-                    setImage(t, ImageDataMemory.getInstance().get(id));
+                    setImage(t, ImageDataMemory.getInstance().get(id), true);
                 }
             }
         }
@@ -107,7 +108,7 @@ public class ImageHandler {
                         && !t.getMarket().isPlanetConditionMarketOnly()) {
 
                     //the default pirate station visual will always get overridden
-                    if (Settings.PRESET_OVERWRITE || t.getCustomInteractionDialogImageVisual() == null || t.getCustomInteractionDialogImageVisual().getSpriteName().contains("pirate_station")) ImageHandler.setImage(t, data);
+                    if (Settings.PRESET_OVERWRITE || t.getCustomInteractionDialogImageVisual() == null || t.getCustomInteractionDialogImageVisual().getSpriteName().contains("pirate_station")) ImageHandler.setImage(t, data, false);
                 }
             }
         }

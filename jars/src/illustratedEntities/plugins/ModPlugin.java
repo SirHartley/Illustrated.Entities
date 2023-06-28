@@ -8,16 +8,14 @@ import illustratedEntities.dev.MarketInfoPrinter;
 import illustratedEntities.helper.ImageHandler;
 import illustratedEntities.helper.Settings;
 import illustratedEntities.helper.TextHandler;
-import illustratedEntities.listeners.DecivImageRemover;
-import illustratedEntities.listeners.ImageOnJumpLoader;
-import illustratedEntities.listeners.NewColonyImageAdder;
-import illustratedEntities.listeners.PostDialogueVisualPanelCleaner;
+import illustratedEntities.listeners.*;
 import org.apache.log4j.Logger;
 
 public class ModPlugin extends BaseModPlugin {
     public static Logger log = Global.getLogger(ModPlugin.class);
     public static final String MOD_ID = "illustrated_entities";
     public static final String HAS_INTERACTION_IMAGE = "$illustrated_entity_image";
+    public static final String ORBITAL_HAS_INTERACTION_IMAGE = "$illustrated_entity_image_orbital";
 
     @Override
     public void onGameLoad(boolean newGame) {
@@ -27,6 +25,7 @@ public class ModPlugin extends BaseModPlugin {
         NewColonyImageAdder.register();
         ImageOnJumpLoader.register();
         PostDialogueVisualPanelCleaner.register();
+        OrbitalStationSynchListener.register();
 
         ImageHandler.cleanseLeftoverImagesFromRemovedMarkets();
         ImageHandler.reapplyAllImages();

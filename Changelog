@@ -3,7 +3,10 @@
 Added - setting specifying if the pre-set images overwrite the existing vanilla illustrations. off by default.
 Adjusted - 0.96 compatibility
 Fixed - Crash when abandoning a colony
-Fixed - Images not getting saved properly if applied via orbital station
+Fixed - Custom set images are no longer lost on save reload
+Fixed - Orbital Stations no longer have different visuals than planets until player leaves system
+Fixed - Custom images now get retained when set via orbital station
+Fixed - Custom images now immediately apply to orbital stations when leaving a planet
 
 1.1.b
 Adjusted - Now removes accidental double spaces on line breaks

@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static illustratedEntities.plugins.ModPlugin.HAS_INTERACTION_IMAGE;
+import static illustratedEntities.plugins.ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE;
 
 public class ImageDataEntry {
     public int id;
@@ -61,6 +62,15 @@ public class ImageDataEntry {
         if (!usedEntityIds.contains(entityID)) usedEntityIds.add(entityID);
 
         ImageDataMemory.getInstance().set(this.id, this);
+    }
+
+    public void addToOrbitalStation(SectorEntityToken t){
+        String path = getImagePath();
+        InteractionDialogImageVisual visual = new InteractionDialogImageVisual(path, 480, 300);
+
+        t.setCustomInteractionDialogImageVisual(visual);
+        t.getMemoryWithoutUpdate().set(ORBITAL_HAS_INTERACTION_IMAGE, id);
+        t.addTag(ORBITAL_HAS_INTERACTION_IMAGE);
     }
 
     public void removeFromEntity(SectorEntityToken t){
