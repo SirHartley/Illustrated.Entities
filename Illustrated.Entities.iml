@@ -11,5 +11,6 @@
     <orderEntry type="library" name="commons-compiler-jdk" level="application" />
     <orderEntry type="library" name="LazyLib" level="application" />
     <orderEntry type="library" name="MagicLib" level="application" />
+    <orderEntry type="library" name="starfarer_obf" level="application" />
   </component>
 </module>

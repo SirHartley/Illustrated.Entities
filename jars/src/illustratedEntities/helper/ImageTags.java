@@ -1,5 +1,6 @@
 package illustratedEntities.helper;
 
+import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.util.Pair;
 
 import java.util.ArrayList;
@@ -8,9 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 public class ImageTags {
-    
+
     public static final String
-            DERELICT = "drl",
+            DERELICT = "der",
+            RUINS = "rns",
             BARREN = "bar",
             DESERT = "dst",
             SNOW = "snw",
@@ -21,18 +23,19 @@ public class ImageTags {
             TERRAN = "ter",
             LAVA = "lav",
             ALIEN = "aln",
-            GAS = "gas",
+            GAS = "gas", //Always primary
             CITY = "cty",
             INTERIOR = "int",
             HABITABLE = "hab",
             MINE = "mne",
-            STATION = "sta",
+            STATION = "stn", //Always optional
             IRRADIATED = "irr",
             TOXIC = "tox",
             HOT = "hot",
             COLD = "cld",
             POLLUTED = "pol",
-            DEVELOPED = "dvl";
+            DEVELOPED = "dvl",
+            ATMOSPHERE = "atm";
 
     public static final List<Pair<String, String>> tagNameList = new ArrayList<Pair<String, String>>(){{
         add( new Pair<>(DERELICT, "derelict"));
@@ -104,7 +107,7 @@ public class ImageTags {
         //put("hot", new String[]{HOT}); // TODO: 09/11/2022 check if removing barren from here didn't make image selection too narrow
         //put("very_hot", new String[]{HOT});
         put("no_atmosphere", new String[]{INTERIOR});
-        put("mild_climate", new String[]{HABITABLE, CITY});
+        put("mild_climate", new String[]{HABITABLE});
         put("extreme_weather", new String[]{INTERIOR});
         put("irradiated", new String[]{IRRADIATED, ALIEN, INTERIOR});
     }};

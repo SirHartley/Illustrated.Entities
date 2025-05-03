@@ -33,12 +33,18 @@ public class Importer {
                 List<String> optionalTags = new ArrayList<>();
                 List<String> optionalExcludedTags = new ArrayList<>();
 
-                for (String s : row.getString("tags_required").replaceAll("\\s", "").split(";")){
+                for (String s : row.getString("tags_required").split("\\s+")){
+                    s = s.replaceAll("\\s", "");
+                    if (s.length() < 3) continue;
+
                     if (s.startsWith("!")) requiredExcludedTags.add(s.substring(1));
                     else requiredTags.add(s);
                 }
 
-                for (String s : row.getString("tags_optional").replaceAll("\\s", "").split(";")){
+                for (String s : row.getString("tags_optional").split("\\s+")){
+                    s = s.replaceAll("\\s", "");
+                    if (s.length() < 3) continue;
+
                     if (s.startsWith("!")) optionalExcludedTags.add(s.substring(1));
                     else optionalTags.add(s);
                 }

@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketConditionAPI;
 import com.fs.starfarer.api.impl.campaign.econ.ResourceDepositsCondition;
+import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.impl.campaign.ids.Entities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
@@ -136,7 +137,7 @@ public class ImagePicker {
                 applicableTags.add(ImageTags.INTERIOR);
             }
 
-            if (!m.isPlanetConditionMarketOnly() && m.getHazardValue() > 150f) applicableTags.add(ImageTags.INTERIOR);
+            if (!m.isPlanetConditionMarketOnly() && m.getHazardValue() > 175f) applicableTags.add(ImageTags.INTERIOR);
 
             int largestPlanet = 0;
             for (MarketAPI market : Misc.getFactionMarkets(m.getFactionId())) {
@@ -172,6 +173,15 @@ public class ImagePicker {
                     int mod = ResourceDepositsCondition.MODIFIER.get(condition.getId()) != null ? ResourceDepositsCondition.MODIFIER.get(condition.getId()) : 0;
                     if (mod > 0) applicableTags.add(ImageTags.MINE);
                 }
+            }
+
+            //if planet has no or toxic atmo, it does not have an atmo, otherwise, add atmo tag
+            if (Collections.disjoint(m.getConditions(), Arrays.asList(Conditions.NO_ATMOSPHERE, Conditions.TOXIC_ATMOSPHERE))){
+                applicableTags.add(ImageTags.ATMOSPHERE);
+            }
+
+            if (Misc.hasRuins(m)){
+                applicableTags.add(ImageTags.RUINS);
             }
 
             if (m.getTags().contains(Tags.NO_MARKET_INFO)) {
