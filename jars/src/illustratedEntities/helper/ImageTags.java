@@ -37,6 +37,8 @@ public class ImageTags {
             DEVELOPED = "dvl",
             ATMOSPHERE = "atm";
 
+    //if no t0 fit bump to t1
+
     public static final List<Pair<String, String>> tagNameList = new ArrayList<Pair<String, String>>(){{
         add( new Pair<>(DERELICT, "derelict"));
         add( new Pair<>(BARREN, "barren"));
