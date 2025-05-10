@@ -39,6 +39,7 @@ public class ImageSelectorPanel {
 
     protected static final String SHOW_FILTER = "$illent_showFilter";
     protected static final String ALLOW_DUPES = "$illent_dupes";
+    protected static final String MODE = "$illent_matchMode";
     protected static final String TAG_SET = "$illent_tagList";
     protected static final String FIRST_DISPLAY = "$illent_firstDisplay";
 
@@ -72,6 +73,7 @@ public class ImageSelectorPanel {
         }
 
         boolean allowDupes = mem.getBoolean(ALLOW_DUPES);
+        ImageTags.MatchMode mode = mem.get(MODE) != null ? (ImageTags.MatchMode) mem.get(MODE) : ImageTags.MatchMode.EXACT;
         boolean showFilter = mem.getBoolean(SHOW_FILTER);
 
         if (!mem.contains(TAG_SET)) mem.set(TAG_SET, ImagePicker.getTags(dialogue.getInteractionTarget()), 0f);
@@ -131,10 +133,38 @@ public class ImageSelectorPanel {
             selectionPanel.addUIElement(anchor).rightOfMid(lastUsedAnchor, opad);
             lastUsedAnchor = anchor;
 
+            //match type
+            buttonId = "matchMode";
+            anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH * 1.4f, BUTTON_HEIGHT, false);
+            button = anchor.addButton("Match: " + Misc.ucFirst(mode.toString().toLowerCase()), buttonId, baseColor, bgColour, Alignment.MID, CutStyle.C2_MENU,
+                    SELECT_BUTTON_WIDTH * 1.4f,
+                    BUTTON_HEIGHT,
+                    0);
+
+            entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
+                @Override
+                public void onToggle() {
+                    MemoryAPI mem = Global.getSector().getMemoryWithoutUpdate();
+
+                    ImageTags.MatchMode nextMode = mode;
+                    if (mode == ImageTags.MatchMode.EXACT) nextMode = ImageTags.MatchMode.BROAD;
+                    if (mode == ImageTags.MatchMode.BROAD) nextMode = ImageTags.MatchMode.ANY;
+                    if (mode == ImageTags.MatchMode.ANY) nextMode = ImageTags.MatchMode.EXACT;
+
+                    mem.set(MODE, nextMode, 0f);
+
+                    new ImageSelectorPanel().showPanel(dialogue);
+                }
+            };
+
+            VisualCustomPanel.getPlugin().addButton(entry);
+            selectionPanel.addUIElement(anchor).rightOfMid(lastUsedAnchor, opad);
+            lastUsedAnchor = anchor;
+
             buttonId = "duplicates";
-            anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH * 1.5f, BUTTON_HEIGHT, false);
+            anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH * 1.2f, BUTTON_HEIGHT, false);
             button = anchor.addAreaCheckbox(allowDupes ? "Duplicates: Yes" : "Duplicates: No", new Object(), baseColor, bgColour, brightColor, //new Color(255,255,255,0)
-                    SELECT_BUTTON_WIDTH * 1.5f,
+                    SELECT_BUTTON_WIDTH * 1.2f,
                     BUTTON_HEIGHT,
                     0f,
                     false);
@@ -182,7 +212,7 @@ public class ImageSelectorPanel {
                     buttonId = tag + (requiredTags.contains(tag) ? "-" : "+");
                     anchor = rowPanel.createUIElement(ARROW_BUTTON_SIZE, ARROW_BUTTON_SIZE, false);
                     bgColour = requiredTags.contains(tag) ? new Color(50, 130, 0, 255) : Misc.getGrayColor();
-                    button = anchor.addButton("+", buttonId, Color.BLACK, bgColour, ARROW_BUTTON_SIZE, ARROW_BUTTON_SIZE, 0);
+                    button = anchor.addButton("+", buttonId, Color.BLACK, bgColour, Alignment.MID, CutStyle.ALL, ARROW_BUTTON_SIZE, ARROW_BUTTON_SIZE, 0);
                     entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
                         @Override
                         public void onToggle() {
@@ -225,7 +255,7 @@ public class ImageSelectorPanel {
         }
 
         //PICTURES
-        List<Integer> imageList = new ArrayList<Integer>(ImagePicker.generateChoices(requiredTags, null, !allowDupes).keySet());
+        List<Integer> imageList = new ArrayList<Integer>(ImagePicker.generateChoices(requiredTags, null, !allowDupes, mode).keySet());
         Collections.sort(imageList);
 
         ImageDataMemory imageDataMemory = ImageDataMemory.getInstance();
@@ -281,7 +311,7 @@ public class ImageSelectorPanel {
 
                 buttonId = imageData.id + "_set";
                 anchor = rowPanel.createUIElement(SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, false);
-                button = anchor.addButton("Choose", buttonId, Color.BLACK, new Color(50, 130, 0, 255), SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, 0);
+                button = anchor.addButton("Apply", buttonId, Color.BLACK, new Color(50, 130, 0, 255), SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, 0);
 
                 entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
                     @Override

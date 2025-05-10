@@ -1,5 +1,10 @@
 1.3.a
-todo reroll image on NPC colony size change /+cty unless manually set / player
+Added - ~1300 new images
+Added - Removes images from Memory when unused! (star <3)
+Added - Image picker now respects colony size and will try to find a fitting image for the population size
+Added - Buttons to specify colony size matching when picking
+Fixed - Picker now respects the seed for image picking / randomisation options
+Removed - The entire old image set of ~600 images
 
 1.2.b
 Adjusted - 0.97 compatibility

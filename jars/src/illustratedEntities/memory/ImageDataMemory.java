@@ -39,4 +39,9 @@ public class ImageDataMemory {
     public Map<Integer, ImageDataEntry> getDataMap(){
         return dataMap;
     }
+
+    public void forceRefresh(){
+        dataMap = new HashMap<>();
+        loadInitialData();
+    }
 }

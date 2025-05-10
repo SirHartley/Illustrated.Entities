@@ -2,15 +2,16 @@
   "illent_csv_path": "data/config/image_data.csv",
   "illent_default_image_path": "graphics/illustrated_entities/images",
   "illent_apply_pre_set_images": true, #True = apply pre-set images to planets when specified. False = apply random ones (if allowed). Does not remove already placed images!
-  "illent_pre_set_images_overwrite": false, #true= pre-set images do overwrite vanilla interaction images.
-  "illent_apply_images_to_random_colonies": false, #True = Apply random images to planets without image - modded or otherwise. Does not remove already placed images if set to false.
+  "illent_pre_set_images_overwrite": true, #true= pre-set images do overwrite vanilla interaction images.
+  "illent_apply_images_to_random_colonies": true, #True = Apply random images to planets without image - modded or otherwise. Does not remove already placed images if set to false.
   "illent_overwrite_vanilla_illustrations": false, #NEW GAME ONLY. True = overwrites existing illustrations with random ones. Does not affect the preset images.
   "illent_respect_faction_when_picking": true, #True = Respect faction restrictions as per image_data.csv. Does not affect images that are already set.
   "illent_avoid_duplicates_if_possible": true, #True = try to avoid duplicates when picking images. Does not affect images that are already set.
   "illent_allow_change_on_NPC_market": false, #False = Do not display "change image" button on NPC colonies. True = Display selector at every planet. Devmode displays it regardless of setting.
   "illent_dupe_selection_default_on": false, #False = set the "Display duplicates" button to False by default. True = set the "Display duplicates" button to True by default
   "illent_allow_text_edits": true, #True = display the option to edit planet/colony text
-  "illent_text_line_num": 7, #number of lines in the text change panel - more than 7 does not properly display
+  "illent_text_line_num": 7, #number of lines in the text change panel - more than 7 does not properly display,
+  "illent_broadmatch": false, #is the mod allowed to pick images one for a population size that is one size larger or smaller that would fit the planet otherwise by default
 
   "ruleCommandPackages":[
     "illustratedEntities.dialogue.rules"

@@ -41,7 +41,7 @@ public class ImageHandler {
     public static int applyFittingRandomImageToEntity(SectorEntityToken t){
         if(t.hasTag(HAS_INTERACTION_IMAGE) || (!Settings.OVERWRITE_VANILLA && t.getCustomInteractionDialogImageVisual() != null)) return 0;
 
-        ImagePicker picker = new ImagePicker(t, Settings.AVOID_DUPLICATES, true);
+        ImagePicker picker = new ImagePicker(t, Settings.AVOID_DUPLICATES, ImageTags.MatchMode.EXACT, true);
         if (picker.isEmpty()) {
             ModPlugin.log.warn("Unable to pick interaction image for " + t.getName() + ", id " + t.getId());
             return 0;

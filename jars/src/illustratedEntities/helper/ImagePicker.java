@@ -15,6 +15,7 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 import illustratedEntities.memory.ImageDataEntry;
 import illustratedEntities.memory.ImageDataMemory;
 import illustratedEntities.plugins.ModPlugin;
+import org.lazywizard.lazylib.MathUtils;
 
 import java.util.*;
 
@@ -23,31 +24,36 @@ public class ImagePicker {
     private WeightedRandomPicker<Integer> picker;
     private Set<String> tags;
     private String faction;
+    private Random r;
 
-    public ImagePicker(SectorEntityToken t, boolean avoidDuplicates, boolean respectSeed) {
-        Random r = respectSeed ? new Random(t.getId().hashCode()) : new Random();
+    public ImagePicker(SectorEntityToken t, boolean avoidDuplicates, ImageTags.MatchMode mode, boolean respectSeed) {
+        this.r = respectSeed ? new Random(t.getId().hashCode()) : new Random();
         this.picker = new WeightedRandomPicker<>();
         this.tags = t != null ? getTags(t) : null;
 
         if (Settings.RESPECT_FACTION && t != null) {
-            if (t.getMarket() != null && t.getMarket().getFaction() != null)
-                this.faction = t.getMarket().getFactionId();
-            else if (t.getFaction() != null) t.getFaction().getId();
+            if (t.getMarket() != null && t.getMarket().getFaction() != null) faction = t.getMarket().getFactionId();
+            else if (t.getFaction() != null) faction = t.getFaction().getId();
             else faction = null;
         }
 
         ModPlugin.log.info("Generating Picker for " + (t != null ? t.getName() : null) + ", [" + (tags != null ? tags.toString() : null) + "]");
 
-        Map<Integer, Integer> baseChanceMap =generateChoices(tags, faction, avoidDuplicates);
+        Map<Integer, Integer> baseChanceMap = generateChoices(tags, faction, avoidDuplicates, mode);
 
         for (Map.Entry<Integer, Integer> entry : baseChanceMap.entrySet()) {
             //we use chance = total num * weight ^ 2 so a result with more tag matches is more likely to get picked against the mass of low matches
             picker.add(entry.getKey(), (float) (baseChanceMap.size() * Math.pow(entry.getValue(), 2)));
         }
 
-        //failsafe - if all images are in use, we allow duplicates even if it shouldn't be allowed.
+        //failsafe - if all images are in use, we allow broadmatch but keep duplicate settings
+        if (mode == ImageTags.MatchMode.EXACT && picker.isEmpty()){
+            generateChoices(tags, faction, avoidDuplicates, ImageTags.MatchMode.BROAD);
+        }
+
+        //failsafe - if all images are in use, we allow duplicates and ANY mode even if it shouldn't be allowed.
         if (avoidDuplicates && picker.isEmpty()) {
-            generateChoices(tags, faction, false);
+            generateChoices(tags, faction, false, ImageTags.MatchMode.ANY);
         }
     }
 
@@ -56,13 +62,13 @@ public class ImagePicker {
     }
 
     public int pick() {
-        return picker.pick();
+        return picker.pick(r);
     }
 
-    public static Map<Integer, Integer> generateChoices(Set<String> tags, String faction, boolean avoidDuplicates) {
+    public static Map<Integer, Integer> generateChoices(Set<String> tags, String faction, boolean avoidDuplicates, ImageTags.MatchMode mode) {
         Map<Integer, Integer> baseChanceMap = new HashMap<>();
 
-        int used = 0, faction_mismatch = 0, station = 0, gas = 0, tag_mismatch = 0, passed = 0;
+        int used = 0, faction_mismatch = 0, station = 0, gas = 0, tag_mismatch = 0, index_mismatch = 0, passed = 0;
 
         for (ImageDataEntry entry : ImageDataMemory.getInstance().getDataMap().values()) {
             if (avoidDuplicates && entry.isUsed()) {
@@ -85,12 +91,36 @@ public class ImagePicker {
                 continue;
             }
 
+            String targetIndex = null;
+            for (String s : tags) if (s.startsWith(ImageTags.INDEX)) targetIndex = s.substring(ImageTags.INDEX.length());
+
+            if (targetIndex != null && !targetIndex.equals("A") && mode != ImageTags.MatchMode.ANY){
+                if (!entry.index.equals("A")){
+                    int imageIndex = Integer.parseInt(entry.index);
+
+                    boolean match;
+                    int check = MathUtils.clamp(Integer.parseInt(targetIndex), 0,4);
+
+                    if (mode == ImageTags.MatchMode.BROAD) {
+                        int l1 = imageIndex + 1;
+                        int l2 = imageIndex - 1;
+                        match = check <= l1 && check >= l2;
+                    } else match = imageIndex == check; //else its exact
+
+                    if (!match) {
+                        index_mismatch++;
+                        continue;
+                    }
+                }
+            }
+
             int score = entry.weight;
 
             //normal cases - the image is valid if it has all required and no forbidden tags
-            if (tags.containsAll(entry.requiredTags) && Collections.disjoint(tags, entry.requiredExcludedTags)) score += entry.requiredTags.size() + entry.requiredExcludedTags.size();
+            if (tags.containsAll(entry.requiredTags) && Collections.disjoint(tags, entry.requiredExcludedTags))
+                score += entry.requiredTags.size() + entry.requiredExcludedTags.size();
             else {
-               tag_mismatch++;
+                tag_mismatch++;
                 continue;
             }
 
@@ -103,8 +133,10 @@ public class ImagePicker {
         }
 
         if (Global.getSettings().isDevMode()) ModPlugin.log.info(
-                "Passed: " + passed + "\n" +
+                "Checked: " + ImageDataMemory.getInstance().getDataMap().size() + "\n" +
+                        "Passed: " + passed + "\n" +
                         "Tag Mismatch: " + tag_mismatch + "\n" +
+                        "Index Mismatch: " + index_mismatch + "\n" +
                         "Used: " + used + "\n" +
                         "Faction Mismatch: " + faction_mismatch + "\n" +
                         "Needs Station: " + station + "\n" +
@@ -124,15 +156,10 @@ public class ImagePicker {
             for (Map.Entry<String, String[]> e : ImageTags.typeTagMap.entrySet()) {
                 if (type.contains(e.getKey())) applicableTags.addAll(Arrays.asList(e.getValue()));
             }
-
-            if (m != null
-                    && !m.isPlanetConditionMarketOnly()
-                    && m.getSize() > 4)
-                applicableTags.add(ImageTags.CITY);
         }
 
         if (m != null) {
-            if(!(t instanceof PlanetAPI) && !t.getCustomEntityType().equals(Entities.STATION_BUILT_FROM_INDUSTRY)) {
+            if (!(t instanceof PlanetAPI) && !t.getCustomEntityType().equals(Entities.STATION_BUILT_FROM_INDUSTRY)) {
                 applicableTags.add(ImageTags.STATION);
                 applicableTags.add(ImageTags.INTERIOR);
             }
@@ -147,7 +174,6 @@ public class ImagePicker {
             if (m.isPlayerOwned()) applicableTags.add(ImageTags.DEVELOPED);
 
             if (!m.isFreePort()
-                    && m.getSize() > 3
                     && !m.isHidden()
                     && largestPlanet > 5
                     && !Factions.PIRATES.equals(m.getFactionId())
@@ -176,11 +202,11 @@ public class ImagePicker {
             }
 
             //if planet has no or toxic atmo, it does not have an atmo, otherwise, add atmo tag
-            if (Collections.disjoint(m.getConditions(), Arrays.asList(Conditions.NO_ATMOSPHERE, Conditions.TOXIC_ATMOSPHERE))){
+            if (Collections.disjoint(m.getConditions(), Arrays.asList(Conditions.NO_ATMOSPHERE, Conditions.TOXIC_ATMOSPHERE))) {
                 applicableTags.add(ImageTags.ATMOSPHERE);
             }
 
-            if (Misc.hasRuins(m)){
+            if (Misc.hasRuins(m)) {
                 applicableTags.add(ImageTags.RUINS);
             }
 
@@ -188,14 +214,29 @@ public class ImagePicker {
                 applicableTags.clear();
                 applicableTags.add(ImageTags.DERELICT);
             }
+
+            applicableTags.add(ImageTags.INDEX + getDevelopmentIndexForMarket(m));
         }
 
-        if (applicableTags.isEmpty()) applicableTags.add(ImageTags.DERELICT);
+        if (applicableTags.isEmpty()) {
+            applicableTags.add(ImageTags.DERELICT);
+            applicableTags.add(ImageTags.INDEX + 0);
+        }
 
         return applicableTags;
     }
 
-    public List<Integer> getChoices(){
+    public List<Integer> getChoices() {
         return picker.getItems();
+    }
+
+    public static int getDevelopmentIndexForMarket(MarketAPI m) {
+        int level = 0;
+
+        if (m != null && !m.isPlanetConditionMarketOnly()) {
+            level += m.getSize() - 2;
+        }
+
+        return level;
     }
 }

@@ -11,6 +11,7 @@ import illustratedEntities.helper.ImageHandler;
 import illustratedEntities.helper.Settings;
 import illustratedEntities.helper.TextHandler;
 import illustratedEntities.listeners.*;
+import illustratedEntities.memory.ImageDataMemory;
 import org.apache.log4j.Logger;
 
 import java.awt.*;
@@ -32,6 +33,7 @@ public class ModPlugin extends BaseModPlugin {
         ImageOnJumpLoader.register();
         PostDialogueVisualPanelCleaner.register();
         OrbitalStationSynchListener.register();
+        ImageDataMemory.getInstance().forceRefresh();
 
         ImageHandler.cleanseLeftoverImagesFromRemovedMarkets();
         ImageHandler.reapplyAllImages();
@@ -56,7 +58,7 @@ public class ModPlugin extends BaseModPlugin {
                 }
             }
 
-            String[] glowTextures = {
+            /*String[] glowTextures = {
                     //"graphics/illustrated_entities/lights/night_lights_dense.png",
                     //"graphics/illustrated_entities/lights/night_lights_moderate.png",
                     //"graphics/illustrated_entities/lights/night_lights_sparse.png",
@@ -88,7 +90,7 @@ public class ModPlugin extends BaseModPlugin {
                 planet.applySpecChanges();
 
             }
-
+*/
             //ImageDataMemory.getInstance().loadInitialData();
         }
     }

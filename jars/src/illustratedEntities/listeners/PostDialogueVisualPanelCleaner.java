@@ -5,7 +5,10 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.util.DelayedActionScript;
 import illustratedEntities.dialogue.panel.VisualCustomPanel;
+import illustratedEntities.helper.ImageHandler;
+import illustratedEntities.loading.Importer;
 import illustratedEntities.memory.ImageDataEntry;
 import illustratedEntities.memory.ImageDataMemory;
 import illustratedEntities.plugins.ModPlugin;
@@ -30,6 +33,12 @@ public class PostDialogueVisualPanelCleaner extends BaseCampaignEventListener {
     public void reportShownInteractionDialog(InteractionDialogAPI dialog) {
         super.reportShownInteractionDialog(dialog);
         Global.getSector().addScript(new VisualPanelRemover());
+        Global.getSector().addScript(new DelayedActionScript(0.3f) {
+            @Override
+            public void doAction() {
+                for (ImageDataEntry entry : ImageDataMemory.getInstance().getDataMap().values()) if (!entry.isUsed()) entry.unload();
+            }
+        });
     }
 
     public static class VisualPanelRemover implements EveryFrameScript{
@@ -51,7 +60,6 @@ public class PostDialogueVisualPanelCleaner extends BaseCampaignEventListener {
             if (isDone) return;
 
             VisualCustomPanel.clearPanel();
-
             isDone = true;
         }
     }

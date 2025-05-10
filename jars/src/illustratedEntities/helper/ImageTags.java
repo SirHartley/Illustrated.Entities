@@ -24,7 +24,6 @@ public class ImageTags {
             LAVA = "lav",
             ALIEN = "aln",
             GAS = "gas", //Always primary
-            CITY = "cty",
             INTERIOR = "int",
             HABITABLE = "hab",
             MINE = "mne",
@@ -35,9 +34,8 @@ public class ImageTags {
             COLD = "cld",
             POLLUTED = "pol",
             DEVELOPED = "dvl",
-            ATMOSPHERE = "atm";
-
-    //if no t0 fit bump to t1
+            ATMOSPHERE = "atm",
+            INDEX = "index";
 
     public static final List<Pair<String, String>> tagNameList = new ArrayList<Pair<String, String>>(){{
         add( new Pair<>(DERELICT, "derelict"));
@@ -52,7 +50,6 @@ public class ImageTags {
         add( new Pair<>(LAVA, "lava"));
         add( new Pair<>(ALIEN, "strange"));
         add( new Pair<>(GAS, "gas"));
-        add( new Pair<>(CITY, "city"));
         add( new Pair<>(INTERIOR, "hostile"));
         add( new Pair<>(HABITABLE, "habitable"));
         add( new Pair<>(MINE, "mining"));
@@ -63,12 +60,13 @@ public class ImageTags {
         add( new Pair<>(COLD, "cold"));
         add( new Pair<>(POLLUTED, "polluted"));
         add( new Pair<>(DEVELOPED, "civilized"));
+        add( new Pair<>(ATMOSPHERE, "atmosph."));
     }};
 
     public static final Map<String, String[]> typeTagMap = new HashMap<String, String[]>(){{
         put("giant", new String[]{GAS});
         put("lava", new String[]{LAVA, HOT});
-        put("frozen", new String[]{SNOW, TUNDRA});
+        put("frozen", new String[]{SNOW});
         put("barren", new String[]{BARREN});
         put("toxic", new String[]{TOXIC});
         put("jungle", new String[]{JUNGLE});
@@ -78,7 +76,7 @@ public class ImageTags {
         put("cryovolcanic", new String[]{SNOW});
         put("rocky_metallic", new String[]{BARREN});
         put("rocky_unstable", new String[]{BARREN});
-        put("rocky_ice", new String[]{SNOW, TUNDRA});
+        put("rocky_ice", new String[]{SNOW, BARREN});
         put("water", new String[]{WATER});
         put("irradiated", new String[]{IRRADIATED});
         put("tundra", new String[]{TUNDRA});
@@ -109,8 +107,9 @@ public class ImageTags {
         //put("hot", new String[]{HOT}); // TODO: 09/11/2022 check if removing barren from here didn't make image selection too narrow
         //put("very_hot", new String[]{HOT});
         put("no_atmosphere", new String[]{INTERIOR});
+        put("thin_atmosphere", new String[]{INTERIOR});
         put("mild_climate", new String[]{HABITABLE});
-        put("extreme_weather", new String[]{INTERIOR});
+        //put("extreme_weather", new String[]{INTERIOR});
         put("irradiated", new String[]{IRRADIATED, ALIEN, INTERIOR});
     }};
 
@@ -121,10 +120,15 @@ public class ImageTags {
         put("toxic", new String[]{TOXIC, ALIEN});
         put("water", new String[]{WATER});
         put("farm", new String[]{HABITABLE});
-        put("pollution", new String[]{POLLUTED});
+        put("pollution", new String[]{POLLUTED, INTERIOR});
 
         //us
         put("storm", new String[]{DESERT});
-        put("floating", new String[]{CITY});
     }};
+
+    public static enum MatchMode{
+        EXACT,
+        BROAD,
+        ANY
+    }
 }

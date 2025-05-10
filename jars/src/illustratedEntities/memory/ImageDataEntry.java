@@ -23,12 +23,14 @@ public class ImageDataEntry {
     public List<String> optionalExcludedTags;
     public List<String> usedEntityIds;
     public String planetId;
+    public String index;
 
     public String faction;
     public int weight;
     public transient Boolean isLoaded;
+    public transient String imageId;
 
-    public ImageDataEntry(int id, int weight, List<String> requiredTags, List<String> requiredExcludedTags, List<String> optionalTags, List<String> optionalExcludedTags, String faction, String planetId) {
+    public ImageDataEntry(int id, int weight, List<String> requiredTags, List<String> requiredExcludedTags, List<String> optionalTags, List<String> optionalExcludedTags, String faction, String planetId, String index) {
         this.id = id;
         this.weight = weight;
         this.requiredTags = requiredTags;
@@ -39,6 +41,7 @@ public class ImageDataEntry {
         this.usedEntityIds = new ArrayList<>();
         this.faction = faction;
         this.planetId = planetId;
+        this.index = index;
     }
 
     public String getImagePath(){
@@ -92,8 +95,13 @@ public class ImageDataEntry {
     }
 
     public void load(){
-        if(isLoaded == null) Importer.loadImage(getImagePath());
+        if(isLoaded == null || !isLoaded) Importer.loadImage(getImagePath());
         isLoaded = true;
+    }
+
+    public void unload(){
+        if(isLoaded != null && isLoaded) Importer.unloadImage(getImagePath());
+        isLoaded = false;
     }
 
     public void print(){
@@ -107,5 +115,6 @@ public class ImageDataEntry {
         ModPlugin.log.info("required excluded " + Arrays.toString(re));
         ModPlugin.log.info("optional " + Arrays.toString(o));
         ModPlugin.log.info("optional excluded " + Arrays.toString(oe));
+        ModPlugin.log.info("index " + index);
     }
 }
