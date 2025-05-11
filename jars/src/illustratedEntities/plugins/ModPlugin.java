@@ -31,6 +31,7 @@ public class ModPlugin extends BaseModPlugin {
         DecivImageRemover.register();
         NewColonyImageAdder.register();
         ImageOnJumpLoader.register();
+        PlayerOpenColonyListener.register();
         PostDialogueVisualPanelCleaner.register();
         OrbitalStationSynchListener.register();
         ImageDataMemory.getInstance().forceRefresh();

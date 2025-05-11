@@ -95,7 +95,7 @@ public class ImageDataEntry {
     }
 
     public void load(){
-        if(isLoaded == null || !isLoaded) Importer.loadImage(getImagePath());
+        if(isLoaded == null || !isLoaded || Global.getSettings().getSprite(getImagePath()).getTexWidth() <= 0) Importer.loadImage(getImagePath());
         isLoaded = true;
     }
 

@@ -4,6 +4,7 @@ Added - Removes images from Memory when unused! (star <3)
 Added - Image picker now respects colony size and will try to find a fitting image for the population size
 Added - Buttons to specify colony size matching when picking
 Fixed - Picker now respects the seed for image picking / randomisation options
+Fixed - The mod now properly classifies planets with hazard > 175 as "hostile environment"
 Removed - The entire old image set of ~600 images
 
 1.2.b

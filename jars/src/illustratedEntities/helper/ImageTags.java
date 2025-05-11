@@ -68,11 +68,11 @@ public class ImageTags {
         put("lava", new String[]{LAVA, HOT});
         put("frozen", new String[]{SNOW});
         put("barren", new String[]{BARREN});
-        put("toxic", new String[]{TOXIC});
+        put("toxic", new String[]{TOXIC, INTERIOR});
         put("jungle", new String[]{JUNGLE});
         put("terran", new String[]{TERRAN});
-        put("desert", new String[]{DESERT, HOT});
-        put("arid", new String[]{ARID, HOT});
+        put("desert", new String[]{DESERT});
+        put("arid", new String[]{ARID});
         put("cryovolcanic", new String[]{SNOW});
         put("rocky_metallic", new String[]{BARREN});
         put("rocky_unstable", new String[]{BARREN});
@@ -88,7 +88,7 @@ public class ImageTags {
         put("green", new String[]{ALIEN});
         put("acid", new String[]{TOXIC});
         put("azure", new String[]{IRRADIATED, HOT});
-        put("burnt", new String[]{BARREN, HOT});
+        put("burnt", new String[]{BARREN});
         put("dust", new String[]{ARID, DESERT});
         put("red", new String[]{DESERT, ALIEN});
         put("purple", new String[]{IRRADIATED});

@@ -211,8 +211,8 @@ public class ImageSelectorPanel {
                     //button "+"
                     buttonId = tag + (requiredTags.contains(tag) ? "-" : "+");
                     anchor = rowPanel.createUIElement(ARROW_BUTTON_SIZE, ARROW_BUTTON_SIZE, false);
-                    bgColour = requiredTags.contains(tag) ? new Color(50, 130, 0, 255) : Misc.getGrayColor();
-                    button = anchor.addButton("+", buttonId, Color.BLACK, bgColour, Alignment.MID, CutStyle.ALL, ARROW_BUTTON_SIZE, ARROW_BUTTON_SIZE, 0);
+                    bgColour = requiredTags.contains(tag) ? new Color(54, 92, 45, 255) : Misc.getGrayColor();
+                    button = anchor.addButton("+", buttonId, Color.WHITE, bgColour, Alignment.MID, CutStyle.ALL, ARROW_BUTTON_SIZE, ARROW_BUTTON_SIZE, 0);
                     entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
                         @Override
                         public void onToggle() {
@@ -311,7 +311,7 @@ public class ImageSelectorPanel {
 
                 buttonId = imageData.id + "_set";
                 anchor = rowPanel.createUIElement(SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, false);
-                button = anchor.addButton("Apply", buttonId, Color.BLACK, new Color(50, 130, 0, 255), SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, 0);
+                button = anchor.addButton("Apply", buttonId, Color.WHITE, new Color(54, 92, 45, 255), SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, 0);
 
                 entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
                     @Override

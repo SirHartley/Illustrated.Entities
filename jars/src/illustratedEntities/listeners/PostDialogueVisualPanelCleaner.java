@@ -32,35 +32,18 @@ public class PostDialogueVisualPanelCleaner extends BaseCampaignEventListener {
     @Override
     public void reportShownInteractionDialog(InteractionDialogAPI dialog) {
         super.reportShownInteractionDialog(dialog);
-        Global.getSector().addScript(new VisualPanelRemover());
-        Global.getSector().addScript(new DelayedActionScript(0.3f) {
+        Global.getSector().addScript(new DelayedActionScript(0.001f) {
+            @Override
+            public void doAction() {
+                VisualCustomPanel.clearPanel();
+            }
+        });
+
+        Global.getSector().addScript(new DelayedActionScript(0.5f) {
             @Override
             public void doAction() {
                 for (ImageDataEntry entry : ImageDataMemory.getInstance().getDataMap().values()) if (!entry.isUsed()) entry.unload();
             }
         });
-    }
-
-    public static class VisualPanelRemover implements EveryFrameScript{
-
-        boolean isDone = false;
-
-        @Override
-        public boolean isDone() {
-            return isDone;
-        }
-
-        @Override
-        public boolean runWhilePaused() {
-            return false;
-        }
-
-        @Override
-        public void advance(float amount) {
-            if (isDone) return;
-
-            VisualCustomPanel.clearPanel();
-            isDone = true;
-        }
     }
 }

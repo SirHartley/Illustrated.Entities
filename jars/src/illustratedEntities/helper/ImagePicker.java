@@ -164,7 +164,7 @@ public class ImagePicker {
                 applicableTags.add(ImageTags.INTERIOR);
             }
 
-            if (!m.isPlanetConditionMarketOnly() && m.getHazardValue() > 175f) applicableTags.add(ImageTags.INTERIOR);
+            if (!m.isPlanetConditionMarketOnly() && m.getHazardValue() > 1.75f) applicableTags.add(ImageTags.INTERIOR);
 
             int largestPlanet = 0;
             for (MarketAPI market : Misc.getFactionMarkets(m.getFactionId())) {
