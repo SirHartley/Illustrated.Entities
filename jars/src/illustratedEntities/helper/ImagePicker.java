@@ -180,6 +180,9 @@ public class ImagePicker {
                     && !Factions.LUDDIC_PATH.equals(m.getFactionId())
                     && !Factions.INDEPENDENT.equals(m.getFactionId())) applicableTags.add(ImageTags.DEVELOPED);
 
+            //we remove this during iteration if needed
+            applicableTags.add(ImageTags.ATMOSPHERE);
+
             //condition-dependent
             for (MarketConditionAPI condition : m.getConditions()) {
                 String id = condition.getSpec().getId();
@@ -199,11 +202,8 @@ public class ImagePicker {
                     int mod = ResourceDepositsCondition.MODIFIER.get(condition.getId()) != null ? ResourceDepositsCondition.MODIFIER.get(condition.getId()) : 0;
                     if (mod > 0) applicableTags.add(ImageTags.MINE);
                 }
-            }
 
-            //if planet has no or toxic atmo, it does not have an atmo, otherwise, add atmo tag
-            if (Collections.disjoint(m.getConditions(), Arrays.asList(Conditions.NO_ATMOSPHERE, Conditions.TOXIC_ATMOSPHERE))) {
-                applicableTags.add(ImageTags.ATMOSPHERE);
+                if (condition.getId().equals(Conditions.NO_ATMOSPHERE) || condition.getId().equals(Conditions.TOXIC_ATMOSPHERE)) applicableTags.remove(ImageTags.ATMOSPHERE);
             }
 
             if (Misc.hasRuins(m)) {
