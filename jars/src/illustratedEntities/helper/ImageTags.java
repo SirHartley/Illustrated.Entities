@@ -2,6 +2,7 @@ package illustratedEntities.helper;
 
 import com.fs.starfarer.api.impl.campaign.ids.Conditions;
 import com.fs.starfarer.api.util.Pair;
+import org.lwjgl.openal.AL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +36,8 @@ public class ImageTags {
             POLLUTED = "pol",
             DEVELOPED = "dvl",
             ATMOSPHERE = "atm",
+            RED = "red",
+            SALT = "slt",
             INDEX = "index";
 
     public static final List<Pair<String, String>> tagNameList = new ArrayList<Pair<String, String>>(){{
@@ -99,6 +102,20 @@ public class ImageTags {
         put("magnetic", new String[]{BARREN});
         put("artificial", new String[]{INTERIOR, STATION});
         put("storm", new String[]{ARID, INTERIOR});
+    }};
+
+    public static final Map<String, String[]> kaleidoscopeNameMap = new HashMap<String, String[]>(){{
+        put("Salty Arid", new String[]{SALT, ARID});
+        put("Rocky Arid", new String[]{BARREN, ARID});
+        put("Barren-Sulfuric", new String[]{TOXIC, BARREN});
+        put("Rock Tundra", new String[]{TUNDRA, BARREN});
+        put("Basalt Desert", new String[]{BARREN, DESERT});
+        put("Salt Desert", new String[]{SALT, DESERT});
+        put("Brine Desert", new String[]{SALT, DESERT});
+        put("Crimson Jungle", new String[]{RED, JUNGLE});
+        put("Fungal-Eccentric", new String[]{ALIEN});
+        put("Red Terran", new String[]{RED, TERRAN});
+        put("Fungal", new String[]{ALIEN});
     }};
 
     public static final Map<String, String[]> specificConditionTagMap = new HashMap<String, String[]>(){{

@@ -73,7 +73,7 @@ public class ImageSelectorPanel {
         }
 
         boolean allowDupes = mem.getBoolean(ALLOW_DUPES);
-        ImageTags.MatchMode mode = mem.get(MODE) != null ? (ImageTags.MatchMode) mem.get(MODE) : ImageTags.MatchMode.EXACT;
+        ImageTags.MatchMode mode = mem.get(MODE) != null ? (ImageTags.MatchMode) mem.get(MODE) : ImageTags.MatchMode.BROAD;
         boolean showFilter = mem.getBoolean(SHOW_FILTER);
 
         if (!mem.contains(TAG_SET)) mem.set(TAG_SET, ImagePicker.getTags(dialogue.getInteractionTarget()), 0f);
