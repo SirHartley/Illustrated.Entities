@@ -38,12 +38,5 @@ public class PostDialogueVisualPanelCleaner extends BaseCampaignEventListener {
                 VisualCustomPanel.clearPanel();
             }
         });
-
-        Global.getSector().addScript(new DelayedActionScript(0.5f) {
-            @Override
-            public void doAction() {
-                for (ImageDataEntry entry : ImageDataMemory.getInstance().getDataMap().values()) if (!entry.isUsed()) entry.unload();
-            }
-        });
     }
 }

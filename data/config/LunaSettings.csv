@@ -1,0 +1,12 @@
+fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
+illustrated_entities_header,Visual Settings,Header,Visual Settings,,,,,
+illustrated_entities_images_enable,Add images,Boolean,TRUE,,Disabling this will disable the entire visual part of the mod.,,,
+illustrated_entities_images_core_worlds,Add preset images to core world planets,Boolean,TRUE,,Apply the pre-selected images to core world planets that do not have a vanilla illustration.,,,
+illustrated_entities_images_random_colonies,Random colony images,Boolean,TRUE,,Apply random images to planets without image - modded or otherwise. If you set this to false the mod will not apply images to any NPC colonies but you can still set the visuals for your own colony..,,,
+illustrated_entities_images_random_skip_core,Skip core for random images,Boolean,FALSE,,If you disable the pre-selected core world images the mod would add random ones instead. Setting this option to TRUE will stop it from doing so.,,,
+illustrated_entities_images_always_show_button,Always show image selector button,Boolean,FALSE,,Show the change image button on colonies you do now own. Devmode displays it regardless of setting.,,,
+illustrated_entities_images_broadmatch,Default broad match,Boolean,TRUE,,Makes broad match the default way the mod picks images. Setting this to false will make the mod try to pick images more fitting to the current population size (= EXACT) which limits the available selection.,,,
+,,,,,,,,
+illustrated_entities_header_text,Text Settings,Header,Text Settings,,,,,
+illustrated_entities_text_enable,Allow text edits,Boolean,TRUE,,Disabling this will disable the entire text editor part of the mod.,,,
+illustrated_entities_text_num_lines,Number of text lines,Int,7,,number of lines in the text change panel - more than 7 does not properly display,1,20,

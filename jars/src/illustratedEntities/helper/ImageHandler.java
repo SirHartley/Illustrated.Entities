@@ -5,6 +5,8 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Entities;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
+import com.fs.starfarer.api.impl.campaign.procgen.Constellation;
 import com.fs.starfarer.api.util.Misc;
 import illustratedEntities.memory.ImageDataEntry;
 import illustratedEntities.memory.ImageDataMemory;
@@ -39,9 +41,9 @@ public class ImageHandler {
     }
 
     public static int applyFittingRandomImageToEntity(SectorEntityToken t){
-        if(t.hasTag(HAS_INTERACTION_IMAGE) || (!Settings.OVERWRITE_VANILLA && t.getCustomInteractionDialogImageVisual() != null)) return 0;
+        if(t.hasTag(HAS_INTERACTION_IMAGE) || t.getCustomInteractionDialogImageVisual() != null) return 0;
 
-        ImagePicker picker = new ImagePicker(t, Settings.AVOID_DUPLICATES, ImageTags.MatchMode.EXACT, true);
+        ImagePicker picker = new ImagePicker(t, true, Settings.getBoolean(Settings.ALWAYS_BROAD_MATCH) ? ImageTags.MatchMode.BROAD : ImageTags.MatchMode.EXACT, true);
         if (picker.isEmpty()) {
             ModPlugin.log.warn("Unable to pick interaction image for " + t.getName() + ", id " + t.getId());
             return 0;
@@ -83,11 +85,13 @@ public class ImageHandler {
         }
     }
 
-    public static void addRandomImagesToMarketsWithoutImage(){
+    public static void addRandomImagesToMarketsWithoutImage(boolean skipCore){
         for (MarketAPI m : Global.getSector().getEconomy().getMarketsCopy()){
             SectorEntityToken entity = m.getPrimaryEntity();
 
-            if (!entity.hasTag(HAS_INTERACTION_IMAGE) && (Settings.OVERWRITE_VANILLA || entity.getCustomInteractionDialogImageVisual() == null)) {
+            if (!m.isPlayerOwned() && skipCore && m.getContainingLocation().hasTag(Tags.THEME_CORE)) continue;
+
+            if (!entity.hasTag(HAS_INTERACTION_IMAGE) && entity.getCustomInteractionDialogImageVisual() == null) {
                 int i = applyFittingRandomImageToEntity(entity);
                 ModPlugin.log.info("applying image to " + entity.getName() + ": " + i);
             }
@@ -107,8 +111,7 @@ public class ImageHandler {
                         && t.getMarket() != null
                         && !t.getMarket().isPlanetConditionMarketOnly()) {
 
-                    //the default pirate station visual will always get overridden
-                    if (Settings.PRESET_OVERWRITE || t.getCustomInteractionDialogImageVisual() == null || t.getCustomInteractionDialogImageVisual().getSpriteName().contains("pirate_station")) ImageHandler.setImage(t, data, false);
+                    ImageHandler.setImage(t, data, false);
                 }
             }
         }

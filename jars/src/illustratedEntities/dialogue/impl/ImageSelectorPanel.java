@@ -67,10 +67,7 @@ public class ImageSelectorPanel {
 
         MemoryAPI mem = Global.getSector().getMemoryWithoutUpdate();
 
-        if (mem.getBoolean(FIRST_DISPLAY)){
-            mem.set(FIRST_DISPLAY, true, 0f);
-            if (Settings.DEFAULT_ENABLE_DUPES) mem.set(ALLOW_DUPES, true, 0f);
-        }
+        if (mem.getBoolean(FIRST_DISPLAY)) mem.set(FIRST_DISPLAY, true, 0f);
 
         boolean allowDupes = mem.getBoolean(ALLOW_DUPES);
         ImageTags.MatchMode mode = mem.get(MODE) != null ? (ImageTags.MatchMode) mem.get(MODE) : ImageTags.MatchMode.BROAD;

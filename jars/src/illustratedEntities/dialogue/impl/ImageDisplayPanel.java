@@ -74,7 +74,7 @@ public class ImageDisplayPanel {
         lastUsedAnchor = anchor;
 
         //desc
-        if (Settings.ENABLE_TEXT_CHANGER){
+        if (Settings.getBoolean(Settings.ENABLE_TEXT)){
             buttonId = "desc";
             anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, false);
             button = anchor.addButton("desc.", buttonId, baseColor, bgColour, Alignment.MID, CutStyle.BOTTOM, SELECT_BUTTON_WIDTH, BUTTON_HEIGHT * 0.8f, 0);

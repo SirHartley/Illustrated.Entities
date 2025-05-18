@@ -8,6 +8,7 @@ import illustratedEntities.helper.TextHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class TextDataEntry {
     public static final String ID_MEM_KEY = "$Illent_TextMemoryID";
@@ -68,8 +69,8 @@ public class TextDataEntry {
     public String parseStringMap(Map<Integer, String> stringMap){
         StringBuilder out = new StringBuilder();
 
-        for (int i = 1; i <= Settings.LINE_AMT; i++){
-            String s = stringMap.containsKey(i) ? stringMap.get(i) : "";
+        for (int i = 1; i <= Settings.getInt(Settings.TEXT_LINE_NUM); i++){
+            String s = stringMap.getOrDefault(i, "");
 
             if (s.isEmpty() && stringMap.containsKey(i +1) && !stringMap.get(i + 1).isEmpty()) {
                 s = "\n\n"; //its an empty line and there is one following it

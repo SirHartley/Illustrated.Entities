@@ -23,7 +23,7 @@ public class ShowDefaultVisualWithSelector extends ShowDefaultVisual {
         boolean hasImage = target.getCustomInteractionDialogImageVisual() != null;
         boolean hasMarket = target.getMarket() != null;
         boolean isPlayerOwned = target.getMarket().isPlayerOwned();
-        boolean allowsNPCPicking = !isPlayerOwned && (Settings.ALLOW_NPC_PICKING || Global.getSettings().isDevMode());
+        boolean allowsNPCPicking = !isPlayerOwned && (Settings.getBoolean(Settings.BUTTON_ALWAYS_SHOW) || Global.getSettings().isDevMode());
 
         if(hasImage && hasMarket
                 && (allowsNPCPicking || isPlayerOwned)){

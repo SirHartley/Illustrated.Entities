@@ -31,7 +31,7 @@ public class ImagePicker {
         this.picker = new WeightedRandomPicker<>();
         this.tags = t != null ? getTags(t) : null;
 
-        if (Settings.RESPECT_FACTION && t != null) {
+        if (t != null) {
             if (t.getMarket() != null && t.getMarket().getFaction() != null) faction = t.getMarket().getFactionId();
             else if (t.getFaction() != null) faction = t.getFaction().getId();
             else faction = null;

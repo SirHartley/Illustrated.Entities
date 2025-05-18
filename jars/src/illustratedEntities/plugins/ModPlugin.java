@@ -34,6 +34,7 @@ public class ModPlugin extends BaseModPlugin {
         PlayerOpenColonyListener.register();
         PostDialogueVisualPanelCleaner.register();
         OrbitalStationSynchListener.register();
+        UnusedImageUnloader.register();
         ImageDataMemory.getInstance().forceRefresh();
 
         ImageHandler.cleanseLeftoverImagesFromRemovedMarkets();
@@ -41,8 +42,8 @@ public class ModPlugin extends BaseModPlugin {
         TextHandler.applyAllEntries();
 
         ImageHandler.addImagesToPlayerMarkets();
-        if(Settings.APPLY_PRESET) ImageHandler.addPresetImagesToMarkets();
-        if(Settings.APPLY_RANDOM) ImageHandler.addRandomImagesToMarketsWithoutImage();
+        if(Settings.getBoolean(Settings.ENABLE_PRESET_CORE_WORLDS)) ImageHandler.addPresetImagesToMarkets();
+        if(Settings.getBoolean(Settings.ENABLE_RANDOM_IMAGES)) ImageHandler.addRandomImagesToMarketsWithoutImage(Settings.getBoolean(Settings.SKIP_CORE));
         ImageHandler.loadImagesForCurrentLocation();
 
         devActions();
