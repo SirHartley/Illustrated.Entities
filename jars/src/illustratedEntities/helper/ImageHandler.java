@@ -77,7 +77,7 @@ public class ImageHandler {
             for (SectorEntityToken t : m.getConnectedEntities()){
                 if (t == primary) continue;
 
-                if (t.getCustomEntityType().equals(Entities.STATION_BUILT_FROM_INDUSTRY) && (t.getCustomInteractionDialogImageVisual() == null || hasImage(t))) {
+                if (Entities.STATION_BUILT_FROM_INDUSTRY.equals(t.getCustomEntityType()) && (t.getCustomInteractionDialogImageVisual() == null || hasImage(t))) {
                     int id = getImageId(primary);
                     setImage(t, ImageDataMemory.getInstance().get(id), true);
                 }

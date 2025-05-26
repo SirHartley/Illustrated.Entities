@@ -1,3 +1,7 @@
+2.0.b
+Adjusted - Changed the default of the "Add random images to NPC colonies" to false
+Fixed - Random crash when a station did not have a custom entity type
+
 2.0.a
 Added - 0.98a compatibility
 Added - ~1300 new images

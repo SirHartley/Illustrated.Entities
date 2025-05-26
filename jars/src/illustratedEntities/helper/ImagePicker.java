@@ -159,7 +159,7 @@ public class ImagePicker {
         }
 
         if (m != null) {
-            if (!(t instanceof PlanetAPI) && !t.getCustomEntityType().equals(Entities.STATION_BUILT_FROM_INDUSTRY)) {
+            if (!(t instanceof PlanetAPI) && !Entities.STATION_BUILT_FROM_INDUSTRY.equals(t.getCustomEntityType())) {
                 applicableTags.add(ImageTags.STATION);
                 applicableTags.add(ImageTags.INTERIOR);
             }
