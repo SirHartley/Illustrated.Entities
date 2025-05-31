@@ -737,7 +737,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 736,tun,!int,1,,,,
 737,unused,,0,,,,too many
 738,bar !hot,cld int,1,,,,
-739,snw dvl,int,2,,,madeira,
+739,snw dvl,int,2,,,,
 740,int drl,stn,A,,,,
 741,tun,,0,,,,
 742,snw,!dvl int,1,,,,
@@ -1275,7 +1275,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1274,bar cld,dvl,1,,,,
 1275,bar,dvl,3,,,,
 1276,cld !tox !irr,,1,,,,
-1277,cld !tox dvl !irr,,3,,,,
+1277,cld !tox dvl !irr,,3,,,madeira,
 1278,cld !tox !irr,,3,,,,
 1279,cld !tox !atm,,0,,,,
 1280,tun !dvl,int,2,,,,

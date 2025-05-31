@@ -5,6 +5,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.loading.specs.PlanetSpec;
 import illustratedEntities.dev.MarketInfoPrinter;
 import illustratedEntities.helper.ImageHandler;
@@ -17,6 +18,7 @@ import org.apache.log4j.Logger;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 public class ModPlugin extends BaseModPlugin {
     public static Logger log = Global.getLogger(ModPlugin.class);
@@ -41,9 +43,15 @@ public class ModPlugin extends BaseModPlugin {
         ImageHandler.reapplyAllImages();
         TextHandler.applyAllEntries();
 
-        ImageHandler.addImagesToPlayerMarkets();
-        if(Settings.getBoolean(Settings.ENABLE_PRESET_CORE_WORLDS)) ImageHandler.addPresetImagesToMarkets();
-        if(Settings.getBoolean(Settings.ENABLE_RANDOM_IMAGES)) ImageHandler.addRandomImagesToMarketsWithoutImage(Settings.getBoolean(Settings.SKIP_CORE));
+        if(Settings.getBoolean(Settings.ENABLE_IMAGES)){
+            ImageHandler.addImagesToPlayerMarkets();
+
+            if(Settings.getBoolean(Settings.ENABLE_PRESET_CORE_WORLDS)) ImageHandler.addPresetImagesToMarkets();
+            if(Settings.getBoolean(Settings.ENABLE_RANDOM_IMAGES)) ImageHandler.addRandomImagesToMarketsWithoutImage(Settings.getBoolean(Settings.SKIP_CORE));
+        } else {
+            for (MarketAPI m : Global.getSector().getEconomy().getMarketsCopy()) if (m.getPrimaryEntity() != null) ImageHandler.removeImageFrom(m.getPrimaryEntity());
+        }
+
         ImageHandler.loadImagesForCurrentLocation();
 
         devActions();

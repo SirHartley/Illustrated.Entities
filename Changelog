@@ -1,3 +1,9 @@
+2.0.c
+Adjusted - Switched out the image for Madeira
+Fixed - Crash when editing the description of certain modded planets
+Fixed - Disabling the image portion of the mod now actually works
+Fixed - No longer crashes with TASC. This is an interim fix. Astropolis will not respect the Ill.Ent settings until TASC updates.
+
 2.0.b
 Adjusted - Changed the default of the "Add random images to NPC colonies" to false
 Fixed - Random crash when a station did not have a custom entity type

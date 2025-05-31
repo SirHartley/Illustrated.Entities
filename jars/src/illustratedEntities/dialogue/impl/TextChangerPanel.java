@@ -18,6 +18,8 @@ import illustratedEntities.helper.TextHandler;
 import illustratedEntities.helper.WordUtils;
 import illustratedEntities.memory.TextDataEntry;
 import illustratedEntities.memory.TextDataMemory;
+import lunalib.backend.ui.components.base.LunaUIBaseElement;
+import lunalib.backend.ui.components.base.LunaUITextField;
 import org.lwjgl.opencl.CL;
 
 import java.awt.*;
@@ -208,6 +210,8 @@ public class TextChangerPanel {
 
                         for (String line : stringArray){
                             StringBuilder builder = new StringBuilder(line);
+                            if (builder.isEmpty()) continue;
+
                             if (Character.isWhitespace(builder.charAt(0))) builder.deleteCharAt(0);
                             if (Character.isWhitespace(builder.charAt(builder.toString().length()-1))) builder.deleteCharAt(builder.toString().length()-1);
 

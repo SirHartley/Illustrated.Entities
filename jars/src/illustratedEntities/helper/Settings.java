@@ -8,6 +8,9 @@ import org.jetbrains.annotations.NotNull;
 public class Settings  {
     public static final String MOD_ID = "illustrated_entities";
 
+    //legacy for TASC compat - it's not used by the mod.
+    public static final int LINE_AMT = 7;
+
     public static final String ENABLE_IMAGES  = "illustrated_entities_images_enable";
     public static final String ENABLE_PRESET_CORE_WORLDS  = "illustrated_entities_images_core_worlds";
     public static final String ENABLE_RANDOM_IMAGES  = "illustrated_entities_images_random_colonies";
