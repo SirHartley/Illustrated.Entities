@@ -70,7 +70,9 @@ public class TextDataEntry {
         StringBuilder out = new StringBuilder();
 
         for (int i = 1; i <= Settings.getInt(Settings.TEXT_LINE_NUM); i++){
-            String s = stringMap.getOrDefault(i, "");
+            String s = "";
+
+            if (stringMap.containsKey(i)) s = stringMap.get(i);
 
             if (s.isEmpty() && stringMap.containsKey(i +1) && !stringMap.get(i + 1).isEmpty()) {
                 s = "\n\n"; //its an empty line and there is one following it

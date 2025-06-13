@@ -210,7 +210,7 @@ public class TextChangerPanel {
 
                         for (String line : stringArray){
                             StringBuilder builder = new StringBuilder(line);
-                            if (builder.isEmpty()) continue;
+                            if (builder.toString().isEmpty()) continue;
 
                             if (Character.isWhitespace(builder.charAt(0))) builder.deleteCharAt(0);
                             if (Character.isWhitespace(builder.charAt(builder.toString().length()-1))) builder.deleteCharAt(builder.toString().length()-1);
