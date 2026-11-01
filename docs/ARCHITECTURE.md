@@ -99,7 +99,7 @@ Use `rg --files jars/src` for the full inventory. The entries below name state a
 | `memory/ImageDataMemory.java` | Map of image id to `ImageDataEntry`, stored in sector memory |
 | `memory/ImageDataEntry.java` | One image: tags, preset planet, `usedEntityIds`, texture load and unload |
 | `memory/TextDataMemory.java` | Map of description number to `TextDataEntry`, stored in sector memory |
-| `memory/TextDataEntry.java` | One edited description: two line maps written to `text1` and `text3` |
+| `memory/TextDataEntry.java` | One edited description: two line maps written to `text1` and `text3`, the whole text in line 1 (`setText`, `getText`) |
 
 ### `loading`
 
@@ -154,6 +154,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 
 - `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`.
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
+- `TextDataEntry.stringMap1/2` are save data and TASC copies them line by line. `setText` stores a description's whole text in line 1; entries from older saves keep one entry per line until the player applies an edit. `parseStringMap` reads up to the highest line key and treats a null line as empty.
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
 - LunaLib's multiline `LunaTextfield` (unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height, so the editor keeps the vanilla fields. TASC also depends on the per-line maps in `TextDataEntry`.
 
