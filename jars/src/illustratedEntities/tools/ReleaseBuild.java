@@ -11,12 +11,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -49,9 +47,11 @@ public final class ReleaseBuild {
     static final Pattern HEADING = Pattern.compile(
             "^(" + VERSION + ")(?:[ \\t]*-[ \\t]*(UNRELEASED|CURRENT PUBLIC VERSION))?[ \\t]*$");
 
-    static final List<String> GAME_JARS = List.of("starfarer.api.jar", "starfarer_obf.jar",
-            "lwjgl.jar", "lwjgl_util.jar", "json.jar", "log4j-1.2.9.jar");
-    static final List<String> MOD_JARS = List.of("LazyLib.jar", "LunaLib.jar");
+    // copied from the Industrial.Evolution lib folder
+    static final String LIBS = "lib";
+    static final List<String> LIB_JARS = List.of("starfarer.api.jar", "starfarer_obf.jar", "fs.common_obf.jar",
+            "lwjgl.jar", "lwjgl_util.jar", "json.jar", "log4j-1.2.9.jar",
+            "LazyLib.jar", "LunaLib.jar", "Kotlin-Runtime.jar");
 
     static final Set<String> ROOT_FILES = Set.of("mod_info.json", VERSION_FILE, "Changelog",
             "IllustratedEntities_icon.png",
@@ -72,29 +72,26 @@ public final class ReleaseBuild {
 
     public static void main(String[] args) throws Exception {
         Path root = Path.of("").toAbsolutePath();
-        if ((args.length == 2 || args.length == 3) && args[0].equals("build")) {
-            build(root, Path.of(args[1]), args.length == 3 ? Path.of(args[2]) : null);
+        if (args.length == 1 && args[0].equals("build")) {
+            build(root);
         } else if ((args.length == 1 || args.length == 2) && args[0].equals("package")) {
             pack(root, args.length == 2 ? args[1] : null);
         } else {
             throw new IllegalArgumentException("From the mod root, with JDK 17:\n"
-                    + "  java " + TOOL + " build <starsector-core> [mods]\n"
+                    + "  java " + TOOL + " build\n"
                     + "  java " + TOOL + " package [release-tag]");
         }
     }
 
-    static void build(Path root, Path game, Path mods) throws Exception {
+    static void build(Path root) throws Exception {
         require(Runtime.version().feature() == 17, "Build with JDK 17.");
-        if (Files.isDirectory(game.resolve("starsector-core"))) game = game.resolve("starsector-core");
-        if (mods == null) mods = Files.isDirectory(game.resolve("mods")) ? game.resolve("mods") : game.resolveSibling("mods");
         Files.createDirectories(root.resolve("out"));
         Path work = Files.createTempDirectory(root.resolve("out"), "release-build-");
         Path classes = Files.createDirectory(work.resolve("classes"));
         List<Path> dependencies = new ArrayList<>();
-        for (String name : GAME_JARS) dependencies.add(game.resolve(name));
+        for (String name : LIB_JARS) dependencies.add(root.resolve(LIBS).resolve(name));
         for (Path path : dependencies) require(Files.isRegularFile(path), "Missing dependency: " + path);
-        dependencies.addAll(modJars(mods, root));
-        try (URLClassLoader loader = new URLClassLoader(new URL[]{game.resolve("json.jar").toUri().toURL()}, null)) {
+        try (URLClassLoader loader = new URLClassLoader(new URL[]{root.resolve(LIBS).resolve("json.jar").toUri().toURL()}, null)) {
             require(!RuntimeException.class.isAssignableFrom(loader.loadClass("org.json.JSONException")),
                     "Use the game's json.jar, not a newer Maven JSON jar.");
         }
@@ -121,44 +118,22 @@ public final class ReleaseBuild {
         Attributes attributes = manifest.getMainAttributes();
         attributes.putValue("Manifest-Version", "1.0");
         attributes.putValue("Implementation-Title", FOLDER);
-        attributes.putValue("Source-SHA256", sourceHash(root));
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         manifest.write(bytes);
         entries.put("META-INF/MANIFEST.MF", bytes.toByteArray());
         Path candidate = work.resolve(MOD + ".jar");
         writeZip(candidate, entries);
-        checkJar(candidate, sourceHash(root), true);
+        checkJar(candidate);
         Files.createDirectories(root.resolve(JAR).getParent());
         Files.move(candidate, root.resolve(JAR), StandardCopyOption.REPLACE_EXISTING);
         System.out.println("Compiled " + sources.size() + " sources.");
         System.out.println("Release jar: " + root.resolve(JAR));
     }
 
-    // library mods also need their sibling jars, such as the kotlin runtime
-    static List<Path> modJars(Path mods, Path root) throws IOException {
-        require(Files.isDirectory(mods), "Missing mods folder: " + mods);
-        List<Path> jars = new ArrayList<>();
-        for (String name : MOD_JARS) {
-            List<Path> matches;
-            try (var paths = Files.list(mods)) {
-                matches = paths.map(mod -> mod.resolve("jars").resolve(name)).filter(Files::isRegularFile)
-                        .filter(path -> !path.toAbsolutePath().startsWith(root)).toList();
-            }
-            require(matches.size() == 1, "Expected one " + name + " in " + mods + ", found " + matches.size());
-            try (var paths = Files.list(matches.get(0).getParent())) {
-                paths.filter(path -> path.toString().endsWith(".jar")).sorted().forEach(jars::add);
-            }
-        }
-        return jars;
-    }
-
     static void pack(Path root, String tag) throws Exception {
         Notes notes = notes(Files.readString(root.resolve("Changelog")), tag);
-        // jar is rebuilt on request only, so only a tagged release needs a fresh one
-        boolean fresh = checkJar(root.resolve(JAR), sourceHash(root), tag != null);
-        if (!fresh) System.out.println("Preview packages a stale release jar; rebuild it before tagging.");
+        checkJar(root.resolve(JAR));
         List<String> tracked = trackedFiles(root);
-        require(tracked.contains(JAR), "Commit " + JAR + " before packaging.");
         Map<String, byte[]> entries = new TreeMap<>();
         for (String name : tracked) {
             if (releaseFile(name)) entries.put(FOLDER + "/" + name, Files.readAllBytes(root.resolve(name)));
@@ -264,13 +239,9 @@ public final class ReleaseBuild {
                 && name.endsWith(".class") && !name.contains("..") && !name.contains("\\");
     }
 
-    static boolean checkJar(Path file, String hash, boolean requireFresh) throws IOException {
+    static void checkJar(Path file) throws IOException {
         require(Files.isRegularFile(file), "Missing " + file + "; run ReleaseBuild build.");
-        boolean fresh;
         try (JarFile jar = new JarFile(file.toFile())) {
-            Manifest manifest = jar.getManifest();
-            fresh = manifest != null && hash.equals(manifest.getMainAttributes().getValue("Source-SHA256"));
-            require(fresh || !requireFresh, "Release jar is stale. Run ReleaseBuild build, then commit " + JAR + ".");
             require(jar.getEntry(PLUGIN) != null, "Release jar has no " + PLUGIN + ".");
             for (ZipEntry entry : jar.stream().toList()) {
                 if (entry.getName().equals("META-INF/MANIFEST.MF")) continue;
@@ -282,20 +253,6 @@ public final class ReleaseBuild {
                 }
             }
         }
-        return fresh;
-    }
-
-    static String sourceHash(Path root) throws Exception {
-        MessageDigest hash = MessageDigest.getInstance("SHA-256");
-        for (Path path : files(root.resolve(SOURCE))) {
-            String name = relative(root, path);
-            if (!name.endsWith(".java") || (name.startsWith(TOOLS) && !name.equals(TOOL))) continue;
-            hash.update(name.getBytes(StandardCharsets.UTF_8));
-            hash.update((byte) 0);
-            hash.update(Files.readString(path).replace("\r\n", "\n").getBytes(StandardCharsets.UTF_8));
-            hash.update((byte) 0);
-        }
-        return HexFormat.of().formatHex(hash.digest());
     }
 
     static List<String> trackedFiles(Path root) throws Exception {

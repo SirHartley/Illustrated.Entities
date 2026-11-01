@@ -39,6 +39,8 @@ jobs:
             jars/src/illustratedEntities/tools/ReleaseBuild.java \
             jars/src/illustratedEntities/tools/ReleaseBuildChecks.java
           java -cp out/release-tools illustratedEntities.tools.ReleaseBuildChecks
+      - name: Build release jar
+        run: java -cp out/release-tools illustratedEntities.tools.ReleaseBuild build
       - name: Package
         id: package
         env:
