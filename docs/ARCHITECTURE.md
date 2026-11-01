@@ -20,7 +20,7 @@ Technical routing for the current implementation, checked against game `0.98a`. 
 | Image left on a dead or abandoned colony | `DecivImageRemover`, `NewColonyImageAdder.reportPlayerAbandonedColony`, `ImageHandler.cleanseLeftoverImagesFromRemovedMarkets` |
 | Change image button, selector, filters | `rules.csv` `illustratedEntities_marketOpen -> ShowDefaultVisualWithSelector -> ImageDisplayPanel -> ImageSelectorPanel` |
 | Description editor | `ImageDisplayPanel` "desc." -> `TextChangerPanel -> TextDataEntry / TextDataMemory -> TextHandler.applyAllEntries` |
-| A setting has no effect | `data/config/LunaSettings.csv` id -> `helper/Settings` constant -> caller |
+| A setting has no effect | `data/config/LunaSettings.csv` id -> `helper/Setting` constant -> `Settings` cache -> caller |
 
 ## Registration and lifecycle
 
@@ -39,18 +39,20 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 ### Settings
 
-`helper/Settings` owns the LunaLib setting ids and reads them through `LunaSettings.getInt/getBoolean` on every call; there is no cache. Ids, defaults, bounds and help text live in `data/config/LunaSettings.csv`. `Settings.CSV_PATH` and `Settings.DEFAULT_IMAGE_PATH` come from `settings.json`. `Settings.LINE_AMT` is kept for TASC, which reads it; the mod does not.
+`helper/Setting` owns ids, defaults, bounds and typed access (`Setting.ENABLE_IMAGES.enabled()`, `Setting.TEXT_LINE_NUM.value()`). `data/config/LunaSettings.csv` owns the tab layout and help text; its defaults and bounds mirror `Setting`. `helper/Settings` installs a LunaLib listener in `onApplicationLoad`, reinstalls it in `onGameLoad`, and caches the values; callers read the cache, not LunaLib. `Settings.reload` sanitizes each value (missing or wrong type falls back to the default, ints are clamped), writes corrected values back to the LunaLib file, then `helper/LunaSettingsBridge` copies them into the open LunaLib settings panel, which keeps pending values and controls after Save. `Settings.CSV_PATH` and `Settings.DEFAULT_IMAGE_PATH` come from `settings.json`. `tools/SettingsChecks` checks that the CSV and `Setting` agree.
 
 ### Build and release tools
 
-`tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
+`tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. `tools/SettingsChecks.java` and `tools/ImagePickerChecks.java` run headless from the repository root against the classes `build` leaves in `out/release-build-*/classes`: `java -cp "out/release-build-<n>/classes:lib/*" illustratedEntities.tools.SettingsChecks` (same for `ImagePickerChecks`). They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
 
 ## Image data
 
 - Each row in `image_data.csv` is one image `graphics/illustrated_entities/images/<id>.png` (`ImageDataEntry.getImagePath`). The id is the save key; never renumber.
-- Columns: `id`, `tags_required`, `tags_optional`, `population`, `faction`, `weight`, `planet_id`, `note`. Tags are space separated, `!` excludes, tokens shorter than 3 chars are skipped. Empty `population` means `A` (any). Player-facing column description is in [README.md](../README.md#adding-images).
+- Columns: `id`, `tags_required`, `tags_optional`, `population`, `faction`, `weight`, `planet_id`, `note`. Tags are space separated, leading `!` (one or more) excludes, tokens shorter than 3 chars are skipped. Empty `population` means `A` (any). Player-facing column description is in [README.md](../README.md#adding-images).
 - Tag codes and the planet type and condition maps that produce them are in `helper/ImageTags`. `ImagePicker.getTags` builds an entity's tag set from planet type, market conditions, hazard (`> 1.75` adds `int`), ruins, faction size and ownership (`dvl`), and adds `index<size - 2>`.
-- `ImagePicker.generateChoices` filters by duplicate use, faction, station (`stn` must be optional on the image), gas giant (`gas` must be required), population index (`EXACT` equal, `BROAD` within 1, `ANY` ignored) and tags; score is `weight + matched tags`, pick weight is `choices * score^2`. Empty results fall back to `BROAD`, then to duplicates allowed with `ANY`.
+- `ImagePicker.generateChoices` skips used images when avoiding duplicates, then `ImagePicker.score` rejects by faction, station (`stn` required or optional on the image), gas giant (`gas` must be required), population index (`EXACT` equal, `BROAD` within 1, `ANY` ignored) and tags (all required present, no required exclusion present). Score is `weight` + required tags + optional tags present - optional exclusions present, +1 for an exact population match, +2 when the image's faction is the entity's. Exclusions never add score. Pick weight is `ImagePicker.pickWeight`: `(1 + max(0, score))^2`. Empty results fall back to `BROAD`, then to duplicates allowed with `ANY`.
+- The image selector lists `generateChoices` for the selected tags with no faction, best score first, then by id.
+- Picked images are stored on the entity, so scoring changes only affect new picks. `tools/ImagePickerChecks` checks the scoring and the `image_data.csv` rows.
 - Random picks are seeded with the entity id hash when `respectSeed` is set, so the same planet gets the same image.
 
 ## Data identity
@@ -85,7 +87,9 @@ Use `rg --files jars/src` for the full inventory. The entries below name state a
 | `helper/ImagePicker.java` | Entity tag set and weighted image choice |
 | `helper/ImageTags.java` | Tag codes, display names, type and condition maps, `MatchMode` |
 | `helper/TextHandler.java` | Applying and deleting edited descriptions |
-| `helper/Settings.java` | Setting ids and access |
+| `helper/Setting.java` | Setting ids, defaults, bounds, sanitizing and typed access |
+| `helper/Settings.java` | LunaLib listener and value cache; TASC compatibility members |
+| `helper/LunaSettingsBridge.java` | Copies sanitized values into the open LunaLib settings panel |
 | `helper/WordUtils.java` | Line wrapping for the text editor |
 
 ### `memory`
@@ -124,7 +128,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 | `dialogue/rules/ShowDefaultVisualWithSelector.java` | Rule command; shows the image with the change button or falls back to vanilla `ShowDefaultVisual` behavior |
 | `dialogue/impl/ImageDisplayPanel.java` | Current image with change and "desc." buttons |
 | `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
-| `dialogue/impl/TextChangerPanel.java` | Description editor (LunaLib `LunaUITextField`) |
+| `dialogue/impl/TextChangerPanel.java` | Description editor: one vanilla `TextFieldAPI` per line, `Setting.TEXT_LINE_NUM` lines per description |
 | `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
 | `dialogue/panel/*` | Custom panel plumbing adapted from Histidine's code: `VisualCustomPanel` holds the static panel, tooltip and plugin |
 
@@ -148,10 +152,11 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`.
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
+- LunaLib's multiline `LunaTextfield` (unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height, so the editor keeps the vanilla fields. TASC also depends on the per-line maps in `TextDataEntry`.
 
 ### Integrations
 
-- TASC (Astropolis) reads `Settings.LINE_AMT`. Keep the field.
+- TASC (Astropolis) calls `Settings.getInt(Settings.TEXT_LINE_NUM)`, `TextDataEntry` (`getString`, `setString`, `apply`, `descriptionNum`), `TextDataMemory.getNexFreetNum/set`, `ImageHandler.hasImage/getImageId/removeImageFrom/setImage` and `ImageDataMemory.get` when it rebuilds a station, and older builds read `Settings.LINE_AMT`. Keep these members and the line-map layout of `TextDataEntry`.
 - Kaleidoscope planet names map to tags in `ImageTags.kaleidoscopeNameMap`; Unknown Skies planet types are in `ImageTags.typeTagMap`.
 
 ## Dead or dormant

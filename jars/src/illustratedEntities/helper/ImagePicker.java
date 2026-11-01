@@ -27,7 +27,7 @@ public class ImagePicker {
     private Random r;
 
     public ImagePicker(SectorEntityToken t, boolean avoidDuplicates, ImageTags.MatchMode mode, boolean respectSeed) {
-        this.r = respectSeed ? new Random(t.getId().hashCode()) : new Random();
+        this.r = respectSeed && t != null ? new Random(t.getId().hashCode()) : new Random();
         this.picker = new WeightedRandomPicker<>();
         this.tags = t != null ? getTags(t) : null;
 
@@ -39,22 +39,11 @@ public class ImagePicker {
 
         ModPlugin.log.info("Generating Picker for " + (t != null ? t.getName() : null) + ", [" + (tags != null ? tags.toString() : null) + "]");
 
-        Map<Integer, Integer> baseChanceMap = generateChoices(tags, faction, avoidDuplicates, mode);
+        Map<Integer, Integer> choices = generateChoices(tags, faction, avoidDuplicates, mode);
+        if (choices.isEmpty() && mode == ImageTags.MatchMode.EXACT) choices = generateChoices(tags, faction, avoidDuplicates, ImageTags.MatchMode.BROAD);
+        if (choices.isEmpty() && avoidDuplicates) choices = generateChoices(tags, faction, false, ImageTags.MatchMode.ANY);
 
-        for (Map.Entry<Integer, Integer> entry : baseChanceMap.entrySet()) {
-            //we use chance = total num * weight ^ 2 so a result with more tag matches is more likely to get picked against the mass of low matches
-            picker.add(entry.getKey(), (float) (baseChanceMap.size() * Math.pow(entry.getValue(), 2)));
-        }
-
-        //failsafe - if all images are in use, we allow broadmatch but keep duplicate settings
-        if (mode == ImageTags.MatchMode.EXACT && picker.isEmpty()){
-            generateChoices(tags, faction, avoidDuplicates, ImageTags.MatchMode.BROAD);
-        }
-
-        //failsafe - if all images are in use, we allow duplicates and ANY mode even if it shouldn't be allowed.
-        if (avoidDuplicates && picker.isEmpty()) {
-            generateChoices(tags, faction, false, ImageTags.MatchMode.ANY);
-        }
+        for (Map.Entry<Integer, Integer> entry : choices.entrySet()) picker.add(entry.getKey(), pickWeight(entry.getValue()));
     }
 
     public boolean isEmpty() {
@@ -66,83 +55,60 @@ public class ImagePicker {
     }
 
     public static Map<Integer, Integer> generateChoices(Set<String> tags, String faction, boolean avoidDuplicates, ImageTags.MatchMode mode) {
-        Map<Integer, Integer> baseChanceMap = new HashMap<>();
-
-        int used = 0, faction_mismatch = 0, station = 0, gas = 0, tag_mismatch = 0, index_mismatch = 0, passed = 0;
+        Map<Integer, Integer> choices = new HashMap<>();
+        Integer targetIndex = getTargetIndex(tags);
+        int used = 0, rejected = 0;
 
         for (ImageDataEntry entry : ImageDataMemory.getInstance().getDataMap().values()) {
             if (avoidDuplicates && entry.isUsed()) {
                 used++;
                 continue;
             }
-            if (!entry.faction.isEmpty() && faction != null && !faction.equals(entry.faction)) {
-                faction_mismatch++;
-                continue;
-            }
 
-            //special cases (stations require station tag, gas giants require gas giant tag...)
-            if (tags.contains(ImageTags.STATION) && !entry.optionalTags.contains(ImageTags.STATION)) {
-                station++;
-                continue; //stations only get station images
-            }
-
-            if (tags.contains(ImageTags.GAS) && !entry.requiredTags.contains(ImageTags.GAS)) {
-                gas++;
-                continue;
-            }
-
-            String targetIndex = null;
-            for (String s : tags) if (s.startsWith(ImageTags.INDEX)) targetIndex = s.substring(ImageTags.INDEX.length());
-
-            if (targetIndex != null && !targetIndex.equals("A") && mode != ImageTags.MatchMode.ANY){
-                if (!entry.index.equals("A")){
-                    int imageIndex = Integer.parseInt(entry.index);
-
-                    boolean match;
-                    int check = MathUtils.clamp(Integer.parseInt(targetIndex), 0,4);
-
-                    if (mode == ImageTags.MatchMode.BROAD) {
-                        int l1 = imageIndex + 1;
-                        int l2 = imageIndex - 1;
-                        match = check <= l1 && check >= l2;
-                    } else match = imageIndex == check; //else its exact
-
-                    if (!match) {
-                        index_mismatch++;
-                        continue;
-                    }
-                }
-            }
-
-            int score = entry.weight;
-
-            //normal cases - the image is valid if it has all required and no forbidden tags
-            if (tags.containsAll(entry.requiredTags) && Collections.disjoint(tags, entry.requiredExcludedTags))
-                score += entry.requiredTags.size() + entry.requiredExcludedTags.size();
-            else {
-                tag_mismatch++;
-                continue;
-            }
-
-            for (String s : entry.optionalTags) if (tags.contains(s)) score++;
-            for (String s : entry.optionalExcludedTags) if (!tags.contains(s)) score++;
-
-            passed++;
-
-            baseChanceMap.put(entry.id, score);
+            Integer score = score(entry, tags, targetIndex, faction, mode);
+            if (score == null) rejected++;
+            else choices.put(entry.id, score);
         }
 
-        if (Global.getSettings().isDevMode()) ModPlugin.log.info(
-                "Checked: " + ImageDataMemory.getInstance().getDataMap().size() + "\n" +
-                        "Passed: " + passed + "\n" +
-                        "Tag Mismatch: " + tag_mismatch + "\n" +
-                        "Index Mismatch: " + index_mismatch + "\n" +
-                        "Used: " + used + "\n" +
-                        "Faction Mismatch: " + faction_mismatch + "\n" +
-                        "Needs Station: " + station + "\n" +
-                        "Needs Gas: " + gas + "\n");
+        if (Global.getSettings().isDevMode()) ModPlugin.log.info("Checked: " + ImageDataMemory.getInstance().getDataMap().size()
+                + ", passed: " + choices.size() + ", used: " + used + ", rejected: " + rejected);
 
-        return baseChanceMap;
+        return choices;
+    }
+
+    public static Integer score(ImageDataEntry entry, Set<String> tags, Integer targetIndex, String faction, ImageTags.MatchMode mode) {
+        if (!entry.faction.isEmpty() && faction != null && !faction.equals(entry.faction)) return null;
+        if (tags.contains(ImageTags.STATION) && !entry.optionalTags.contains(ImageTags.STATION) && !entry.requiredTags.contains(ImageTags.STATION)) return null;
+        if (tags.contains(ImageTags.GAS) && !entry.requiredTags.contains(ImageTags.GAS)) return null;
+        if (!tags.containsAll(entry.requiredTags) || !Collections.disjoint(tags, entry.requiredExcludedTags)) return null;
+
+        int score = entry.weight + entry.requiredTags.size();
+
+        if (targetIndex != null && mode != ImageTags.MatchMode.ANY && !entry.index.equals("A")) {
+            int distance = Math.abs(Integer.parseInt(entry.index) - targetIndex);
+            if (distance > (mode == ImageTags.MatchMode.BROAD ? 1 : 0)) return null;
+            if (distance == 0) score++;
+        }
+
+        for (String s : entry.optionalTags) if (tags.contains(s)) score++;
+        for (String s : entry.optionalExcludedTags) if (tags.contains(s)) score--;
+        if (faction != null && faction.equals(entry.faction)) score += 2;
+
+        return score;
+    }
+
+    // +1 keeps score 0 images pickable, the square favours better matches
+    public static float pickWeight(int score) {
+        return (float) Math.pow(1 + Math.max(0, score), 2);
+    }
+
+    public static Integer getTargetIndex(Set<String> tags) {
+        for (String s : tags) {
+            if (!s.startsWith(ImageTags.INDEX)) continue;
+            String index = s.substring(ImageTags.INDEX.length());
+            return index.equals("A") ? null : MathUtils.clamp(Integer.parseInt(index), 0, 4);
+        }
+        return null;
     }
 
     public static Set<String> getTags(SectorEntityToken t) {

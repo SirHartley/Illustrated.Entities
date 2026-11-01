@@ -51,7 +51,7 @@ Images are `graphics/illustrated_entities/images/<id>.png`, 480 x 300, described
 |---|---|
 | `id` | Image number, matches the file name |
 | `tags_required` | Tags the planet must have. Prefix `!` for tags it must not have |
-| `tags_optional` | Tags that raise the image's score when present (or absent, with `!`) |
+| `tags_optional` | Tags that raise the image's score when present. Prefix `!` for tags that lower it when present |
 | `population` | Fitting colony size index (colony size minus 2, `0` to `4`); empty means any |
 | `faction` | Faction id the image is limited to; empty means any |
 | `weight` | Extra score; empty means `0` |
@@ -65,7 +65,7 @@ Tags, separated by spaces:
 | `der` | derelict | `int` | hostile environment |
 | `rns` | ruins | `hab` | habitable |
 | `bar` | barren | `mne` | mining |
-| `dst` | desert | `stn` | station (images for stations must list it as optional) |
+| `dst` | desert | `stn` | station (images for stations must list it; as optional, the image also fits planets) |
 | `snw` | snow | `irr` | irradiated |
 | `tun` | tundra | `tox` | toxic |
 | `ard` | arid | `hot` | hot |

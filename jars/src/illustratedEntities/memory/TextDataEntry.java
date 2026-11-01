@@ -3,7 +3,7 @@ package illustratedEntities.memory;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.loading.Description;
-import illustratedEntities.helper.Settings;
+import illustratedEntities.helper.Setting;
 import illustratedEntities.helper.TextHandler;
 
 import java.util.HashMap;
@@ -69,7 +69,7 @@ public class TextDataEntry {
     public String parseStringMap(Map<Integer, String> stringMap){
         StringBuilder out = new StringBuilder();
 
-        for (int i = 1; i <= Settings.getInt(Settings.TEXT_LINE_NUM); i++){
+        for (int i = 1; i <= Setting.TEXT_LINE_NUM.value(); i++){
             String s = stringMap.getOrDefault(i, "");
 
             if (s.isEmpty() && stringMap.containsKey(i +1) && !stringMap.get(i + 1).isEmpty()) {
