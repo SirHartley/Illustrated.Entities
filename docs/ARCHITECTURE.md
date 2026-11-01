@@ -130,6 +130,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 | `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
 | `dialogue/impl/TextChangerPanel.java` | Description editor: one vanilla `TextFieldAPI` per line, `Setting.TEXT_LINE_NUM` lines per description |
 | `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
+| `dialogue/panel/MultilineTextField.java` | Multiline text box (`CustomUIPanelPlugin`): own word wrap and rendering with LazyLib `LazyFont`, cursor, new lines, scroll bar, `MAX_CHARS` cap; fields sharing a focus group unfocus each other |
 | `dialogue/panel/*` | Custom panel plumbing adapted from Histidine's code: `VisualCustomPanel` holds the static panel, tooltip and plugin |
 
 ### `dev`
@@ -145,6 +146,8 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - Images are loaded on demand with `SettingsAPI.loadTexture` and freed with `GL11.glDeleteTextures` plus `unloadTexture` (`Importer`). Any code that shows an image must call `ImageDataEntry.load()` first or the visual renders white.
 - The visual size is fixed at `480 x 300` in `ImageDataEntry.addToEntity` and `addToOrbitalStation`.
 - `VisualCustomPanel` keeps static references to the panel and plugin. They must be cleared when the dialog closes or they leak; `PostDialogueVisualPanelCleaner` does this with a `DelayedActionScript`.
+- `VisualPanelAPI.showCustomPanel` adds the custom panel to the dialog after the option list, and panels hand input to their children last added first, dropping consumed events. A focused `MultilineTextField` consumes every keyboard event, so option hotkeys (number keys, space, Esc) and the dialog never see them. Option shortcuts fire on key down.
+- The stock scroller around `VisualCustomPanel`'s tooltip takes the mouse wheel before its children whenever its content is taller than its view, so panel content must fit `VisualCustomPanel.PANEL_HEIGHT` for a `MultilineTextField` to scroll.
 - `ShowDefaultVisualWithSelector` replaces the vanilla market visual. It must keep the vanilla fallback branches (planet info, fleet info) so markets without a mod image look unchanged.
 
 ### Save data
