@@ -19,7 +19,7 @@ Technical routing for the current implementation, checked against game `0.98a`. 
 | Orbital station shows a different image than its planet | `OrbitalStationSynchListener` / `ImageOnJumpLoader -> ImageHandler.applyPlanetImageToOrbitalStations` |
 | Image left on a dead or abandoned colony | `DecivImageRemover`, `NewColonyImageAdder.reportPlayerAbandonedColony`, `ImageHandler.cleanseLeftoverImagesFromRemovedMarkets` |
 | Change image button, selector, filters | `rules.csv` `illustratedEntities_marketOpen -> ShowDefaultVisualWithSelector -> ImageDisplayPanel -> ImageSelectorPanel` |
-| Description editor | `ImageDisplayPanel` "desc." -> `TextChangerPanel -> TextDataEntry / TextDataMemory -> TextHandler.applyAllEntries` |
+| Description editor | `ImageDisplayPanel` "desc." -> `TextChangerPanel` (one `MultilineTextField` per description) `-> TextDataEntry / TextDataMemory -> TextHandler.applyAllEntries` |
 | A setting has no effect | `data/config/LunaSettings.csv` id -> `helper/Setting` constant -> `Settings` cache -> caller |
 
 ## Registration and lifecycle
@@ -90,7 +90,6 @@ Use `rg --files jars/src` for the full inventory. The entries below name state a
 | `helper/Setting.java` | Setting ids, defaults, bounds, sanitizing and typed access |
 | `helper/Settings.java` | LunaLib listener and value cache; TASC compatibility members |
 | `helper/LunaSettingsBridge.java` | Copies sanitized values into the open LunaLib settings panel |
-| `helper/WordUtils.java` | Line wrapping for the text editor |
 
 ### `memory`
 
@@ -128,7 +127,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 | `dialogue/rules/ShowDefaultVisualWithSelector.java` | Rule command; shows the image with the change button or falls back to vanilla `ShowDefaultVisual` behavior |
 | `dialogue/impl/ImageDisplayPanel.java` | Current image with change and "desc." buttons |
 | `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
-| `dialogue/impl/TextChangerPanel.java` | Description editor: one vanilla `TextFieldAPI` per line, `Setting.TEXT_LINE_NUM` lines per description |
+| `dialogue/impl/TextChangerPanel.java` | Description editor: one `MultilineTextField` per description, filled from `TextDataEntry.getText` or the vanilla `text1`/`text3`; Apply writes `TextDataEntry.setText` |
 | `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
 | `dialogue/panel/MultilineTextField.java` | Multiline text box (`CustomUIPanelPlugin`): own word wrap and rendering with LazyLib `LazyFont`, cursor, new lines, scroll bar, `MAX_CHARS` cap; fields sharing a focus group unfocus each other |
 | `dialogue/panel/*` | Custom panel plumbing adapted from Histidine's code: `VisualCustomPanel` holds the static panel, tooltip and plugin |
@@ -156,7 +155,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
 - `TextDataEntry.stringMap1/2` are save data and TASC copies them line by line. `setText` stores a description's whole text in line 1; entries from older saves keep one entry per line until the player applies an edit. `parseStringMap` reads up to the highest line key and treats a null line as empty.
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
-- LunaLib's multiline `LunaTextfield` (unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height, so the editor keeps the vanilla fields. TASC also depends on the per-line maps in `TextDataEntry`.
+- LunaLib's multiline `LunaTextfield` (`LunaLib-Kotlin.jar`, unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height. `MultilineTextField` is a Java rewrite of it without those limits; do not swap it back.
 
 ### Integrations
 
