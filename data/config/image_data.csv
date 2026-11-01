@@ -226,7 +226,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 225,dvl hab !dst !ard !wtr !tun,!cld ter jun,4,,,,
 226,irr hot,bar ,0,,,,
 227,ter dvl !int,!int,2,,,,
-228,drl int stn,stn,A,,,,server racks
+228,der int stn,stn,A,,,,server racks
 229,int dvl,stn,A,,,,
 230,dst int,hot !hab ,1,,,,salt
 231,atm bar,hot,0,,,,
@@ -398,7 +398,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 397,ard,dvl hab,1,,,,
 398,atm dvl !wtr !lav !irr,int,4,,,,
 399,int stn,stn dvl,A,,,,
-400,drl,stn,A,,,,
+400,der,stn,A,,,,
 401,ard,hab,0,,,,
 402,dst atm,dvl,2,,,,
 403,hot bar atm,dvl,2,,,,
@@ -738,7 +738,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 737,unused,,0,,,,too many
 738,bar !hot,cld int,1,,,,
 739,snw dvl,int,2,,,,
-740,int drl,stn,A,,,,
+740,int der,stn,A,,,,
 741,tun,,0,,,,
 742,snw,!dvl int,1,,,,
 743,unused,,,,,,no clue
@@ -855,7 +855,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 854,snw int,,2,,,,
 855,tun rns,,0,,,,salt
 856,dvl snw mne,,2,,,,
-857,snw,svl atm,2,,,yesod,
+857,snw,dvl atm,2,,,yesod,
 858,hab !hot !int dvl,!int,3,,,,
 859,unused,,0,,,,too many
 860,cld hab !dvl,,3,,,,
@@ -1010,7 +1010,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1009,int !dvl hab,,1,,,,tea house
 1010,int stn,stn dvl,A,,,,
 1011,int !dvl !lav mne,,3,,,,
-1012,hab !Int dvl !hot,,4,,,,
+1012,hab !int dvl !hot,,4,,,,
 1013,unused,,0,,,,red
 1014,ter hab,,0,,,,
 1015,ter rns,,0,,,,enough
@@ -1115,7 +1115,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1114,int,stn,A,,,,
 1115,int stn,stn,2,,,mimir_platform,
 1116,wtr,,0,,,,
-1117,int svl stn,stn,A,,,,ind
+1117,int dvl stn,stn,A,,,,ind
 1118,bar,,1,,,,
 1119,int stn,stn mne,A,,,,ind
 1120,int dvl stn,stn,4,,,achaman_enterprise_station,

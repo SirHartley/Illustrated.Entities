@@ -3,6 +3,7 @@ Adjusted - Random images now favour images that match the planet's features inst
 Adjusted - The image selector lists the best matching images first
 Fixed - Planets got no random image when every fitting image was already in use or none matched the exact colony size
 Fixed - Images tagged for stations only as a required tag never showed up for stations
+Fixed - Four station images never showed up because of tag typos, and one image could appear on hostile planets
 Adjusted - Settings fall back to their defaults when a saved value is missing or invalid, and the number of text lines is kept within 1 to 20
 
 2.0.c
