@@ -124,7 +124,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 | `dialogue/rules/ShowDefaultVisualWithSelector.java` | Rule command; shows the image with the change button or falls back to vanilla `ShowDefaultVisual` behavior |
 | `dialogue/impl/ImageDisplayPanel.java` | Current image with change and "desc." buttons |
 | `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
-| `dialogue/impl/TextChangerPanel.java` | Description editor (LunaLib `LunaUITextField`) |
+| `dialogue/impl/TextChangerPanel.java` | Description editor: one vanilla `TextFieldAPI` per line, `Setting.TEXT_LINE_NUM` lines per description |
 | `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
 | `dialogue/panel/*` | Custom panel plumbing adapted from Histidine's code: `VisualCustomPanel` holds the static panel, tooltip and plugin |
 
@@ -148,6 +148,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`.
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
+- LunaLib's multiline `LunaTextfield` (unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height, so the editor keeps the vanilla fields. TASC also depends on the per-line maps in `TextDataEntry`.
 
 ### Integrations
 
