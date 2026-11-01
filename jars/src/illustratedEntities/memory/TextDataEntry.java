@@ -3,7 +3,6 @@ package illustratedEntities.memory;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.loading.Description;
-import illustratedEntities.helper.Setting;
 import illustratedEntities.helper.TextHandler;
 
 import java.util.HashMap;
@@ -36,6 +35,17 @@ public class TextDataEntry {
         } else return stringMap2.get(lineNum);
     }
 
+    // the editor keeps the whole text in line 1, older saves and TASC copies have one entry per line
+    public void setText(int textNum, String text){
+        Map<Integer, String> map = textNum == 1 ? stringMap1 : stringMap2;
+        map.clear();
+        map.put(1, text);
+    }
+
+    public String getText(int textNum){
+        return parseStringMap(textNum == 1 ? stringMap1 : stringMap2);
+    }
+
     public String getDescriptionID(){
         return DEFAULT_PREFIX + descriptionNum;
     }
@@ -56,11 +66,11 @@ public class TextDataEntry {
 
     public boolean isValid(){
         for (String s : stringMap1.values()){
-            if(!s.isEmpty()) return true;
+            if(s != null && !s.isBlank()) return true;
         }
 
         for (String s : stringMap2.values()){
-            if(!s.isEmpty()) return true;
+            if(s != null && !s.isBlank()) return true;
         }
 
         return false;
@@ -68,19 +78,26 @@ public class TextDataEntry {
 
     public String parseStringMap(Map<Integer, String> stringMap){
         StringBuilder out = new StringBuilder();
+        int lastLine = 0;
+        for (int lineNum : stringMap.keySet()) lastLine = Math.max(lastLine, lineNum);
 
-        for (int i = 1; i <= Setting.TEXT_LINE_NUM.value(); i++){
-            String s = stringMap.getOrDefault(i, "");
+        for (int i = 1; i <= lastLine; i++){
+            String s = line(stringMap, i);
 
-            if (s.isEmpty() && stringMap.containsKey(i +1) && !stringMap.get(i + 1).isEmpty()) {
-                s = "\n\n"; //its an empty line and there is one following it
-                out.append(s);
+            if (s.isEmpty() && !line(stringMap, i + 1).isEmpty()) {
+                out.append("\n\n"); //its an empty line and there is one following it
             } else if (!s.isEmpty()){
-                if (stringMap.containsKey(i -1) && !stringMap.get(i - 1).isEmpty() && !Character.isWhitespace(out.charAt(out.length()-1))) out.append(" ");
+                if (!line(stringMap, i - 1).isEmpty() && !Character.isWhitespace(out.charAt(out.length()-1))) out.append(" ");
                 out.append(s);
             }
         }
 
         return out.toString();
+    }
+
+    // tasc copies missing lines as null
+    private static String line(Map<Integer, String> stringMap, int lineNum){
+        String s = stringMap.get(lineNum);
+        return s == null ? "" : s;
     }
 }

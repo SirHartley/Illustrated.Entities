@@ -4,7 +4,12 @@ Adjusted - The image selector lists the best matching images first
 Fixed - Planets got no random image when every fitting image was already in use or none matched the exact colony size
 Fixed - Images tagged for stations only as a required tag never showed up for stations
 Fixed - Four station images never showed up because of tag typos, and one image could appear on hostile planets
-Adjusted - Settings fall back to their defaults when a saved value is missing or invalid, and the number of text lines is kept within 1 to 20
+Adjusted - Settings fall back to their defaults when a saved value is missing or invalid
+Adjusted - The description editor has one text box per description: click to place the cursor, Enter starts a new line, and the box scrolls once the text is longer than it
+Note - Each description holds up to 5000 characters
+Fixed - Descriptions edited before the number of text lines was lowered were cut off
+Fixed - Crash when TASC upgraded a station whose description was edited before the number of text lines was raised
+Removed - The "Number of text lines" setting, the description editor no longer uses fixed lines
 
 2.0.c
 Adjusted - Switched out the image for Madeira

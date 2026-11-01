@@ -9,8 +9,7 @@ public enum Setting {
     BUTTON_ALWAYS_SHOW("illustrated_entities_images_always_show_button", false),
     ALWAYS_BROAD_MATCH("illustrated_entities_images_broadmatch", true),
 
-    ENABLE_TEXT("illustrated_entities_text_enable", true),
-    TEXT_LINE_NUM(Settings.TEXT_LINE_NUM, 7, 1, 20);
+    ENABLE_TEXT("illustrated_entities_text_enable", true);
 
     public final String id;
     public final Object fallback;
