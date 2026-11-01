@@ -12,7 +12,7 @@ Reviews, explanations, audits, and proposals are read-only unless the user reque
 
 1. Read the current remote `CLAUDE.md` in full at the start of each new task. Within the same task, reuse the version already read unless the instructions change. Read new or changed instruction files before following them.
 2. Use the `starsector-knowledge` skill before answering or changing anything related to Starsector. It covers one exact game version. Do not rely on memory.
-3. LazyLib and LunaLib are not in the repository. Read their jars from an installed copy of the mods, extracted to a temporary directory, never into the repository.
+3. If the skill is incomplete, inspect the read-only jars under `lib/` (game, LazyLib, LunaLib). Extract them to a temporary directory, never into the repository.
 4. Select the required guides using [Which guide to read](#which-guide-to-read). Apply every matching row, including for reviews and fixes to existing behavior.
 
 ### Which guide to read
@@ -74,6 +74,7 @@ Update documents automatically as part of each relevant change. Before committin
 | `CLAUDE.md` | Task scope, workflow, commits, PRs, build gate, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
 | `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle, save data and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No release history or duplicate policy. |
 | `docs/RELEASE.md` | Version numbers, release builder, package contents and publishing | Keep the workflow and builder aligned. |
+| `lib/` | Read-only compile jars (game, LazyLib, LunaLib, Kotlin runtime) | Replace only for a game or library update, as described in `docs/RELEASE.md`. |
 | `Changelog` and `docs/CHANGELOG.md` | Shipped change notes and how agents write them | Add or amend unreleased entries with each implementation task; preserve published entries. |
 
 Give each fact one home. Move useful detail to its proper owner and link to it. After moving a section, repair inbound links and check that no requirement or technical constraint was lost.
@@ -151,27 +152,16 @@ After the final runtime-affecting commit and before merge:
 
 1. Fetch and build the exact remote task-branch revision.
 2. Use a clean, empty output directory.
-3. Compile every source file under `jars/src` with JDK 17 (`--release 17`) and the dependencies below.
+3. Compile every source file under `jars/src` with JDK 17 against the jars in `lib/`, using the release builder's `build` command in [RELEASE.md](docs/RELEASE.md#build-the-release-jar). It needs no game install.
 4. Require a successful exit with no compile errors.
 5. Record the command, branch commit, JDK version and result in the pull request. The final reply links the PR and states the result and any untested behavior.
 6. Stop before merge if the build or a required dependency is unavailable.
 
-Required compile dependencies:
-
-- Every jar in the game's `starsector-core` folder: `starfarer.api.jar`, `starfarer_obf.jar` and `fs.common_obf.jar` (the source imports `com.fs.starfarer.loading.specs.PlanetSpec` and `com.fs.graphics.Sprite`), `json.jar`, `lwjgl.jar`, `lwjgl_util.jar`, `log4j-1.2.9.jar`.
-- LazyLib: `jars/*.jar` from the installed mod (includes the Kotlin runtime and `org.jetbrains.annotations`).
-- LunaLib: `jars/*.jar` from the installed mod.
-
-Use the game's bundled libraries; never substitute Maven versions. Starsector's `JSONException` is checked and a newer JSON jar hides that.
-
-Reference command, with `$CORE`, `$LAZYLIB` and `$LUNALIB` pointing at those folders:
-
 ```sh
-CP="$CORE/*:$LAZYLIB/jars/*:$LUNALIB/jars/*"
-javac --release 17 -encoding UTF-8 -cp "$CP" -d "$(mktemp -d)" $(find jars/src -name '*.java')
+java jars/src/illustratedEntities/tools/ReleaseBuild.java build
 ```
 
-The release jar is built by the release builder, not by this command; see [RELEASE.md](docs/RELEASE.md).
+`lib/` holds the game's bundled libraries; never substitute Maven versions. Starsector's `JSONException` is checked and a newer JSON jar hides that. The `build` output is gitignored; committing or publishing it is release work.
 
 ## Repository navigation
 

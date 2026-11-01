@@ -43,7 +43,7 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 ### Build and release tools
 
-The release builder, its checks and the manual release workflow are owned by [RELEASE.md](RELEASE.md).
+`tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
 
 ## Image data
 
