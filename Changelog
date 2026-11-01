@@ -1,3 +1,8 @@
+2.0.d - UNRELEASED
+Fixed - Turning off "Add images" now also stops images on new colonies, removes them from orbital stations and hides the image button
+Fixed - Turning off "Add images" no longer deletes the vanilla illustrations that preset images replaced
+Note - Only applies to illustrations replaced after this update. Saves that already ran the mod need a new game to get them back.
+
 2.0.c
 Adjusted - Switched out the image for Madeira
 Fixed - Crash when editing the description of certain modded planets

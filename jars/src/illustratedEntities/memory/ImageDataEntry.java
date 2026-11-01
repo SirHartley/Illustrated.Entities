@@ -14,6 +14,7 @@ import java.util.List;
 
 import static illustratedEntities.plugins.ModPlugin.HAS_INTERACTION_IMAGE;
 import static illustratedEntities.plugins.ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE;
+import static illustratedEntities.plugins.ModPlugin.VANILLA_VISUAL;
 
 public class ImageDataEntry {
     public int id;
@@ -57,6 +58,9 @@ public class ImageDataEntry {
 
         String path = getImagePath();
         InteractionDialogImageVisual visual = new InteractionDialogImageVisual(path, 480, 300);
+        InteractionDialogImageVisual vanilla = t.getCustomInteractionDialogImageVisual();
+
+        if (vanilla != null && !t.hasTag(HAS_INTERACTION_IMAGE)) t.getMemoryWithoutUpdate().set(VANILLA_VISUAL, vanilla);
 
         t.setCustomInteractionDialogImageVisual(visual);
         t.getMemoryWithoutUpdate().set(HAS_INTERACTION_IMAGE, id);
@@ -76,9 +80,16 @@ public class ImageDataEntry {
         t.addTag(ORBITAL_HAS_INTERACTION_IMAGE);
     }
 
+    public static void removeFromOrbitalStation(SectorEntityToken t){
+        t.setCustomInteractionDialogImageVisual(null);
+        t.getMemoryWithoutUpdate().unset(ORBITAL_HAS_INTERACTION_IMAGE);
+        t.removeTag(ORBITAL_HAS_INTERACTION_IMAGE);
+    }
+
     public void removeFromEntity(SectorEntityToken t){
         usedEntityIds.remove(t.getId());
-        t.setCustomInteractionDialogImageVisual(null);
+        t.setCustomInteractionDialogImageVisual((InteractionDialogImageVisual) t.getMemoryWithoutUpdate().get(VANILLA_VISUAL));
+        t.getMemoryWithoutUpdate().unset(VANILLA_VISUAL);
         t.getMemoryWithoutUpdate().unset(HAS_INTERACTION_IMAGE);
         t.removeTag(HAS_INTERACTION_IMAGE);
 

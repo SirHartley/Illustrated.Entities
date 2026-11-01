@@ -36,7 +36,7 @@ public class ImageDisplayPanel {
         Color bgColour = Color.darkGray;
         Color brightColor = Misc.getBrightPlayerColor();
 
-        TooltipMakerAPI lastUsedAnchor;
+        TooltipMakerAPI lastUsedAnchor = null;
         TooltipMakerAPI anchor;
         String buttonId;
         ButtonAPI button;
@@ -55,23 +55,25 @@ public class ImageDisplayPanel {
         CustomPanelAPI selectionPanel = panel.createCustomPanel(PANEL_WIDTH_1, BUTTON_HEIGHT, new NoFrameCustomPanelPlugin());
 
         //change image button
-        buttonId = "change_interaction_visual";
-        boolean devmode = Global.getSettings().isDevMode();
-        String buttonName = devmode ? "[" + ImageHandler.getImageId(dialogue.getInteractionTarget()) + "] image" : "image";
-        float width = devmode ? SELECT_BUTTON_WIDTH * 1.5f : SELECT_BUTTON_WIDTH;
+        if (Settings.getBoolean(Settings.ENABLE_IMAGES)) {
+            buttonId = "change_interaction_visual";
+            boolean devmode = Global.getSettings().isDevMode();
+            String buttonName = devmode ? "[" + ImageHandler.getImageId(dialogue.getInteractionTarget()) + "] image" : "image";
+            float width = devmode ? SELECT_BUTTON_WIDTH * 1.5f : SELECT_BUTTON_WIDTH;
 
-        anchor = selectionPanel.createUIElement(width, BUTTON_HEIGHT, false);
-        button = anchor.addButton(buttonName, buttonId, baseColor, bgColour, Alignment.MID, CutStyle.BOTTOM, width, BUTTON_HEIGHT * 0.8f, 0);
-        entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
-            @Override
-            public void onToggle() {
-                new ImageSelectorPanel().showPanel(dialogue);
-            }
-        };
+            anchor = selectionPanel.createUIElement(width, BUTTON_HEIGHT, false);
+            button = anchor.addButton(buttonName, buttonId, baseColor, bgColour, Alignment.MID, CutStyle.BOTTOM, width, BUTTON_HEIGHT * 0.8f, 0);
+            entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
+                @Override
+                public void onToggle() {
+                    new ImageSelectorPanel().showPanel(dialogue);
+                }
+            };
 
-        VisualCustomPanel.getPlugin().addButton(entry);
-        selectionPanel.addUIElement(anchor).inTR(0f, 0f); //last in row
-        lastUsedAnchor = anchor;
+            VisualCustomPanel.getPlugin().addButton(entry);
+            selectionPanel.addUIElement(anchor).inTR(0f, 0f); //last in row
+            lastUsedAnchor = anchor;
+        }
 
         //desc
         if (Settings.getBoolean(Settings.ENABLE_TEXT)){
@@ -87,7 +89,8 @@ public class ImageDisplayPanel {
             };
 
             VisualCustomPanel.getPlugin().addButton(entry);
-            selectionPanel.addUIElement(anchor).leftOfMid(lastUsedAnchor, opad); //first in row
+            if (lastUsedAnchor == null) selectionPanel.addUIElement(anchor).inTR(0f, 0f);
+            else selectionPanel.addUIElement(anchor).leftOfMid(lastUsedAnchor, opad); //first in row
             lastUsedAnchor = anchor;
         }
 
