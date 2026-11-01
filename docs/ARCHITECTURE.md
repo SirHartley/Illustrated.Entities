@@ -39,7 +39,7 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 ### Settings
 
-`helper/Setting` owns ids, defaults, bounds and typed access (`Setting.ENABLE_IMAGES.enabled()`, `Setting.TEXT_LINE_NUM.value()`). `data/config/LunaSettings.csv` owns the tab layout and help text; its defaults and bounds mirror `Setting`. `helper/Settings` installs a LunaLib listener in `onApplicationLoad`, reinstalls it in `onGameLoad`, and caches the values; callers read the cache, not LunaLib. `Settings.reload` sanitizes each value (missing or wrong type falls back to the default, ints are clamped), writes corrected values back to the LunaLib file, then `helper/LunaSettingsBridge` copies them into the open LunaLib settings panel, which keeps pending values and controls after Save. `Settings.CSV_PATH` and `Settings.DEFAULT_IMAGE_PATH` come from `settings.json`. `tools/SettingsChecks` checks that the CSV and `Setting` agree.
+`helper/Setting` owns ids, defaults, bounds and typed access (`Setting.ENABLE_IMAGES.enabled()`, `value()` for int settings). `data/config/LunaSettings.csv` owns the tab layout and help text; its defaults and bounds mirror `Setting`. `helper/Settings` installs a LunaLib listener in `onApplicationLoad`, reinstalls it in `onGameLoad`, and caches the values; callers read the cache, not LunaLib. `Settings.reload` sanitizes each value (missing or wrong type falls back to the default, ints are clamped), writes corrected values back to the LunaLib file, then `helper/LunaSettingsBridge` copies them into the open LunaLib settings panel, which keeps pending values and controls after Save. `Settings.CSV_PATH` and `Settings.DEFAULT_IMAGE_PATH` come from `settings.json`. `tools/SettingsChecks` checks that the CSV and `Setting` agree.
 
 ### Build and release tools
 
@@ -159,7 +159,8 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 
 ### Integrations
 
-- TASC (Astropolis) calls `Settings.getInt(Settings.TEXT_LINE_NUM)`, `TextDataEntry` (`getString`, `setString`, `apply`, `descriptionNum`), `TextDataMemory.getNexFreetNum/set`, `ImageHandler.hasImage/getImageId/removeImageFrom/setImage` and `ImageDataMemory.get` when it rebuilds a station, and older builds read `Settings.LINE_AMT`. Keep these members and the line-map layout of `TextDataEntry`.
+- TASC (Astropolis) calls `Settings.getInt(Settings.TEXT_LINE_NUM)`, `TextDataEntry` (`getString`, `setString`, `apply`, `descriptionNum`), `TextDataMemory.getNexFreetNum/set`, `ImageHandler.hasImage/getImageId/removeImageFrom/setImage` and `ImageDataMemory.get` when it rebuilds a station, and older builds read `Settings.LINE_AMT`. Keep these members and the line-map layout of `TextDataEntry`. The line count setting is gone; `Settings.getInt(Settings.TEXT_LINE_NUM)` returns `LINE_AMT` (7) so TASC still copies line 1.
+- TASC makes a new `TextDataEntry` for the rebuilt station and never removes the old one, so every rebuild of a station with an edited description uses up a description slot.
 - Kaleidoscope planet names map to tags in `ImageTags.kaleidoscopeNameMap`; Unknown Skies planet types are in `ImageTags.typeTagMap`.
 
 ## Dead or dormant

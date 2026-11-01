@@ -14,7 +14,7 @@ import java.util.Map;
 public final class Settings implements LunaSettingsListener {
     public static final String MOD_ID = "illustrated_entities";
 
-    // read by TASC, the mod uses Setting.TEXT_LINE_NUM
+    // tasc copies this many TextDataEntry lines, the editor only fills line 1
     public static final int LINE_AMT = 7;
     public static final String TEXT_LINE_NUM = "illustrated_entities_text_num_lines";
 
@@ -70,6 +70,7 @@ public final class Settings implements LunaSettingsListener {
 
     // public api for other mods (TASC calls getInt)
     public static int getInt(String id) {
+        if (TEXT_LINE_NUM.equals(id)) return LINE_AMT;
         Setting setting = Setting.byId(id);
         return setting != null ? setting.value() : 0;
     }
