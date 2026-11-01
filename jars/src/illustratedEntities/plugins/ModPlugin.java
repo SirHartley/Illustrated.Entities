@@ -47,7 +47,7 @@ public class ModPlugin extends BaseModPlugin {
         if(Settings.getBoolean(Settings.ENABLE_IMAGES)){
             ImageHandler.addImagesToPlayerMarkets();
 
-            if(Settings.getBoolean(Settings.ENABLE_PRESET_CORE_WORLDS)) ImageHandler.addPresetImagesToMarkets();
+            if(Settings.getBoolean(Settings.ENABLE_PRESET_CORE_WORLDS)) ImageHandler.addPresetImagesToMarkets(Settings.getBoolean(Settings.PRESET_REPLACE_VANILLA));
             if(Settings.getBoolean(Settings.ENABLE_RANDOM_IMAGES)) ImageHandler.addRandomImagesToMarketsWithoutImage(Settings.getBoolean(Settings.SKIP_CORE));
         } else ImageHandler.removeAllImages();
 

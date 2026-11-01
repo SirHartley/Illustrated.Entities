@@ -1,4 +1,6 @@
 2.0.d - UNRELEASED
+Added - Setting "Preset images replace vanilla illustrations", off by default. Before, preset images always replaced them
+Note - Saves that already ran the mod keep the preset image on those planets.
 Fixed - Turning off "Add images" now also stops images on new colonies, removes them from orbital stations and hides the image button
 Fixed - Turning off "Add images" no longer deletes the vanilla illustrations that preset images replaced
 Note - Only applies to illustrations replaced after this update. Saves that already ran the mod need a new game to get them back.

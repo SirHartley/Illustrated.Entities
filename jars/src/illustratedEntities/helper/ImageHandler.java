@@ -103,7 +103,7 @@ public class ImageHandler {
         }
     }
 
-    public static void addPresetImagesToMarkets(){
+    public static void addPresetImagesToMarkets(boolean replaceVanilla){
         ImageDataMemory memory = ImageDataMemory.getInstance();
 
         for (ImageDataEntry data : new ArrayList<>(memory.getDataMap().values())){
@@ -116,7 +116,10 @@ public class ImageHandler {
                         && t.getMarket() != null
                         && !t.getMarket().isPlanetConditionMarketOnly()) {
 
-                    ImageHandler.setImage(t, data, false);
+                    boolean coversVanilla = hasImage(t) ? t.getMemoryWithoutUpdate().contains(ModPlugin.VANILLA_VISUAL) : t.getCustomInteractionDialogImageVisual() != null;
+
+                    if (replaceVanilla || !coversVanilla) ImageHandler.setImage(t, data, false);
+                    else if (getImageId(t) == data.id) removeImageFrom(t);
                 }
             }
         }

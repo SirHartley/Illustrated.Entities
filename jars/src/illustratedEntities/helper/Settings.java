@@ -13,6 +13,7 @@ public class Settings  {
 
     public static final String ENABLE_IMAGES  = "illustrated_entities_images_enable";
     public static final String ENABLE_PRESET_CORE_WORLDS  = "illustrated_entities_images_core_worlds";
+    public static final String PRESET_REPLACE_VANILLA  = "illustrated_entities_images_core_worlds_replace_vanilla";
     public static final String ENABLE_RANDOM_IMAGES  = "illustrated_entities_images_random_colonies";
     public static final String SKIP_CORE  = "illustrated_entities_images_random_skip_core";
     public static final String BUTTON_ALWAYS_SHOW  = "illustrated_entities_images_always_show_button";

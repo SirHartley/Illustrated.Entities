@@ -14,7 +14,7 @@ Technical routing for the current implementation, checked against game `0.98a`. 
 | Change / symptom | Route |
 |---|---|
 | Wrong or no image picked for a planet | `ImagePicker.getTags -> ImageTags maps -> ImagePicker.generateChoices -> ImageHandler.applyFittingRandomImageToEntity` |
-| Preset image for a named vanilla planet | `image_data.csv` `planet_id` -> `ImageHandler.addPresetImagesToMarkets` |
+| Preset image for a named vanilla planet | `image_data.csv` `planet_id` -> `ImageHandler.addPresetImagesToMarkets`; skips or reverts entities with a vanilla illustration unless `Settings.PRESET_REPLACE_VANILLA` |
 | Image missing or white after a jump or reload | `ImageOnJumpLoader` / `PlayerOpenColonyListener` -> `ImageDataEntry.load`; `UnusedImageUnloader -> ImageDataEntry.unload` |
 | Orbital station shows a different image than its planet | `OrbitalStationSynchListener` / `ImageOnJumpLoader -> ImageHandler.applyPlanetImageToOrbitalStations` |
 | Image left on a dead or abandoned colony | `DecivImageRemover`, `NewColonyImageAdder.reportPlayerAbandonedColony`, `ImageHandler.cleanseLeftoverImagesFromRemovedMarkets` |
