@@ -22,8 +22,9 @@ import illustratedEntities.memory.ImageDataMemory;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ImageSelectorPanel {
@@ -252,8 +253,9 @@ public class ImageSelectorPanel {
         }
 
         //PICTURES
-        List<Integer> imageList = new ArrayList<Integer>(ImagePicker.generateChoices(requiredTags, null, !allowDupes, mode).keySet());
-        Collections.sort(imageList);
+        Map<Integer, Integer> choices = ImagePicker.generateChoices(requiredTags, null, !allowDupes, mode);
+        List<Integer> imageList = new ArrayList<>(choices.keySet());
+        imageList.sort(Comparator.comparing((Integer id) -> -choices.get(id)).thenComparing(id -> id));
 
         ImageDataMemory imageDataMemory = ImageDataMemory.getInstance();
 

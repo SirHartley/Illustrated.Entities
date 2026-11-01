@@ -1,6 +1,11 @@
 2.0.d - UNRELEASED
 Added - Setting "Preset images replace vanilla illustrations", off by default. Before, preset images always replaced them
 Note - Saves that already ran the mod keep the preset image on those planets.
+Adjusted - Random images now favour images that match the planet's features instead of images with many exclusions
+Adjusted - The image selector lists the best matching images first
+Fixed - Planets got no random image when every fitting image was already in use or none matched the exact colony size
+Fixed - Images tagged for stations only as a required tag never showed up for stations
+Adjusted - Settings fall back to their defaults when a saved value is missing or invalid, and the number of text lines is kept within 1 to 20
 Fixed - Turning off "Add images" now also stops images on new colonies, removes them from orbital stations and hides the image button
 Fixed - Turning off "Add images" no longer deletes the vanilla illustrations that preset images replaced
 Note - Only applies to illustrations replaced after this update. Saves that already ran the mod need a new game to get them back.

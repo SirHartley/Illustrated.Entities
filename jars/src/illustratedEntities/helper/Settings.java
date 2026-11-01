@@ -1,35 +1,84 @@
 package illustratedEntities.helper;
 
 import com.fs.starfarer.api.Global;
+import illustratedEntities.plugins.ModPlugin;
+import lunalib.backend.ui.settings.LunaSettingsLoader;
 import lunalib.lunaSettings.LunaSettings;
 import lunalib.lunaSettings.LunaSettingsListener;
-import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 
-public class Settings  {
+import java.io.IOException;
+import java.util.EnumMap;
+import java.util.Map;
+
+public final class Settings implements LunaSettingsListener {
     public static final String MOD_ID = "illustrated_entities";
 
-    //legacy for TASC compat - it's not used by the mod.
+    // read by TASC, the mod uses Setting.TEXT_LINE_NUM
     public static final int LINE_AMT = 7;
-
-    public static final String ENABLE_IMAGES  = "illustrated_entities_images_enable";
-    public static final String ENABLE_PRESET_CORE_WORLDS  = "illustrated_entities_images_core_worlds";
-    public static final String PRESET_REPLACE_VANILLA  = "illustrated_entities_images_core_worlds_replace_vanilla";
-    public static final String ENABLE_RANDOM_IMAGES  = "illustrated_entities_images_random_colonies";
-    public static final String SKIP_CORE  = "illustrated_entities_images_random_skip_core";
-    public static final String BUTTON_ALWAYS_SHOW  = "illustrated_entities_images_always_show_button";
-    public static final String ALWAYS_BROAD_MATCH  = "illustrated_entities_images_broadmatch";
-
-    public static final String ENABLE_TEXT  = "illustrated_entities_text_enable";
-    public static final String TEXT_LINE_NUM  = "illustrated_entities_text_num_lines"; //int
+    public static final String TEXT_LINE_NUM = "illustrated_entities_text_num_lines";
 
     public static final String CSV_PATH = Global.getSettings().getString("illent_csv_path");
     public static final String DEFAULT_IMAGE_PATH = Global.getSettings().getString("illent_default_image_path");
 
-    public static int getInt(String id){
-        return LunaSettings.getInt(MOD_ID, id);
+    private static Map<Setting, Object> current = defaults();
+
+    public static void install() {
+        if (!LunaSettings.hasSettingsListenerOfClass(Settings.class)) {
+            LunaSettings.addSettingsListener(new Settings());
+        }
+        reload();
     }
 
-    public static boolean getBoolean(String id){
-        return LunaSettings.getBoolean(MOD_ID, id);
+    public static Object get(Setting setting) {
+        return current.getOrDefault(setting, setting.fallback);
+    }
+
+    public static Map<Setting, Object> defaults() {
+        Map<Setting, Object> result = new EnumMap<>(Setting.class);
+        for (Setting setting : Setting.values()) result.put(setting, setting.fallback);
+        return result;
+    }
+
+    @Override
+    public void settingsChanged(String modId) {
+        if (MOD_ID.equals(modId)) reload();
+    }
+
+    public static void reload() {
+        // luna loads lazily, a get on our own id loads it without reloading other mods
+        LunaSettings.getBoolean(MOD_ID, Setting.ENABLE_IMAGES.id);
+        var data = LunaSettingsLoader.getSettings().get(MOD_ID);
+        if (data == null) return;
+        Map<Setting, Object> result = new EnumMap<>(Setting.class);
+        for (Setting key : Setting.values()) result.put(key, key.sanitize(data.opt(key.id)));
+        current = result;
+        try {
+            boolean changed = false;
+            for (Setting key : Setting.values()) {
+                Object value = current.get(key);
+                if (value.equals(data.opt(key.id))) continue;
+                data.put(key.id, value);
+                changed = true;
+            }
+            if (changed) data.save();
+        } catch (IOException | JSONException ex) {
+            ModPlugin.log.error("Could not save Illustrated.Entities settings", ex);
+        }
+        LunaSettingsBridge.sync(current);
+    }
+
+    // public api for other mods (TASC calls getInt)
+    public static int getInt(String id) {
+        Setting setting = Setting.byId(id);
+        return setting != null ? setting.value() : 0;
+    }
+
+    public static boolean getBoolean(String id) {
+        Setting setting = Setting.byId(id);
+        return setting != null && setting.enabled();
+    }
+
+    private Settings() {
     }
 }

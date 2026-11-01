@@ -45,7 +45,7 @@ public class Importer {
                     s = s.replaceAll("\\s", "");
                     if (s.length() < 3) continue;
 
-                    if (s.startsWith("!")) requiredExcludedTags.add(s.substring(1));
+                    if (s.startsWith("!")) requiredExcludedTags.add(s.replaceFirst("^!+", ""));
                     else requiredTags.add(s);
                 }
 
@@ -53,7 +53,7 @@ public class Importer {
                     s = s.replaceAll("\\s", "");
                     if (s.length() < 3) continue;
 
-                    if (s.startsWith("!")) optionalExcludedTags.add(s.substring(1));
+                    if (s.startsWith("!")) optionalExcludedTags.add(s.replaceFirst("^!+", ""));
                     else optionalTags.add(s);
                 }
 

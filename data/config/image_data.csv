@@ -5,19 +5,19 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 4,hab !int hot !wtr !jun,!dvl !int,3,,,,
 5,aln hab,!,0,,,,shroom
 6,ter dvl aln,int !pol,3,,,,red
-7,bar mne,!dvl hot,1,,-1,,
+7,bar mne,!dvl hot,1,,,,
 8,pol,!dvl tox bar int ter,2,,,,
 9,int !dvl,!stn,1,,,,
 10,cld dst atm,hab ard !pol,0,,,,rust?
 11,int dvl stn,stn,2,,,,
-12,!dvl !int !cld !dst !tox !jun,ter ard hab hot,2,,-3,,
+12,!dvl !int !cld !dst !tox !jun,ter ard hab hot,2,,,,
 13,ter aln,dvl hab,3,,,,red
 14,lav,hot tox pol,0,,,,
 15,jun hab,hot !dvl,1,,,,red jun
 16,int stn,stn !dvl,3,pirates,,,mil
-17,mne !lav !cld !irr,dvl bar dst ard hot int,3,,-2,,??
-18,hab !dvl !wtr !hot,ter pol,2,,-2,,slums
-19,dvl !ter !wtr !tox !irr,int bar,4,,-2,,
+17,mne !lav !cld !irr,dvl bar dst ard hot int,3,,,,??
+18,hab !dvl !wtr !hot,ter pol,2,,,,slums
+19,dvl !ter !wtr !tox !irr,int bar,4,,,,
 20,wtr,int hab dvl !pol,3,,,,
 21,ter,!int cld !dvl,1,,,,wizards
 22,mne !cld,,1,,,,
@@ -29,32 +29,32 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 28,hot irr,,2,,,,
 29,!dvl bar int,,1,pirates,,,camp
 30,hab wtr,ter dvl !pol,2,,2,,
-31,hot !lav !dst !ard !wtr !tox !jun,mne,2,,-3,,
+31,hot !lav !dst !ard !wtr !tox !jun,mne,2,,,,
 32,!dvl !int !cld !wtr !tox,ter mne pol,2,,,,
 33,bar dvl,mne int !hab !cld,1,,,,
 34,hot !hab !irr,!dst !ard,2,,,,
-35,!int hot !lav !wtr !jun !jun,ard dst,2,,-3,,
+35,!int hot !lav !wtr !jun !jun,ard dst,2,,,,
 36,ter dvl hab,,3,,,,wizards
-37,!int !cld !tun !wtr !tox,!dvl !dst !hot,3,,-2,,
+37,!int !cld !tun !wtr !tox,!dvl !dst !hot,3,,,,
 38,bar hot,,0,,,,
 39,bar !cld,hot int !dvl,2,,,,
 40,cld ard rns,!dvl dst,0,,,,salt
 41,wtr dvl,hab !pol,3,,,,
 42,dst !dvl !bar,hab !pol,1,,,,
 43,dvl !int,!hot,4,,,,
-44,hot !dst !ard !wtr !tox !irr !jun,lav mne !dvl,2,,-5,,
+44,hot !dst !ard !wtr !tox !irr !jun,lav mne !dvl,2,,,,
 45,hot wtr,,3,,,,
 46,int,stn,1,pirates,,,
 47,dst !bar hab,!dvl ard hab,0,,,,
-48,hot !dst !ard !wtr !jun,!dvl lav bar,2,,-3,,
+48,hot !dst !ard !wtr !jun,!dvl lav bar,2,,,,
 49,!int dvl,ter wtr !hot !cld,3,,,,
 50,bar rns,int dvl,0,,,,salt?
 51,dst pol,ard hab,1,,,,
 52,bar,hot,0,,,,
-53,!hot !int dvl !jun !ter,hab,4,,-3,,
-54,!dvl !int !hot !wtr !tox,hab,3,,-3,,
+53,!hot !int dvl !jun !ter,hab,4,,,,
+54,!dvl !int !hot !wtr !tox,hab,3,,,,
 55,ter hab dvl,!pol,4,,,,
-56,hot hab !lav !bar !wtr !jun !ter,mne,1,,-4,,
+56,hot hab !lav !bar !wtr !jun !ter,mne,1,,,,
 57,int ,stn,3,,,,
 58,!dvl bar,hot,1,,,,
 59,int rns !lav,,0,,,,mid
@@ -67,7 +67,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 66,dst !int,!dvl hot mne,3,,,,
 67,lav,int hot tox,3,,,,
 68,!int cld !dvl,atm mne,1,,,,
-69,tun,cold hab,0,,,,
+69,tun,cld hab,0,,,,
 70,!dvl mne !int hab,!bar hab,1,,,,
 71,bar !hot,!atm !hab dvl int,3,,,,
 72,jun,hot atm aln,0,,,,red jun
@@ -83,7 +83,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 82,dst int,!dvl,A,,,,
 83,lav,,2,,,,
 84,bar mne,,1,,,,
-85,hab !cld !dst !ard !tun,ter jun atm,4,,-3,,
+85,hab !cld !dst !ard !tun,ter jun atm,4,,,,
 86,ter int,,0,,,,red fungal
 87,jun dvl,hot,3,,3,,red
 88,ter rns,hot !dvl wtr,1,,,,
@@ -108,7 +108,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 107,lav rns,!dvl,2,,,,
 108,!int !hot !dst !tox,!dvl,3,,,qaras,
 109,mne !dvl,!hab atm bar,1,,,,
-110,!int !dvl !jun !cld !hot !tox,dst hot ard,2,,-4,,mil
+110,!int !dvl !jun !cld !hot !tox,dst hot ard,2,,,,mil
 111,!atm bar ,cld,1,,,,
 112,bar hot,,2,,,,
 113,hot int,bar !atm !dvl,3,,,,
@@ -119,15 +119,15 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 118,int dvl stn,stn,A,,,,
 119,lav int,mne !dvl,1,,,,
 120,hot !hab,lav bar atm hot int,2,,,,
-121,cld atm !irr !jun !ter,!dvl tun dst,1,,-3,,
-122,hab !int !jun !cld !tun !wtr,ter,3,,-3,,
-123,hab atm !hot !cld !jun !tun !wtr aln,ard ter int,0,,-3,,fungal?
+121,cld atm !irr !jun !ter,!dvl tun dst,1,,,,
+122,hab !int !jun !cld !tun !wtr,ter,3,,,,
+123,hab atm !hot !cld !jun !tun !wtr aln,ard ter int,0,,,,fungal?
 124,bar int hot,dvl mne,2,,,,
 125,wtr hab,hot,2,,,,
 126,int hot bar,mne,1,,,,
 127,bar mne,int !dvl hot,2,,,,
 128,int !lav,stn,1,,,,
-129,hot !lav !ard !wtr !jun,bar ter dst ard,0,,-2,,
+129,hot !lav !ard !wtr !jun,bar ter dst ard,0,,,,
 130,hot bar,bar lav !dvl atm,3,,,,
 131,dvl hab !int ter,!hot !cld,3,,,,
 132,ard hab,!cld,0,,,,
@@ -144,20 +144,20 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 143,hot !wtr !lav !irr,!dst ard bar,1,,,,
 144,int dvl,stn,2,,,,
 145,pol,!dvl hot rns,2,,,,
-146,hab !int dvl !dst !hot ,ter jun wtr,4,,-3,,
+146,hab !int dvl !dst !hot ,ter jun wtr,4,,,,
 147,der,stn,2,,-1,,mid
 148,lav mne,!dvl pol,2,,,,
-149,dvl hab !hot !cld !jun,wtr ter,3,,-2,,
+149,dvl hab !hot !cld !jun,wtr ter,3,,,,
 150,!dvl !int,!int atm hot,4,pirates,,,
 151,atm hot !wtr !jun,bar dvl,4,,,,
 152,ard,hot,0,,,,
 153,mne hot !irr,pol dvl,2,,,,
 154,int !dvl,hot bar,0,,,,caves
 155,hab !cld !dst,wtr ter ard,2,,,,
-156,hab !cld !hot !dst !ard,wtr ter int,1,,-3,,
+156,hab !cld !hot !dst !ard,wtr ter int,1,,,,
 157,int,stn,3,,,agreus,
 158,hot mne !irr,lav dst bar,2,,,,
-159,!hot dvl !int,,2,,-1,,mid
+159,!hot dvl !int,,2,,,,mid
 160,hot mne,lav bar dst,2,,,,
 161,bar atm,,0,,,,
 162,jun,hab,0,,,,
@@ -183,7 +183,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 182,ter !dvl hab,,1,,,,
 183,lav atm,,0,,,,
 184,int lav,,3,,,,
-185,hab !hot !cld !int atm,wtr ter jun,1,,-3,,
+185,hab !hot !cld !int atm,wtr ter jun,1,,,,
 186,dst mne,!dvl rns,1,,,,
 187,unused,,0,,,,too many
 188,atm dvl bar,!cld !hot,3,,,,
@@ -223,7 +223,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 222,lav rns,,0,,,,
 223,wtr hab,dvl !cld,1,,,,
 224,!int dst atm,!dvl,1,,,,scenic
-225,dvl hab !dst !ard !wtr !tun,!cld ter jun,4,,-4,,
+225,dvl hab !dst !ard !wtr !tun,!cld ter jun,4,,,,
 226,irr hot,bar ,0,,,,
 227,ter dvl !int,!int,2,,,,
 228,drl int stn,stn,A,,,,server racks
@@ -235,7 +235,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 234,dvl !hab !hot,int,4,,,,
 235,dst,dvl,1,,,,mid
 236,jun,hab,0,,,,
-237,hab dvl !wtr !ter !jun !tun,ter dst ard ,3,,-4,,
+237,hab dvl !wtr !ter !jun !tun,ter dst ard ,3,,,,
 238,int dvl !hab,bar,A,,,,
 239,ard hab,!hot,1,,,,
 240,dst,,1,,,,
@@ -258,7 +258,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 257,bar,!!dvl !int,1,,,,SHOULD BE 1 NOT A
 258,int !cld !dvl !wtr,,1,,,,mid
 259,unused,,0,,,,idk
-260,hab dvl atm !tun !wtr,ter wtr hab !hot,4,,-3,,
+260,hab dvl atm !tun !wtr,ter wtr hab !hot,4,,,,
 261,dst,,1,,,,
 262,bar atm !dst,!int hab,4,,,,
 263,int dvl stn,stn,A,,,,
@@ -267,15 +267,15 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 266,wtr dvl,pol,3,,-1,,
 267,dst dvl,int,2,,,,
 268,ter hab,!int dvl,2,,,,
-269,hab !dvl !cld !wtr !lav !int !jun,,2,,-4,,shithole
+269,hab !dvl !cld !wtr !lav !int !jun,,2,,,,shithole
 270,pol wtr !dvl,!rns,1,,,,
 271,hab dst,hot !dvl,1,,,,
 272,int dvl !hab !irr,bar,4,,,,
 273,cld mne,snw tun !dvl,2,,,,
 274,dst dvl ,hab,3,,,,
-275,!int dst,dvl hab,3,,-1,,
+275,!int dst,dvl hab,3,,,,
 276,jun !dvl,hab hot,1,,,,
-277,dvl !int hab !wtr !cld !tun,ter ,4,,-3,,
+277,dvl !int hab !wtr !cld !tun,ter ,4,,,,
 278,mne atm !int,!cld,1,,,,
 279,atm hot rns !lav !jun,!dvl rns,0,,,,
 280,dvl !int !cld,hab,4,,1,,
@@ -317,17 +317,17 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 316,!int !cld !wtr !jun,hot dvl,3,,,,
 317,ter cld,hab,0,,,,
 318,int rns,,0,,,,
-319,dvl !int dst,mne hab,3,,-1,,
+319,dvl !int dst,mne hab,3,,,,
 320,tun,!dvl,1,,,,salt
 321,ter dvl,hab,1,,-1,,outpost
 322,cld bar,,0,,,,
-323,int bar,!dvl mne,1,,-3,,
+323,int bar,!dvl mne,1,,-2,,
 324,dst rns !dvl,!hot,0,,,,
 325,!atm bar,hot rns,0,,,,
 326,hot tox,int,2,,5,,
 327,ard hab !int,,0,,,,
 328,!dvl dst !int,hab,1,,,,
-329,dvl !wtr !lav !tox !irr !jun,int atm !hab,4,,-3,,
+329,dvl !wtr !lav !tox !irr !jun,int atm !hab,4,,,,
 330,int dvl,stn,3,,,,
 331,pol hab !dst,ter jun hot,3,,,,
 332,int dvl mne !lav,cld,2,,,,
@@ -336,7 +336,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 335,dst,,0,,,,
 336,dst !dvl,rns hot,2,,,,
 337,lav,,0,,,,
-338,dst rns !dvl,,0,,-1,,
+338,dst rns !dvl,,0,,,,
 339,cld hab !int,tun snw,2,,,,
 340,unused,,1,,,,mid
 341,bar hot rns,!dvl int rns,1,,,,hot bar?
@@ -365,7 +365,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 364,hot bar,mne !dvl,2,,,,
 365,hot bar rns !dvl,!atm,0,,,,
 366,unused,,0,,,,egg sun
-367,!dvl !int !cld !wtr hab,,1,,-3,,
+367,!dvl !int !cld !wtr hab,,1,,,,
 368,atm bar hot,!,0,,,,
 369,ter dvl hab !int,!hot !cld,2,,,,
 370,dst,hab,0,,,,salt
@@ -378,7 +378,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 377,int stn,dvl stn,2,,,,
 378,unused,,2,,,,got 3 of these already
 379,wtr !dvl hab,!,1,,,,
-380,!wtr !ter !jun !snw !lav !irr,int !hab cld,3,,-3,,
+380,!wtr !ter !jun !snw !lav !irr,int !hab cld,3,,,,
 381,ter hab !int,dvl !hot !cld,2,,,,LC / London
 382,dst !int !dvl,hab hot,1,,,,
 383,wtr,int hab dvl,1,,,,
@@ -396,14 +396,14 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 395,unused,,0,,,,too many
 396,bar hot,,2,,,,
 397,ard,dvl hab,1,,,,
-398,atm dvl !wtr !lav !irr,int,4,,-2,,
+398,atm dvl !wtr !lav !irr,int,4,,,,
 399,int stn,stn dvl,A,,,,
 400,drl,stn,A,,,,
 401,ard,hab,0,,,,
 402,dst atm,dvl,2,,,,
 403,hot bar atm,dvl,2,,,,
 404,dvl int,stn,A,,,,
-405,!dvl ter !int,,1,,-2,,
+405,!dvl ter !int,,1,,,,
 406,!dvl dst,!int,1,,,,
 407,dst,int dvl,3,,,,
 408,irr hot,aln,0,,,,
@@ -453,22 +453,22 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 452,bar hot int,atm,2,,,,
 453,dvl ter !int hab,,2,,,,
 454,!dvl ter !int hab,,2,,,,
-455,!dvl hab !int ard,,2,,-2,,?use case
+455,!dvl hab !int ard,,2,,,,?use case
 456,bar atm !lav,hab !cld !hot,4,,,,
 457,ard !int hab,!dvl,2,,2,,
 458,dst rns int,!!dvl !hab,0,,,,
 459,dvl !int !wtr !tun,atm,4,,,,
-460,ard !int,dvl hab,3,,-2,,
+460,ard !int,dvl hab,3,,-1,,
 461,tox,,0,,,,
 462,dst,rns,2,,,,
 463,unused,,1,,,,too many
-464,dst,rns !int,2,,-2,,
+464,dst,rns !int,2,,-1,,
 465,ter hab !int,!dvl,1,,,,
 466,pol wtr,dvl,3,,,,
 467,ter hab !cld,!dvl,1,,,,
 468,tun,!dvl int,2,,,,
 469,unused,,1,,,,too many
-470,wtr !dvl !int,,2,,-1,,hovels
+470,wtr !dvl !int,,2,,,,hovels
 471,int dvl,stn,A,,,,
 472,int,stn,A,,,,
 473,wtr !dvl !int,,2,,,,
@@ -504,7 +504,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 503,wtr,dvl,1,,,,
 504,tox,,0,,10,,
 505,int mne bar,dvl,1,,,,
-506,ter !int hab dvl,,2,,-2,,LC village
+506,ter !int hab dvl,,2,,-1,,LC village
 507,tox,,0,,,,
 508,tun rns,cld !dvl,0,,,,
 509,ter,hab !int dvl,0,,,,
@@ -529,7 +529,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 528,tox !dvl,,1,,10,,
 529,ter dvl,hab !int,2,,,,floating
 530,jun !dvl !int,hab,3,,,,
-531,!dvl int !hot,!hab,2,,-1,,
+531,!dvl int !hot,!hab,2,,,,
 532,unused,,0,,,,
 533,ter hab !int,dvl,2,,,,old
 534,tox,,2,,10,salamanca,
@@ -541,7 +541,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 540,jun !int hab,!!dvl,1,,,,
 541,dvl ter hab,!int,2,,,,
 542,irr,,0,,,,
-543,ter hab !int dvl,,2,,-1,,
+543,ter hab !int dvl,,2,,,,
 544,tox rns,dvl,0,,10,,
 545,jun dvl,int,1,,,,
 546,jun int,,0,,,,red
@@ -576,7 +576,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 575,jun,!dvl,1,,,,
 576,ter !hot,!pol,0,,,,
 577,wtr !int,!pol hab,1,,,,
-578,atm hab !int !hot !cld !wtr !tun,ter hab jun,2,,-3,,
+578,atm hab !int !hot !cld !wtr !tun,ter hab jun,2,,,,
 579,int !hot,stn,A,luddic_church,,,LC LP
 580,ter hab dvl !int,!pol,4,,,,
 581,wtr !dvl hab,!int,1,,,,
@@ -638,13 +638,13 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 637,wtr !dvl,hab !int,0,,,,
 638,wtr,!hab !int,2,,,,
 639,unused,,0,,,,irradiated terran?
-640,ter dvl !int,hab ,2,,-1,,
+640,ter dvl !int,hab ,2,,,,
 641,int dvl !hot,stn,4,,,raesvelg,
 642,dvl ter int,hab,3,,,,
 643,tun,hab !int !dvl,1,,3,,
 644,ter rns,dvl hab !int,2,,,,
 645,ter,,1,,,,
-646,ter !int,dvl hab,1,,-1,,wazzard
+646,ter !int,dvl hab,1,,,,wazzard
 647,atm cld !irr,int !hab,2,,,,
 648,ter hab !int dvl,,2,,,,
 649,tun,cld,0,,,,
@@ -674,7 +674,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 673,tun rns,hab,0,,,,
 674,unused,,2,,,,enough of these
 675,hab dvl !hot !cld,,4,,,,
-676,ter !dvl,,1,,-1,,
+676,ter !dvl,,1,,,,
 677,ter,,0,,,,
 678,int dvl !lav !irr,stn,A,,,,
 679,cld atm !irr,,0,,,,
@@ -686,7 +686,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 685,!dvl wtr,hab,1,,,,
 686,tun,hab,0,,-1,,
 687,snw,,0,,,,
-688,atm cld dvl !bar !dst !irr !jun,snw tun,1,,-4,,
+688,atm cld dvl !bar !dst !irr !jun,snw tun,1,,,,
 689,ter dvl !int,hab !cld,3,,,,
 690,ter dvl !int,hab !hot !cld !pol,1,,,,
 691,hab dvl !hot !jun,,4,,,,
@@ -697,7 +697,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 696,ter !int,dvl hab,1,,,,
 697,snw int,,0,,,,
 698,wtr !dvl,hab,1,,,,
-699,dvl !hot !mne int cld,hab !pol,4,,-3,,
+699,dvl !hot !mne int cld,hab !pol,4,,,,
 700,ter !dvl !pol,hab,1,,,,
 701,tun !int,dvl,1,,,,
 702,!int ter dvl,,2,,,,
@@ -769,7 +769,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 768,snw,int,3,,,,
 769,bar int,atm ,2,,,,
 770,!int hab !wtr,dvl ,4,,,,ring world!
-771,!int hab !dvl !wtr !dst,!cld ter,4,,-2,,
+771,!int hab !dvl !wtr !dst,!cld ter,4,,,,
 772,int stn,stn,A,,,,
 773,bar int,atm ,4,,,,
 774,hab cld !int,,0,,,,
@@ -859,7 +859,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 858,hab !hot !int dvl,!int,3,,,,
 859,unused,,0,,,,too many
 860,cld hab !dvl,,3,,,,
-861,!int !lav !dvl !wtr atm !jun,,1,,-4,,
+861,!int !lav !dvl !wtr atm !jun,,1,,,,
 862,tun !int !dvl,,3,,,,drab
 863,int dvl stn,stn,A,,,,
 864,bar !int,,0,,,,
@@ -868,7 +868,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 867,unused,,0,,,,too many
 868,cld int aln,snw bar,2,,,,
 869,tun,!dvl,1,,,,ind
-870,cld atm !bar !snw !irr,hab !int,3,,-2,,
+870,cld atm !bar !snw !irr,hab !int,3,,,,
 871,cld hab,,0,,,,
 872,!int !wtr,atm !dvl,4,,,,
 873,bar mne,,0,,,,
@@ -899,7 +899,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 898,tun mne,,1,,,,
 899,unused,,0,,,,crystal
 900,bar cld,,0,,,,crystal
-901,cld atm !dst !snw !irr,rns,3,,-2,,
+901,cld atm !dst !snw !irr,rns,3,,,,
 902,cld atm !dvl !int,,2,,,,
 903,dvl bar !atm,,3,,,,
 904,snw ,int,1,,,,
@@ -991,7 +991,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 990,ter hab,dvl,3,,1,,
 991,jun int,!dvl,1,,,,shrroom
 992,ter,rns,1,,,,
-993,hot !dst !ard int !tox,bar lav,2,,-3,,
+993,hot !dst !ard int !tox,bar lav,2,,,,
 994,jun int,,0,,,,shrroom
 995,bar mne,!dvl,1,,,,
 996,ter hab !int,,0,,,,weeb
@@ -1006,7 +1006,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1005,bar mne,,1,,,,
 1006,irr rns,!dvl,0,,,,
 1007,tun,,0,,,,
-1008,atm !hot !ter !jun !irr !tox,,4,,-3,,??
+1008,atm !hot !ter !jun !irr !tox,,4,,,,??
 1009,int !dvl hab,,1,,,,tea house
 1010,int stn,stn dvl,A,,,,
 1011,int !dvl !lav mne,,3,,,,
@@ -1019,7 +1019,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1018,unused,,2,,,,??
 1019,bar !atm,int,3,,,,
 1020,int dvl stn,stn,A,,4,,
-1021,hot !dst !ard !wtr !tox !irr !jun,bar lav dvl,2,,-4,,
+1021,hot !dst !ard !wtr !tox !irr !jun,bar lav dvl,2,,,,
 1022,irr,int,1,,,,
 1023,bar mne ,!dvl !int,3,,,,
 1024,jun dvl,hab !int,1,,,,
@@ -1030,7 +1030,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1029,ter dvl hab !int,,3,,,,weeb
 1030,ard,!dvl,1,,,,wazzard
 1031,ter dvl hab !int,,2,,,,weeb
-1032,!wtr !hot !dst !jun,dvl,3,,-1,,
+1032,!wtr !hot !dst !jun,dvl,3,,,,
 1033,int stn,stn,1,,,,
 1034,bar,!dvl mne,1,,,,
 1035,!hot !ter !wtr !int,dvl cld hab int,3,,,,
@@ -1039,7 +1039,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1038,bar,cld mne,1,,,,
 1039,!dvl !int,atm,4,,,,
 1040,cld atm !irr,atm,3,,,,
-1041,hot !ard !dst !wtr !tox !jun,atm,0,,-3,,
+1041,hot !ard !dst !wtr !tox !jun,atm,0,,,,
 1042,bar,int,3,,,,
 1043,int,stn !dvl,A,,,,
 1044,int !lav !tox !irr,!hot !atm,4,,,,ind
@@ -1062,21 +1062,21 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1061,bar,!dvl mne,1,,,,
 1062,ter dvl,!int,3,,,,
 1063,ter aln,int,0,,,,red
-1064,hot !ard !dst !wtr !irr !jun,!dvl mne,2,,-3,,
+1064,hot !ard !dst !wtr !irr !jun,!dvl mne,2,,,,
 1065,bar mne,,1,,,,
-1066,hab !cld !hot !wtr,ter jun,3,,-1,eventide,
+1066,hab !cld !hot !wtr,ter jun,3,,,eventide,
 1067,int,stn mne,1,,,,
-1068,!dvl rns hab !cld,,1,,-1,,
-1069,!hab !lav !tox !irr,,4,,-1,,
+1068,!dvl rns hab !cld,,1,,,,
+1069,!hab !lav !tox !irr,,4,,,,
 1070,unused,,A,,,,hate the boxes
 1071,hot !ard !dst !wtr,,4,,,,
 1072,bar atm,dvl,3,,,,
-1073,hot !ard !dst !wtr !jun,mne,2,,-3,,
-1074,!dvl !int hab !hot,,3,,-1,,
+1073,hot !ard !dst !wtr !jun,mne,2,,,,
+1074,!dvl !int hab !hot,,3,,,,
 1075,int dst,bar hot hab,2,,,,
-1076,hot !ard !dst !wtr !tox !irr !jun,pol,2,,-3,,ind
+1076,hot !ard !dst !wtr !tox !irr !jun,pol,2,,,,ind
 1077,bar hot,int !dvl,2,,,,
-1078,hot !ard !dst !dvl !wtr,,2,,-2,,
+1078,hot !ard !dst !dvl !wtr,,2,,,,
 1079,ter dvl hab,,1,,,,
 1080,bar !dvl !hot,,1,,,,
 1081,cld bar,,0,,,,
@@ -1090,12 +1090,12 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1089,mne bar,hot,2,,,cruor,
 1090,mne bar,cld,2,,,,
 1091,int,dvl,3,,,,
-1092,hot !ard !dst !wtr !tox !irr !jun,int,2,,-5,,
+1092,hot !ard !dst !wtr !tox !irr !jun,int,2,,,,
 1093,ard,,0,,,,
 1094,int dvl stn,stn,A,,,aztlan_starport,
 1095,bar hot mne,,3,,,,
 1096,rns tun,,0,,,,
-1097,hot !ard !dst !wtr,mne int,4,,-1,,
+1097,hot !ard !dst !wtr,mne int,4,,,,
 1098,bar cld mne,,3,,,,ind
 1099,hot bar,atm,3,,,,
 1100,hot bar,,2,,,,
@@ -1312,7 +1312,7 @@ id,tags_required,tags_optional,population,faction,weight,planet_id,note
 1311,lav dvl,int,3,,,,
 1312,unused,,A,,,,
 1313,int dvl !lav,stn,2,,,,uppity
-1314,hot !dst !ard !wtr !jun,,0,,-2,,
+1314,hot !dst !ard !wtr !jun,,0,,,,
 1315,bar int,cld,3,,,,
 1316,bar int !cld mne,!dvl mne,3,,,,ind
 1317,mne,bar hot,2,,,,

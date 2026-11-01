@@ -9,6 +9,7 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.loading.specs.PlanetSpec;
 import illustratedEntities.dev.MarketInfoPrinter;
 import illustratedEntities.helper.ImageHandler;
+import illustratedEntities.helper.Setting;
 import illustratedEntities.helper.Settings;
 import illustratedEntities.helper.TextHandler;
 import illustratedEntities.listeners.*;
@@ -28,8 +29,14 @@ public class ModPlugin extends BaseModPlugin {
     public static final String VANILLA_VISUAL = "$illent_vanilla_visual";
 
     @Override
+    public void onApplicationLoad() {
+        Settings.install();
+    }
+
+    @Override
     public void onGameLoad(boolean newGame) {
         super.onGameLoad(newGame);
+        Settings.install();
 
         DecivImageRemover.register();
         NewColonyImageAdder.register();
@@ -44,11 +51,11 @@ public class ModPlugin extends BaseModPlugin {
         ImageHandler.reapplyAllImages();
         TextHandler.applyAllEntries();
 
-        if(Settings.getBoolean(Settings.ENABLE_IMAGES)){
+        if(Setting.ENABLE_IMAGES.enabled()){
             ImageHandler.addImagesToPlayerMarkets();
 
-            if(Settings.getBoolean(Settings.ENABLE_PRESET_CORE_WORLDS)) ImageHandler.addPresetImagesToMarkets(Settings.getBoolean(Settings.PRESET_REPLACE_VANILLA));
-            if(Settings.getBoolean(Settings.ENABLE_RANDOM_IMAGES)) ImageHandler.addRandomImagesToMarketsWithoutImage(Settings.getBoolean(Settings.SKIP_CORE));
+            if(Setting.ENABLE_PRESET_CORE_WORLDS.enabled()) ImageHandler.addPresetImagesToMarkets(Setting.PRESET_REPLACE_VANILLA.enabled());
+            if(Setting.ENABLE_RANDOM_IMAGES.enabled()) ImageHandler.addRandomImagesToMarketsWithoutImage(Setting.SKIP_CORE.enabled());
         } else ImageHandler.removeAllImages();
 
         ImageHandler.loadImagesForCurrentLocation();
