@@ -9,7 +9,7 @@ import illustratedEntities.dialogue.panel.InteractionDialogCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.NoFrameCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.VisualCustomPanel;
 import illustratedEntities.helper.ImageHandler;
-import illustratedEntities.helper.Settings;
+import illustratedEntities.helper.Setting;
 
 import java.awt.*;
 
@@ -74,7 +74,7 @@ public class ImageDisplayPanel {
         lastUsedAnchor = anchor;
 
         //desc
-        if (Settings.getBoolean(Settings.ENABLE_TEXT)){
+        if (Setting.ENABLE_TEXT.enabled()){
             buttonId = "desc";
             anchor = selectionPanel.createUIElement(SELECT_BUTTON_WIDTH, BUTTON_HEIGHT, false);
             button = anchor.addButton("desc.", buttonId, baseColor, bgColour, Alignment.MID, CutStyle.BOTTOM, SELECT_BUTTON_WIDTH, BUTTON_HEIGHT * 0.8f, 0);

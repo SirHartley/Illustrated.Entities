@@ -10,7 +10,7 @@ import com.fs.starfarer.api.impl.campaign.rulecmd.ShowDefaultVisual;
 import com.fs.starfarer.api.util.Misc;
 import illustratedEntities.dialogue.impl.ImageDisplayPanel;
 import illustratedEntities.dialogue.panel.VisualCustomPanel;
-import illustratedEntities.helper.Settings;
+import illustratedEntities.helper.Setting;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class ShowDefaultVisualWithSelector extends ShowDefaultVisual {
         boolean hasImage = target.getCustomInteractionDialogImageVisual() != null;
         boolean hasMarket = target.getMarket() != null;
         boolean isPlayerOwned = target.getMarket().isPlayerOwned();
-        boolean allowsNPCPicking = !isPlayerOwned && (Settings.getBoolean(Settings.BUTTON_ALWAYS_SHOW) || Global.getSettings().isDevMode());
+        boolean allowsNPCPicking = !isPlayerOwned && (Setting.BUTTON_ALWAYS_SHOW.enabled() || Global.getSettings().isDevMode());
 
         if(hasImage && hasMarket
                 && (allowsNPCPicking || isPlayerOwned)){

@@ -20,7 +20,7 @@ Technical routing for the current implementation, checked against game `0.98a`. 
 | Image left on a dead or abandoned colony | `DecivImageRemover`, `NewColonyImageAdder.reportPlayerAbandonedColony`, `ImageHandler.cleanseLeftoverImagesFromRemovedMarkets` |
 | Change image button, selector, filters | `rules.csv` `illustratedEntities_marketOpen -> ShowDefaultVisualWithSelector -> ImageDisplayPanel -> ImageSelectorPanel` |
 | Description editor | `ImageDisplayPanel` "desc." -> `TextChangerPanel -> TextDataEntry / TextDataMemory -> TextHandler.applyAllEntries` |
-| A setting has no effect | `data/config/LunaSettings.csv` id -> `helper/Settings` constant -> caller |
+| A setting has no effect | `data/config/LunaSettings.csv` id -> `helper/Setting` constant -> `Settings` cache -> caller |
 
 ## Registration and lifecycle
 
@@ -39,11 +39,11 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 ### Settings
 
-`helper/Settings` owns the LunaLib setting ids and reads them through `LunaSettings.getInt/getBoolean` on every call; there is no cache. Ids, defaults, bounds and help text live in `data/config/LunaSettings.csv`. `Settings.CSV_PATH` and `Settings.DEFAULT_IMAGE_PATH` come from `settings.json`. `Settings.LINE_AMT` is kept for TASC, which reads it; the mod does not.
+`helper/Setting` owns ids, defaults, bounds and typed access (`Setting.ENABLE_IMAGES.enabled()`, `Setting.TEXT_LINE_NUM.value()`). `data/config/LunaSettings.csv` owns the tab layout and help text; its defaults and bounds mirror `Setting`. `helper/Settings` installs a LunaLib listener in `onApplicationLoad`, reinstalls it in `onGameLoad`, and caches the values; callers read the cache, not LunaLib. `Settings.reload` sanitizes each value (missing or wrong type falls back to the default, ints are clamped), writes corrected values back to the LunaLib file, then `helper/LunaSettingsBridge` copies them into the open LunaLib settings panel, which keeps pending values and controls after Save. `Settings.CSV_PATH` and `Settings.DEFAULT_IMAGE_PATH` come from `settings.json`. `tools/SettingsChecks` checks that the CSV and `Setting` agree.
 
 ### Build and release tools
 
-`tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
+`tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. `tools/SettingsChecks.java` runs headless against the classes `build` leaves in `out/release-build-*/classes`: `java -cp "out/release-build-<n>/classes:lib/*" illustratedEntities.tools.SettingsChecks`. They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
 
 ## Image data
 
@@ -85,7 +85,9 @@ Use `rg --files jars/src` for the full inventory. The entries below name state a
 | `helper/ImagePicker.java` | Entity tag set and weighted image choice |
 | `helper/ImageTags.java` | Tag codes, display names, type and condition maps, `MatchMode` |
 | `helper/TextHandler.java` | Applying and deleting edited descriptions |
-| `helper/Settings.java` | Setting ids and access |
+| `helper/Setting.java` | Setting ids, defaults, bounds, sanitizing and typed access |
+| `helper/Settings.java` | LunaLib listener and value cache; TASC compatibility members |
+| `helper/LunaSettingsBridge.java` | Copies sanitized values into the open LunaLib settings panel |
 | `helper/WordUtils.java` | Line wrapping for the text editor |
 
 ### `memory`
@@ -152,7 +154,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 
 ### Integrations
 
-- TASC (Astropolis) reads `Settings.LINE_AMT`. Keep the field.
+- TASC (Astropolis) calls `Settings.getInt(Settings.TEXT_LINE_NUM)`, `TextDataEntry` (`getString`, `setString`, `apply`, `descriptionNum`), `TextDataMemory.getNexFreetNum/set`, `ImageHandler.hasImage/getImageId/removeImageFrom/setImage` and `ImageDataMemory.get` when it rebuilds a station, and older builds read `Settings.LINE_AMT`. Keep these members and the line-map layout of `TextDataEntry`.
 - Kaleidoscope planet names map to tags in `ImageTags.kaleidoscopeNameMap`; Unknown Skies planet types are in `ImageTags.typeTagMap`.
 
 ## Dead or dormant
