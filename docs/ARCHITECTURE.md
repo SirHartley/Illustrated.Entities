@@ -43,14 +43,16 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 ### Build and release tools
 
-`tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. `tools/SettingsChecks.java` runs headless against the classes `build` leaves in `out/release-build-*/classes`: `java -cp "out/release-build-<n>/classes:lib/*" illustratedEntities.tools.SettingsChecks`. They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
+`tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. `tools/SettingsChecks.java` and `tools/ImagePickerChecks.java` run headless from the repository root against the classes `build` leaves in `out/release-build-*/classes`: `java -cp "out/release-build-<n>/classes:lib/*" illustratedEntities.tools.SettingsChecks` (same for `ImagePickerChecks`). They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
 
 ## Image data
 
 - Each row in `image_data.csv` is one image `graphics/illustrated_entities/images/<id>.png` (`ImageDataEntry.getImagePath`). The id is the save key; never renumber.
-- Columns: `id`, `tags_required`, `tags_optional`, `population`, `faction`, `weight`, `planet_id`, `note`. Tags are space separated, `!` excludes, tokens shorter than 3 chars are skipped. Empty `population` means `A` (any). Player-facing column description is in [README.md](../README.md#adding-images).
+- Columns: `id`, `tags_required`, `tags_optional`, `population`, `faction`, `weight`, `planet_id`, `note`. Tags are space separated, leading `!` (one or more) excludes, tokens shorter than 3 chars are skipped. Empty `population` means `A` (any). Player-facing column description is in [README.md](../README.md#adding-images).
 - Tag codes and the planet type and condition maps that produce them are in `helper/ImageTags`. `ImagePicker.getTags` builds an entity's tag set from planet type, market conditions, hazard (`> 1.75` adds `int`), ruins, faction size and ownership (`dvl`), and adds `index<size - 2>`.
-- `ImagePicker.generateChoices` filters by duplicate use, faction, station (`stn` must be optional on the image), gas giant (`gas` must be required), population index (`EXACT` equal, `BROAD` within 1, `ANY` ignored) and tags; score is `weight + matched tags`, pick weight is `choices * score^2`. Empty results fall back to `BROAD`, then to duplicates allowed with `ANY`.
+- `ImagePicker.generateChoices` skips used images when avoiding duplicates, then `ImagePicker.score` rejects by faction, station (`stn` required or optional on the image), gas giant (`gas` must be required), population index (`EXACT` equal, `BROAD` within 1, `ANY` ignored) and tags (all required present, no required exclusion present). Score is `weight` + required tags + optional tags present - optional exclusions present, +1 for an exact population match, +2 when the image's faction is the entity's. Exclusions never add score. Pick weight is `ImagePicker.pickWeight`: `(1 + max(0, score))^2`. Empty results fall back to `BROAD`, then to duplicates allowed with `ANY`.
+- The image selector lists `generateChoices` for the selected tags with no faction, best score first, then by id.
+- Picked images are stored on the entity, so scoring changes only affect new picks. `tools/ImagePickerChecks` checks the scoring and the `image_data.csv` rows.
 - Random picks are seeded with the entity id hash when `respectSeed` is set, so the same planet gets the same image.
 
 ## Data identity
