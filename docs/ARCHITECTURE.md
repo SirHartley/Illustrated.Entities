@@ -157,7 +157,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
 - LunaLib's multiline `LunaTextfield` (`LunaLib-Kotlin.jar`, unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height. `MultilineTextField` is a Java rewrite of it without those limits; do not swap it back.
 
-### Integrations
+### Other mods
 
 - TASC (Astropolis) calls `Settings.getInt(Settings.TEXT_LINE_NUM)`, `TextDataEntry` (`getString`, `setString`, `apply`, `descriptionNum`), `TextDataMemory.getNexFreetNum/set`, `ImageHandler.hasImage/getImageId/removeImageFrom/setImage` and `ImageDataMemory.get` when it rebuilds a station, and older builds read `Settings.LINE_AMT`. Keep these members and the line-map layout of `TextDataEntry`. The line count setting is gone; `Settings.getInt(Settings.TEXT_LINE_NUM)` returns `LINE_AMT` (7) so TASC still copies line 1.
 - TASC makes a new `TextDataEntry` for the rebuilt station and never removes the old one, so every rebuild of a station with an edited description uses up a description slot.

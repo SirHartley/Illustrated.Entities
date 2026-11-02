@@ -6,12 +6,17 @@ Starsector mod (game `0.98a`) that adds illustrations to populated planets and s
 
 These instructions apply to all coding agents. App-specific tools are scoped below.
 
-Reviews, explanations, audits, and proposals are read-only unless the user requests changes. For implementation, finish the authorized edit, commit, pull request, and merge steps. Use reasonable assumptions for routine details; ask when a missing decision would materially change the scope or behavior. A request to stop or propose only overrides the implementation workflow.
+Reviews, explanations, audits, and proposals are read-only unless the user requests changes. For implementation, finish the authorized edit, commit, validation, pull request, and merge steps. Use reasonable assumptions for routine details; ask when a missing decision would materially change the scope or behavior. A request to stop or propose only overrides the implementation workflow.
+
+When the user asks for a plan, or to check something as a possible change, post the plan and start no work (no branch, commit or pull request) until the user approves it. Once the plan is approved, finish and merge as usual.
 
 ### Read the current documentation
 
 1. Read the current remote `CLAUDE.md` in full at the start of each new task. Within the same task, reuse the version already read unless the instructions change. Read new or changed instruction files before following them.
 2. Use the `starsector-knowledge` skill before answering or changing anything related to Starsector. It covers one exact game version. Do not rely on memory.
+   - Load the `house-style` skill for every task. Its personal rules (answers, vocabulary, comments, commits, punctuation) take precedence over older wording in this repository.
+   - Load the `patchlib` skill before deciding on, planning, writing or reviewing a PatchLib patch.
+   - Load the `starsector-rules-writing` skill for any change to `data/campaign/rules.csv` or a rule command class.
 3. If the skill is incomplete, inspect the read-only jars under `lib/` (game, LazyLib, LunaLib). Extract them to a temporary directory, never into the repository.
 4. Select the required guides using [Which guide to read](#which-guide-to-read). Apply every matching row, including for reviews and fixes to existing behavior.
 
@@ -41,25 +46,28 @@ After reading this file, use the task to choose the next document. Read the rele
 - Update the affected documentation in the same commit, following [Documentation upkeep](#documentation-upkeep). Do this without a separate user request.
 - Update `Changelog` in the same commit, using [CHANGELOG.md](docs/CHANGELOG.md).
 - Rebuild and commit release artifacts, bump versions, and publish a release only when the user explicitly asks; follow [RELEASE.md](docs/RELEASE.md).
-- Work only in the current task checkout. Live game installations are read-only unless the user explicitly asks you to change them.
+- Work only in the current task checkout. Live game installations and unrelated checkouts are read-only unless the user explicitly asks you to change them.
+- Do not deploy or synchronize after merge unless the user explicitly requests it.
 - The mod is published and players keep long saves. Anything stored in sector memory (`ImageDataMemory`, `TextDataMemory`, entity tags and memory keys) is save data: keep field names and keys stable, and say in the PR when a change affects existing saves.
 - Image files are referenced by numeric id (`graphics/illustrated_entities/images/<id>.png`). Never renumber or reuse an id; saves store it.
-- Prefer listeners and existing callbacks over polling. Before adding a polling solution, verify against the exact source that no callback covers the requirement, and document the missing coverage.
+- Keep all tools and automated checks under `jars/src/illustratedEntities/tools`, in the normal module. Do not add separate test source trees or duplicate platform classes. Tools may read existing constants and types; do not change runtime classes to support them.
+- Prefer listeners and existing callbacks over polling. Before adding or retaining a polling solution, verify against the exact source that no existing callback covers the requirement. Document the missing coverage and keep the scan scope and frequency to what the behavior needs.
 
 ### Validate and merge
 
 - Every runtime-affecting final branch must pass the clean build described in [Building](#building).
-- Build the exact final remote task-branch revision. Earlier builds, partial builds and IDE analysis do not satisfy the gate.
+- Build the exact final remote task-branch revision. Earlier builds, partial builds, IDE analysis and static checks do not satisfy the gate.
 - Missing compilers or required dependencies are merge blockers. Documentation-only changes do not require a build.
 - Changes to `data/config/image_data.csv` must keep the header and column count, and every `id` must have a matching `<id>.png`.
+- A change to `data/config/LunaSettings.csv` or `helper/Setting` must pass `tools/SettingsChecks`. A change to `image_data.csv`, `ImagePicker`, `ImageTags` or `loading/Importer` must pass `tools/ImagePickerChecks`. Commands are in [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - No CI runs on pushes or pull requests. The release workflow runs only when started by hand on request; do not add triggers or check workflows.
 - Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
 - Use the connected GitHub app to create, inspect, and merge pull requests.
-- Fetch current remote `master` before branching and again before merging. Integrate intervening changes, push the exact final commit, and verify the merged remote revision.
+- Fetch current remote `master` before branching and again before merging. Merge intervening changes, push the exact final commit, and verify the merged remote revision.
 
 ### Branch cleanup
 
-GitHub normally deletes a pull request's head branch after merge. Verify that the branch is gone. Remove it manually when it was pushed without a pull request or its pull request was closed without merging. If deletion returns HTTP 403, report the branch name and leave it in place.
+GitHub normally deletes a pull request's head branch after merge. Verify that the branch is gone. Remove it manually when it was pushed without a pull request, its pull request was closed without merging, or it predates the repository setting. If deletion returns HTTP 403, report the branch name and leave it in place.
 
 After merge, fast-forward the local task branch to the new `master`.
 
@@ -91,7 +99,7 @@ Write documentation in ordinary English. Use direct verbs and concrete nouns; re
 
 ## Comments and documentation
 
-- Default to no comments. Add one only where it explains what is not apparent from the code: engine quirks, required ordering, lifecycle rules, save compatibility, reflection, units, invariants, non-obvious math, cross-file coupling.
+- Default to no comments. Add one only where it explains what is not apparent from the code: engine quirks, required ordering, lifecycle rules, save compatibility, serialization, reflection, units, invariants, non-obvious math, cross-file coupling.
 - Comments are minimal, all lowercase, terse programmer speak, one line where possible (`// also called for refit previews, listener never advances there`). Code identifiers keep their exact spelling.
 - Add no other comments: no javadoc, section headers, restated code, history, TODOs or commented-out code.
 - Fix or remove a comment your change makes stale; leave untouched comments alone.
@@ -102,13 +110,15 @@ Write documentation in ordinary English. Use direct verbs and concrete nouns; re
 - Organize members for reading, not alphabetical sorting.
 - Default order: nested enums; static fields and initializers; instance fields and initializers; other nested types; constructors; lifecycle and public entry points in execution or usage order; supporting helpers near their callers.
 - Preserve initializer order when moving code could change behavior.
+- Keep a cohesive subsystem together when strict declaration grouping would make the class harder to follow.
 - Group fields by responsibility, one blank line between groups, none inside a group.
-- One blank line between methods. No section header comments; split or reorder a class that needs them.
+- Leave one blank line after a class, enum, interface, or record opening brace.
+- One blank line between methods and major sections. Do not stack empty lines. No section header comments; split or reorder a class that needs them.
 - New code goes in the existing package for its area (see [ARCHITECTURE.md](docs/ARCHITECTURE.md#source-owners)). Search the named owner before adding another helper.
 
 ## Agent behavior
 
-- Keep the user's selected model. The main agent owns planning, integration, and shipped code. Delegate bounded research only when authorized.
+- Keep the user's selected model. The main agent owns planning, merging and shipped code. Delegate bounded research only when authorized.
 - Treat repository instructions as project requirements and skill guidance as scoped reference material. If a skill blocks work or changes its scope, identify the exact instruction and explain the effect.
 - Give brief progress updates and concise final results. Put detailed evidence in the pull request.
 
