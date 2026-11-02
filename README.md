@@ -42,7 +42,6 @@ Settings are in the LunaLib settings menu in game. The help text for each one is
 | Always show image selector button | off |
 | Default broad match | on |
 | Allow text edits | on |
-| Number of text lines | 7 |
 
 ## Adding images
 

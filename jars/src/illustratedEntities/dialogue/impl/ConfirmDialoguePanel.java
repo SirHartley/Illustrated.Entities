@@ -20,7 +20,6 @@ public class ConfirmDialoguePanel {
     protected static final float SELECT_BUTTON_WIDTH = 95f;
     protected static final float TEXT_FIELD_PANEL_HEIGHT = 300f;
 
-    public static final String TEXTFIELD_KEY = "$Illent_textField_";
     public static final String CLEAR = "$Illent_clearTextfields";
 
     public void showPanel(InteractionDialogAPI dialogue) {

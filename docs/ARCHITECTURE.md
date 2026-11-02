@@ -19,7 +19,7 @@ Technical routing for the current implementation, checked against game `0.98a`. 
 | Orbital station shows a different image than its planet | `OrbitalStationSynchListener` / `ImageOnJumpLoader -> ImageHandler.applyPlanetImageToOrbitalStations` |
 | Image left on a dead or abandoned colony | `DecivImageRemover`, `NewColonyImageAdder.reportPlayerAbandonedColony`, `ImageHandler.cleanseLeftoverImagesFromRemovedMarkets` |
 | Change image button, selector, filters | `rules.csv` `illustratedEntities_marketOpen -> ShowDefaultVisualWithSelector -> ImageDisplayPanel -> ImageSelectorPanel` |
-| Description editor | `ImageDisplayPanel` "desc." -> `TextChangerPanel -> TextDataEntry / TextDataMemory -> TextHandler.applyAllEntries` |
+| Description editor | `ImageDisplayPanel` "desc." -> `TextChangerPanel` (one `MultilineTextField` per description) `-> TextDataEntry / TextDataMemory -> TextHandler.applyAllEntries` |
 | A setting has no effect | `data/config/LunaSettings.csv` id -> `helper/Setting` constant -> `Settings` cache -> caller |
 
 ## Registration and lifecycle
@@ -39,7 +39,7 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 ### Settings
 
-`helper/Setting` owns ids, defaults, bounds and typed access (`Setting.ENABLE_IMAGES.enabled()`, `Setting.TEXT_LINE_NUM.value()`). `data/config/LunaSettings.csv` owns the tab layout and help text; its defaults and bounds mirror `Setting`. `helper/Settings` installs a LunaLib listener in `onApplicationLoad`, reinstalls it in `onGameLoad`, and caches the values; callers read the cache, not LunaLib. `Settings.reload` sanitizes each value (missing or wrong type falls back to the default, ints are clamped), writes corrected values back to the LunaLib file, then `helper/LunaSettingsBridge` copies them into the open LunaLib settings panel, which keeps pending values and controls after Save. `Settings.CSV_PATH` and `Settings.DEFAULT_IMAGE_PATH` come from `settings.json`. `tools/SettingsChecks` checks that the CSV and `Setting` agree.
+`helper/Setting` owns ids, defaults, bounds and typed access (`Setting.ENABLE_IMAGES.enabled()`, `value()` for int settings). `data/config/LunaSettings.csv` owns the tab layout and help text; its defaults and bounds mirror `Setting`. `helper/Settings` installs a LunaLib listener in `onApplicationLoad`, reinstalls it in `onGameLoad`, and caches the values; callers read the cache, not LunaLib. `Settings.reload` sanitizes each value (missing or wrong type falls back to the default, ints are clamped), writes corrected values back to the LunaLib file, then `helper/LunaSettingsBridge` copies them into the open LunaLib settings panel, which keeps pending values and controls after Save. `Settings.CSV_PATH` and `Settings.DEFAULT_IMAGE_PATH` come from `settings.json`. `tools/SettingsChecks` checks that the CSV and `Setting` agree.
 
 ### Build and release tools
 
@@ -91,7 +91,6 @@ Use `rg --files jars/src` for the full inventory. The entries below name state a
 | `helper/Setting.java` | Setting ids, defaults, bounds, sanitizing and typed access |
 | `helper/Settings.java` | LunaLib listener and value cache; TASC compatibility members |
 | `helper/LunaSettingsBridge.java` | Copies sanitized values into the open LunaLib settings panel |
-| `helper/WordUtils.java` | Line wrapping for the text editor |
 
 ### `memory`
 
@@ -100,7 +99,7 @@ Use `rg --files jars/src` for the full inventory. The entries below name state a
 | `memory/ImageDataMemory.java` | Map of image id to `ImageDataEntry`, stored in sector memory |
 | `memory/ImageDataEntry.java` | One image: tags, preset planet, `usedEntityIds`, texture load and unload |
 | `memory/TextDataMemory.java` | Map of description number to `TextDataEntry`, stored in sector memory |
-| `memory/TextDataEntry.java` | One edited description: two line maps written to `text1` and `text3` |
+| `memory/TextDataEntry.java` | One edited description: two line maps written to `text1` and `text3`, the whole text in line 1 (`setText`, `getText`) |
 
 ### `loading`
 
@@ -129,8 +128,9 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 | `dialogue/rules/ShowDefaultVisualWithSelector.java` | Rule command; shows the image with the change button or falls back to vanilla `ShowDefaultVisual` behavior |
 | `dialogue/impl/ImageDisplayPanel.java` | Current image with change and "desc." buttons |
 | `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
-| `dialogue/impl/TextChangerPanel.java` | Description editor: one vanilla `TextFieldAPI` per line, `Setting.TEXT_LINE_NUM` lines per description |
+| `dialogue/impl/TextChangerPanel.java` | Description editor: one `MultilineTextField` per description, filled from `TextDataEntry.getText` or the vanilla `text1`/`text3`; Apply writes `TextDataEntry.setText` |
 | `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
+| `dialogue/panel/MultilineTextField.java` | Multiline text box (`CustomUIPanelPlugin`): own word wrap and rendering with LazyLib `LazyFont`, cursor, new lines, scroll bar, `MAX_CHARS` cap; fields sharing a focus group unfocus each other |
 | `dialogue/panel/*` | Custom panel plumbing adapted from Histidine's code: `VisualCustomPanel` holds the static panel, tooltip and plugin |
 
 ### `dev`
@@ -146,6 +146,9 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - Images are loaded on demand with `SettingsAPI.loadTexture` and freed with `GL11.glDeleteTextures` plus `unloadTexture` (`Importer`). Any code that shows an image must call `ImageDataEntry.load()` first or the visual renders white.
 - The visual size is fixed at `480 x 300` in `ImageDataEntry.addToEntity` and `addToOrbitalStation`.
 - `VisualCustomPanel` keeps static references to the panel and plugin. They must be cleared when the dialog closes or they leak; `PostDialogueVisualPanelCleaner` does this with a `DelayedActionScript`.
+- `VisualPanelAPI.showCustomPanel` adds the custom panel to the dialog after the option list, and panels hand input to their children last added first, dropping consumed events. A focused `MultilineTextField` consumes every keyboard event, so option hotkeys (number keys, space, Esc) and the dialog never see them. Option shortcuts fire on key down.
+- The stock scroller around `VisualCustomPanel`'s tooltip (`ScrollPanelAPI`) takes the mouse wheel before its children whenever its content is taller than its view. `TextChangerPanel` builds its tooltip without a scroller (`VisualCustomPanel.createPanel(dialog, true, false)`) so the wheel always reaches a `MultilineTextField`; its page must fit `VisualCustomPanel.PANEL_HEIGHT`.
+- Vanilla clips scroll panels and clipping panels with a scissor stack. `MultilineTextField` intersects its own scissor with the current one and restores it after drawing; a plugin inside a clipped panel must not end its render with `glDisable(GL_SCISSOR_TEST)`.
 - `ShowDefaultVisualWithSelector` replaces the vanilla market visual. It must keep the vanilla fallback branches (planet info, fleet info) so markets without a mod image look unchanged.
 
 ### Save data
@@ -153,16 +156,18 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`.
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
 - `ImageDataEntry.addToEntity` stores a vanilla illustration it replaces in `$illent_vanilla_visual`; `removeFromEntity` puts it back. Entities overwritten before this key existed have no copy and lose the vanilla illustration on removal.
+- `TextDataEntry.stringMap1/2` are save data and TASC copies them line by line. `setText` stores a description's whole text in line 1; entries from older saves keep one entry per line until the player applies an edit. `parseStringMap` reads up to the highest line key and treats a null line as empty.
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
-- LunaLib's multiline `LunaTextfield` (unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height, so the editor keeps the vanilla fields. TASC also depends on the per-line maps in `TextDataEntry`.
+- LunaLib's multiline `LunaTextfield` (`LunaLib-Kotlin.jar`, unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height. `MultilineTextField` is a Java rewrite of it without those limits; do not swap it back.
 
 ### Image setting
 
 With `Setting.ENABLE_IMAGES` off: `ModPlugin.onGameLoad` calls `ImageHandler.removeAllImages` (planets, stations and orbital station copies), `NewColonyImageAdder` skips new colonies, and `ImageDisplayPanel` hides the "image" button. `ShowDefaultVisualWithSelector` shows the panel only while images or text edits are on. A change to the setting takes full effect on the next load.
 
-### Integrations
+### Other mods
 
-- TASC (Astropolis) calls `Settings.getInt(Settings.TEXT_LINE_NUM)`, `TextDataEntry` (`getString`, `setString`, `apply`, `descriptionNum`), `TextDataMemory.getNexFreetNum/set`, `ImageHandler.hasImage/getImageId/removeImageFrom/setImage` and `ImageDataMemory.get` when it rebuilds a station, and older builds read `Settings.LINE_AMT`. Keep these members and the line-map layout of `TextDataEntry`.
+- TASC (Astropolis) calls `Settings.getInt(Settings.TEXT_LINE_NUM)`, `TextDataEntry` (`getString`, `setString`, `apply`, `descriptionNum`), `TextDataMemory.getNexFreetNum/set`, `ImageHandler.hasImage/getImageId/removeImageFrom/setImage` and `ImageDataMemory.get` when it rebuilds a station, and older builds read `Settings.LINE_AMT`. Keep these members and the line-map layout of `TextDataEntry`. The line count setting is gone; `Settings.getInt(Settings.TEXT_LINE_NUM)` returns `LINE_AMT` (7) so TASC still copies line 1.
+- TASC makes a new `TextDataEntry` for the rebuilt station and never removes the old one, so every rebuild of a station with an edited description uses up a description slot.
 - Kaleidoscope planet names map to tags in `ImageTags.kaleidoscopeNameMap`; Unknown Skies planet types are in `ImageTags.typeTagMap`.
 
 ## Dead or dormant

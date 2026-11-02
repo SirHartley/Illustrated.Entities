@@ -27,6 +27,7 @@ Adjusted - Switched out the image for Madeira
 - Entries: one change per line, starting `Added - `, `Adjusted - `, `Fixed - ` or `Removed - `.
 - A `Note - ` line directly below an entry explains a limit or something the player must do.
 - Optional short category lines (`Images`, `Text editor`, `General`) when a version has many entries.
+- Use a `Development` category for useful changes to the build or authoring tools. Do not present a refactor or a documentation edit as a gameplay change.
 - If no unreleased section exists, add one above the newest version. Ask the user which version comes next if it has not been chosen; do not invent a new version per commit.
 
 ## Wording
