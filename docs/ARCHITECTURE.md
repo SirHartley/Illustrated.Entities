@@ -147,6 +147,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - `VisualCustomPanel` keeps static references to the panel and plugin. They must be cleared when the dialog closes or they leak; `PostDialogueVisualPanelCleaner` does this with a `DelayedActionScript`.
 - `VisualPanelAPI.showCustomPanel` adds the custom panel to the dialog after the option list, and panels hand input to their children last added first, dropping consumed events. A focused `MultilineTextField` consumes every keyboard event, so option hotkeys (number keys, space, Esc) and the dialog never see them. Option shortcuts fire on key down.
 - The stock scroller around `VisualCustomPanel`'s tooltip takes the mouse wheel before its children whenever its content is taller than its view, so panel content must fit `VisualCustomPanel.PANEL_HEIGHT` for a `MultilineTextField` to scroll.
+- Vanilla clips scroll panels and clipping panels with a scissor stack. `MultilineTextField` intersects its own scissor with the current one and restores it after drawing; a plugin inside a clipped panel must not end its render with `glDisable(GL_SCISSOR_TEST)`.
 - `ShowDefaultVisualWithSelector` replaces the vanilla market visual. It must keep the vanilla fallback branches (planet info, fleet info) so markets without a mod image look unchanged.
 
 ### Save data
