@@ -68,7 +68,7 @@ public final class Settings implements LunaSettingsListener {
         LunaSettingsBridge.sync(current);
     }
 
-    // public api for other mods (TASC calls getInt)
+    // public api for other mods, tasc calls getInt
     public static int getInt(String id) {
         if (TEXT_LINE_NUM.equals(id)) return LINE_AMT;
         Setting setting = Setting.byId(id);

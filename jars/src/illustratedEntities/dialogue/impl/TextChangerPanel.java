@@ -31,8 +31,9 @@ public class TextChangerPanel {
     public static final String CLEAR = "$Illent_clearTextfields";
     private static final String NO_DESCRIPTION = "No description... yet";
 
+    // no outer scroller, it would take the mouse wheel before the text fields; the page fits in PANEL_HEIGHT
     public void showPanel(InteractionDialogAPI dialogue) {
-        VisualCustomPanel.createPanel(dialogue, true);
+        VisualCustomPanel.createPanel(dialogue, true, false);
         showTextChangePanel(dialogue);
     }
 

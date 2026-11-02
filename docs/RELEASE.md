@@ -6,7 +6,7 @@ How Illustrated.Entities is built, packaged and published. Nothing here runs unl
 
 | Piece | Path | Role |
 |---|---|---|
-| Changelog | `Changelog` | Source of the version and the release notes. The newest version heading (`2.0.c`) is the release |
+| Changelog | `Changelog` | Source of the version and the release notes. The newest version heading is the release |
 | Mod metadata | `mod_info.json` | Version stamped into the ZIP's copy; loads `jars/src.jar` |
 | Version file | `IllustratedEntities.version` | Online Version Checker file on `master`; stamped at packaging, committed back after a release |
 | Release builder | `jars/src/illustratedEntities/tools/ReleaseBuild.java` | `build` and `package`, run with `java <file>` |
@@ -16,6 +16,8 @@ How Illustrated.Entities is built, packaged and published. Nothing here runs unl
 | Release workflow | `.github/workflows/release.yml` | Manual only: preview without a version, publish with one |
 
 The IDE artifact (`jars/src.jar`, gitignored) is separate from the release jar, so an IDE build never replaces it.
+
+The release jar is built in CI from `lib/` and never committed, by the user's choice. This differs from the house release template (committed jar with a source hash and freshness check); do not add those back.
 
 ## Build the release jar
 
@@ -52,3 +54,7 @@ java jars/src/illustratedEntities/tools/ReleaseBuild.java package 2.0.d    # rel
 5. Check the release ZIP and notes, and that `master`'s version file names the new version.
 
 The workflow has no push, pull request, tag or schedule trigger. Without a version it only uploads a preview artifact. It refuses to overwrite an existing release, and run on an existing version tag it publishes that tag. It compiles from `lib/` and downloads nothing.
+
+## Maintenance
+
+Update this guide when `ReleaseBuild`, `ReleaseBuildChecks`, `.github/workflows/release.yml`, the version file or the jars in `lib/` change. Changelog entry rules belong in [CHANGELOG.md](CHANGELOG.md); code owners belong in [ARCHITECTURE.md](ARCHITECTURE.md).

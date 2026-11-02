@@ -146,7 +146,8 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - The visual size is fixed at `480 x 300` in `ImageDataEntry.addToEntity` and `addToOrbitalStation`.
 - `VisualCustomPanel` keeps static references to the panel and plugin. They must be cleared when the dialog closes or they leak; `PostDialogueVisualPanelCleaner` does this with a `DelayedActionScript`.
 - `VisualPanelAPI.showCustomPanel` adds the custom panel to the dialog after the option list, and panels hand input to their children last added first, dropping consumed events. A focused `MultilineTextField` consumes every keyboard event, so option hotkeys (number keys, space, Esc) and the dialog never see them. Option shortcuts fire on key down.
-- The stock scroller around `VisualCustomPanel`'s tooltip takes the mouse wheel before its children whenever its content is taller than its view, so panel content must fit `VisualCustomPanel.PANEL_HEIGHT` for a `MultilineTextField` to scroll.
+- The stock scroller around `VisualCustomPanel`'s tooltip (`ScrollPanelAPI`) takes the mouse wheel before its children whenever its content is taller than its view. `TextChangerPanel` builds its tooltip without a scroller (`VisualCustomPanel.createPanel(dialog, true, false)`) so the wheel always reaches a `MultilineTextField`; its page must fit `VisualCustomPanel.PANEL_HEIGHT`.
+- Vanilla clips scroll panels and clipping panels with a scissor stack. `MultilineTextField` intersects its own scissor with the current one and restores it after drawing; a plugin inside a clipped panel must not end its render with `glDisable(GL_SCISSOR_TEST)`.
 - `ShowDefaultVisualWithSelector` replaces the vanilla market visual. It must keep the vanilla fallback branches (planet info, fleet info) so markets without a mod image look unchanged.
 
 ### Save data
@@ -157,7 +158,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
 - LunaLib's multiline `LunaTextfield` (`LunaLib-Kotlin.jar`, unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height. `MultilineTextField` is a Java rewrite of it without those limits; do not swap it back.
 
-### Integrations
+### Other mods
 
 - TASC (Astropolis) calls `Settings.getInt(Settings.TEXT_LINE_NUM)`, `TextDataEntry` (`getString`, `setString`, `apply`, `descriptionNum`), `TextDataMemory.getNexFreetNum/set`, `ImageHandler.hasImage/getImageId/removeImageFrom/setImage` and `ImageDataMemory.get` when it rebuilds a station, and older builds read `Settings.LINE_AMT`. Keep these members and the line-map layout of `TextDataEntry`. The line count setting is gone; `Settings.getInt(Settings.TEXT_LINE_NUM)` returns `LINE_AMT` (7) so TASC still copies line 1.
 - TASC makes a new `TextDataEntry` for the rebuilt station and never removes the old one, so every rebuild of a station with an edited description uses up a description slot.

@@ -40,17 +40,25 @@ public class VisualCustomPanel {
     }
 
     public static void createPanel(InteractionDialogAPI dialog, boolean replace) {
-        createPanel(dialog, replace, PANEL_WIDTH, PANEL_HEIGHT);
+        createPanel(dialog, replace, PANEL_WIDTH, PANEL_HEIGHT, true);
+    }
+
+    public static void createPanel(InteractionDialogAPI dialog, boolean replace, boolean withScroller) {
+        createPanel(dialog, replace, PANEL_WIDTH, PANEL_HEIGHT, withScroller);
     }
 
     public static void createPanel(InteractionDialogAPI dialog, boolean replace, float width, float height) {
+        createPanel(dialog, replace, width, height, true);
+    }
+
+    public static void createPanel(InteractionDialogAPI dialog, boolean replace, float width, float height, boolean withScroller) {
         if (!replace && tooltip != null)
             return;
 
         VisualPanelAPI vp = dialog.getVisualPanel();
         plugin = new InteractionDialogCustomPanelPlugin();
         panel = vp.showCustomPanel(width, height, plugin);
-        tooltip = panel.createUIElement(width, height, true);
+        tooltip = panel.createUIElement(width, height, withScroller);
 
         //tooltip.setForceProcessInput(true);
 

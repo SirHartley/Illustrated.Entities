@@ -8,12 +8,14 @@ import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.FontException;
 import org.lazywizard.lazylib.ui.LazyFont;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +31,7 @@ public class MultilineTextField implements CustomUIPanelPlugin {
     private static final float MIN_THUMB_HEIGHT = 16f;
     private static final float BLINK_TIME = 0.5f;
     private static final int WHEEL_LINES = 3;
+    private static final IntBuffer SCISSOR_BOX = BufferUtils.createIntBuffer(16);
 
     private final LazyFont font;
     private final float fontSize;
@@ -432,10 +435,7 @@ public class MultilineTextField implements CustomUIPanelPlugin {
         float h = position.getHeight();
         drawBorder(x, y, w, h, focused ? Misc.getBasePlayerColor() : Misc.getDarkPlayerColor(), alphaMult);
 
-        // glScissor takes physical pixels, ui positions are virtual
-        float scale = Global.getSettings().getScreenScaleMult();
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor((int) (x * scale), (int) ((y + PAD) * scale), (int) Math.ceil(w * scale), (int) Math.ceil(viewHeight() * scale));
+        boolean parentClip = pushScissor(x, y + PAD, w, viewHeight());
 
         Color color = textColor(alphaMult);
         int first = Math.max(0, (int) (scroll / lineHeight));
@@ -453,12 +453,41 @@ public class MultilineTextField implements CustomUIPanelPlugin {
             drawQuad(cursorX, lineTop - lineHeight, 1f, lineHeight, Misc.getBasePlayerColor(), alphaMult);
         }
 
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        popScissor(parentClip);
 
         if (maxScroll() > 0f) {
             drawQuad(barX(), y + PAD, BAR_WIDTH, viewHeight(), Misc.getDarkPlayerColor(), alphaMult);
             drawQuad(barX(), thumbTop() - thumbHeight(), BAR_WIDTH, thumbHeight(), Misc.getBasePlayerColor(), alphaMult);
         }
+    }
+
+    // vanilla scroll panels clip with their own scissor, so intersect with it and put it back after
+    private static boolean pushScissor(float x, float y, float w, float h) {
+        boolean parentClip = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
+        GL11.glGetInteger(GL11.GL_SCISSOR_BOX, SCISSOR_BOX);
+
+        // glScissor takes physical pixels, ui positions are virtual
+        float scale = Global.getSettings().getScreenScaleMult();
+        int left = (int) (x * scale);
+        int bottom = (int) (y * scale);
+        int right = left + (int) Math.ceil(w * scale);
+        int top = bottom + (int) Math.ceil(h * scale);
+
+        if (parentClip) {
+            left = Math.max(left, SCISSOR_BOX.get(0));
+            bottom = Math.max(bottom, SCISSOR_BOX.get(1));
+            right = Math.min(right, SCISSOR_BOX.get(0) + SCISSOR_BOX.get(2));
+            top = Math.min(top, SCISSOR_BOX.get(1) + SCISSOR_BOX.get(3));
+        }
+
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL11.glScissor(left, bottom, Math.max(0, right - left), Math.max(0, top - bottom));
+        return parentClip;
+    }
+
+    private static void popScissor(boolean parentClip) {
+        if (parentClip) GL11.glScissor(SCISSOR_BOX.get(0), SCISSOR_BOX.get(1), SCISSOR_BOX.get(2), SCISSOR_BOX.get(3));
+        else GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
     private LazyFont.DrawableString drawn(int line) {
