@@ -1,7 +1,8 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
 illustrated_entities_header,Visual Settings,Header,Visual Settings,,,,,
 illustrated_entities_images_enable,Add images,Boolean,TRUE,,Disabling this will disable the entire visual part of the mod.,,,
-illustrated_entities_images_core_worlds,Add preset images to core world planets,Boolean,TRUE,,Apply the pre-selected images to core world planets that do not have a vanilla illustration.,,,
+illustrated_entities_images_core_worlds,Add preset images to core world planets,Boolean,TRUE,,Apply the pre-selected images to core world planets.,,,
+illustrated_entities_images_core_worlds_replace_vanilla,Preset images replace vanilla illustrations,Boolean,FALSE,,Let the pre-selected images replace the vanilla illustration of planets and stations that have one. Turning this off restores the vanilla illustration on the next load.,,,
 illustrated_entities_images_random_colonies,Random colony images,Boolean,FALSE,,Apply random images to planets without image - modded or otherwise. If you set this to false the mod will not apply images to any NPC colonies but you can still set the visuals for your own colony..,,,
 illustrated_entities_images_random_skip_core,Skip core for random images,Boolean,FALSE,,If you disable the pre-selected core world images the mod would add random ones instead. Setting this option to TRUE will stop it from doing so.,,,
 illustrated_entities_images_always_show_button,Always show image selector button,Boolean,FALSE,,Show the change image button on colonies you do now own. Devmode displays it regardless of setting.,,,

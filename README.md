@@ -36,6 +36,7 @@ Settings are in the LunaLib settings menu in game. The help text for each one is
 |---|---|
 | Add images | on |
 | Add preset images to core world planets | on |
+| Preset images replace vanilla illustrations | off |
 | Random colony images | off |
 | Skip core for random images | off |
 | Always show image selector button | off |

@@ -32,12 +32,17 @@ public class ImageHandler {
     }
 
     public static void removeImageFrom(SectorEntityToken t){
-        ModPlugin.log.info("removing image from " + t.getName());
-
         if (!hasImage(t)) return;
+
+        ModPlugin.log.info("removing image from " + t.getName());
 
         int num = getImageId(t);
         ImageDataMemory.getInstance().get(num).removeFromEntity(t);
+    }
+
+    public static void removeAllImages(){
+        for (SectorEntityToken t : Global.getSector().getEntitiesWithTag(ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE)) ImageDataEntry.removeFromOrbitalStation(t);
+        for (SectorEntityToken t : Global.getSector().getEntitiesWithTag(HAS_INTERACTION_IMAGE)) removeImageFrom(t);
     }
 
     public static int applyFittingRandomImageToEntity(SectorEntityToken t){
@@ -98,7 +103,7 @@ public class ImageHandler {
         }
     }
 
-    public static void addPresetImagesToMarkets(){
+    public static void addPresetImagesToMarkets(boolean replaceVanilla){
         ImageDataMemory memory = ImageDataMemory.getInstance();
 
         for (ImageDataEntry data : new ArrayList<>(memory.getDataMap().values())){
@@ -111,7 +116,10 @@ public class ImageHandler {
                         && t.getMarket() != null
                         && !t.getMarket().isPlanetConditionMarketOnly()) {
 
-                    ImageHandler.setImage(t, data, false);
+                    boolean coversVanilla = hasImage(t) ? t.getMemoryWithoutUpdate().contains(ModPlugin.VANILLA_VISUAL) : t.getCustomInteractionDialogImageVisual() != null;
+
+                    if (replaceVanilla || !coversVanilla) ImageHandler.setImage(t, data, false);
+                    else if (getImageId(t) == data.id) removeImageFrom(t);
                 }
             }
         }

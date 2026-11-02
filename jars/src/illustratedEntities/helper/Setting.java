@@ -4,6 +4,7 @@ public enum Setting {
 
     ENABLE_IMAGES("illustrated_entities_images_enable", true),
     ENABLE_PRESET_CORE_WORLDS("illustrated_entities_images_core_worlds", true),
+    PRESET_REPLACE_VANILLA("illustrated_entities_images_core_worlds_replace_vanilla", false),
     ENABLE_RANDOM_IMAGES("illustrated_entities_images_random_colonies", false),
     SKIP_CORE("illustrated_entities_images_random_skip_core", false),
     BUTTON_ALWAYS_SHOW("illustrated_entities_images_always_show_button", false),

@@ -26,6 +26,7 @@ public class ModPlugin extends BaseModPlugin {
     public static final String MOD_ID = "illustrated_entities";
     public static final String HAS_INTERACTION_IMAGE = "$illustrated_entity_image";
     public static final String ORBITAL_HAS_INTERACTION_IMAGE = "$illustrated_entity_image_orbital";
+    public static final String VANILLA_VISUAL = "$illent_vanilla_visual";
 
     @Override
     public void onApplicationLoad() {
@@ -53,11 +54,9 @@ public class ModPlugin extends BaseModPlugin {
         if(Setting.ENABLE_IMAGES.enabled()){
             ImageHandler.addImagesToPlayerMarkets();
 
-            if(Setting.ENABLE_PRESET_CORE_WORLDS.enabled()) ImageHandler.addPresetImagesToMarkets();
+            if(Setting.ENABLE_PRESET_CORE_WORLDS.enabled()) ImageHandler.addPresetImagesToMarkets(Setting.PRESET_REPLACE_VANILLA.enabled());
             if(Setting.ENABLE_RANDOM_IMAGES.enabled()) ImageHandler.addRandomImagesToMarketsWithoutImage(Setting.SKIP_CORE.enabled());
-        } else {
-            for (MarketAPI m : Global.getSector().getEconomy().getMarketsCopy()) if (m.getPrimaryEntity() != null) ImageHandler.removeImageFrom(m.getPrimaryEntity());
-        }
+        } else ImageHandler.removeAllImages();
 
         ImageHandler.loadImagesForCurrentLocation();
 

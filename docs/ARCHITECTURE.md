@@ -14,7 +14,7 @@ Technical routing for the current implementation, checked against game `0.98a`. 
 | Change / symptom | Route |
 |---|---|
 | Wrong or no image picked for a planet | `ImagePicker.getTags -> ImageTags maps -> ImagePicker.generateChoices -> ImageHandler.applyFittingRandomImageToEntity` |
-| Preset image for a named vanilla planet | `image_data.csv` `planet_id` -> `ImageHandler.addPresetImagesToMarkets` |
+| Preset image for a named vanilla planet | `image_data.csv` `planet_id` -> `ImageHandler.addPresetImagesToMarkets`; skips or reverts entities with a vanilla illustration unless `Setting.PRESET_REPLACE_VANILLA` |
 | Image missing or white after a jump or reload | `ImageOnJumpLoader` / `PlayerOpenColonyListener` -> `ImageDataEntry.load`; `UnusedImageUnloader -> ImageDataEntry.unload` |
 | Orbital station shows a different image than its planet | `OrbitalStationSynchListener` / `ImageOnJumpLoader -> ImageHandler.applyPlanetImageToOrbitalStations` |
 | Image left on a dead or abandoned colony | `DecivImageRemover`, `NewColonyImageAdder.reportPlayerAbandonedColony`, `ImageHandler.cleanseLeftoverImagesFromRemovedMarkets` |
@@ -35,7 +35,7 @@ Technical routing for the current implementation, checked against game `0.98a`. 
 | `data/strings/descriptions.csv` | Placeholder `CUSTOM` descriptions `illent_desc_1` to `illent_desc_99` the text editor writes into |
 | `data/config/version/version_files.csv` | Version Checker entry for `IllustratedEntities.version` |
 
-Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> NewColonyImageAdder -> ImageOnJumpLoader -> PlayerOpenColonyListener -> PostDialogueVisualPanelCleaner -> OrbitalStationSynchListener -> UnusedImageUnloader`) -> `ImageDataMemory.forceRefresh` -> `ImageHandler.cleanseLeftoverImagesFromRemovedMarkets` -> `ImageHandler.reapplyAllImages` -> `TextHandler.applyAllEntries` -> image application (player markets, presets, random) or removal when images are disabled -> `ImageHandler.loadImagesForCurrentLocation` -> dev mode only: `MarketInfoPrinter` and market dump to the log.
+Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> NewColonyImageAdder -> ImageOnJumpLoader -> PlayerOpenColonyListener -> PostDialogueVisualPanelCleaner -> OrbitalStationSynchListener -> UnusedImageUnloader`) -> `ImageDataMemory.forceRefresh` -> `ImageHandler.cleanseLeftoverImagesFromRemovedMarkets` -> `ImageHandler.reapplyAllImages` -> `TextHandler.applyAllEntries` -> image application (player markets, presets, random) or `ImageHandler.removeAllImages` when images are disabled -> `ImageHandler.loadImagesForCurrentLocation` -> dev mode only: `MarketInfoPrinter` and market dump to the log.
 
 ### Settings
 
@@ -61,6 +61,7 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 |---|---|---|
 | `$illustrated_entity_image` | entity tag and memory key (`ModPlugin.HAS_INTERACTION_IMAGE`) | entity has a mod image; memory value is the image id |
 | `$illustrated_entity_image_orbital` | entity tag and memory key (`ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE`) | orbital station mirrors its planet's image |
+| `$illent_vanilla_visual` | entity memory (`ModPlugin.VANILLA_VISUAL`) | vanilla illustration replaced by a mod image, restored on removal |
 | `$illustrated_entities_data_memory` | sector memory (`ImageDataMemory.IMAGE_MEMORY`) | `ImageDataMemory` instance |
 | `$illustrated_entities_text_memory` | sector memory (`TextDataMemory.TEXT_MEMORY`) | `TextDataMemory` instance |
 | `$Illent_TextMemoryID` | entity memory (`TextDataEntry.ID_MEM_KEY`) | number of the entity's edited description |
@@ -154,9 +155,14 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 
 - `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`.
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
+- `ImageDataEntry.addToEntity` stores a vanilla illustration it replaces in `$illent_vanilla_visual`; `removeFromEntity` puts it back. Entities overwritten before this key existed have no copy and lose the vanilla illustration on removal.
 - `TextDataEntry.stringMap1/2` are save data and TASC copies them line by line. `setText` stores a description's whole text in line 1; entries from older saves keep one entry per line until the player applies an edit. `parseStringMap` reads up to the highest line key and treats a null line as empty.
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
 - LunaLib's multiline `LunaTextfield` (`LunaLib-Kotlin.jar`, unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height. `MultilineTextField` is a Java rewrite of it without those limits; do not swap it back.
+
+### Image setting
+
+With `Setting.ENABLE_IMAGES` off: `ModPlugin.onGameLoad` calls `ImageHandler.removeAllImages` (planets, stations and orbital station copies), `NewColonyImageAdder` skips new colonies, and `ImageDisplayPanel` hides the "image" button. `ShowDefaultVisualWithSelector` shows the panel only while images or text edits are on. A change to the setting takes full effect on the next load.
 
 ### Other mods
 

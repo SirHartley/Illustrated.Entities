@@ -24,8 +24,9 @@ public class ShowDefaultVisualWithSelector extends ShowDefaultVisual {
         boolean hasMarket = target.getMarket() != null;
         boolean isPlayerOwned = target.getMarket().isPlayerOwned();
         boolean allowsNPCPicking = !isPlayerOwned && (Setting.BUTTON_ALWAYS_SHOW.enabled() || Global.getSettings().isDevMode());
+        boolean hasButtons = Setting.ENABLE_IMAGES.enabled() || Setting.ENABLE_TEXT.enabled();
 
-        if(hasImage && hasMarket
+        if(hasImage && hasMarket && hasButtons
                 && (allowsNPCPicking || isPlayerOwned)){
 
             VisualCustomPanel.createPanel(dialog, true);

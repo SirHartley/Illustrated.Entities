@@ -5,6 +5,7 @@ import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.PlayerColonizationListener;
 import illustratedEntities.helper.ImageHandler;
+import illustratedEntities.helper.Setting;
 import illustratedEntities.memory.ImageDataMemory;
 import illustratedEntities.plugins.ModPlugin;
 
@@ -16,6 +17,8 @@ public class NewColonyImageAdder implements PlayerColonizationListener {
 
     @Override
     public void reportPlayerColonizedPlanet(PlanetAPI planet) {
+        if (!Setting.ENABLE_IMAGES.enabled()) return;
+
         int i = ImageHandler.applyFittingRandomImageToEntity(planet);
 
         ModPlugin.log.info("applying image to newly established colony: " + i);
