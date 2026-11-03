@@ -18,11 +18,11 @@ Fixed - "Add images" off no longer deletes vanilla illustrations under presets
 Note - Older saves need a new game to get those illustrations back
 
 Description editor
-Adjusted - One text box per description with a cursor, new lines and scrolling
-Note - Each description holds up to 5000 characters
-Fixed - Descriptions no longer cut off after lowering the number of text lines
-Fixed - Crash when TASC upgrades a station with an edited description
-Removed - "Number of text lines" setting (editor no longer uses fixed lines)
+Adjusted - Description editor uses one scrolling text box per description
+Note - Each description holds up to 5000 characters, Enter starts a new line
+Fixed - Edited descriptions cut off after lowering "Number of text lines"
+Fixed - Rare crash when TASC upgrades a station with an edited description
+Removed - "Number of text lines" setting (replaced by scrolling text boxes)
 
 2.0.c
 Adjusted - Switched out the image for Madeira

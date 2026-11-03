@@ -35,7 +35,7 @@ public class TextDataEntry {
         } else return stringMap2.get(lineNum);
     }
 
-    // the editor keeps the whole text in line 1, older saves and TASC copies have one entry per line
+    // the editor keeps the whole text in line 1, older saves and tasc copies have one entry per line
     public void setText(int textNum, String text){
         Map<Integer, String> map = textNum == 1 ? stringMap1 : stringMap2;
         map.clear();
