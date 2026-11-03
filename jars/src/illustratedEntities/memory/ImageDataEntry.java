@@ -90,6 +90,7 @@ public class ImageDataEntry {
         usedEntityIds.remove(t.getId());
         t.setCustomInteractionDialogImageVisual((InteractionDialogImageVisual) t.getMemoryWithoutUpdate().get(VANILLA_VISUAL));
         t.getMemoryWithoutUpdate().unset(VANILLA_VISUAL);
+        t.getMemoryWithoutUpdate().unset(ModPlugin.PLAYER_PICK);
         t.getMemoryWithoutUpdate().unset(HAS_INTERACTION_IMAGE);
         t.removeTag(HAS_INTERACTION_IMAGE);
 

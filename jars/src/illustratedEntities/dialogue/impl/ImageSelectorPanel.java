@@ -19,6 +19,7 @@ import illustratedEntities.helper.ImageTags;
 import illustratedEntities.helper.Settings;
 import illustratedEntities.memory.ImageDataEntry;
 import illustratedEntities.memory.ImageDataMemory;
+import illustratedEntities.plugins.ModPlugin;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -319,6 +320,7 @@ public class ImageSelectorPanel {
                         SectorEntityToken primary = market.getPrimaryEntity();
                         ImageHandler.removeImageFrom(primary);
                         ImageHandler.setImage(primary, imageData, false);
+                        primary.getMemoryWithoutUpdate().set(ModPlugin.PLAYER_PICK, true);
                         ImageHandler.applyPlanetImageToOrbitalStations(market);
                         dialogue.getTextPanel().clear();
                         printDefaultText(dialogue);

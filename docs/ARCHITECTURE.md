@@ -14,7 +14,7 @@ Technical routing for the current implementation, checked against game `0.98a`. 
 | Change / symptom | Route |
 |---|---|
 | Wrong or no image picked for a planet | `ImagePicker.getTags -> ImageTags maps -> ImagePicker.generateChoices -> ImageHandler.applyFittingRandomImageToEntity` |
-| Preset image for a named vanilla planet | `image_data.csv` `planet_id` -> `ImageHandler.addPresetImagesToMarkets`; skips or reverts entities with a vanilla illustration unless `Setting.PRESET_REPLACE_VANILLA` |
+| Preset image for a named vanilla planet | `image_data.csv` `planet_id` -> `ImageHandler.addPresetImagesToMarkets`; skips or reverts entities with a vanilla illustration unless `Setting.PRESET_REPLACE_VANILLA`; skips entities with `$illent_player_pick` |
 | Image missing or white after a jump or reload | `ImageOnJumpLoader` / `PlayerOpenColonyListener` -> `ImageDataEntry.load`; `UnusedImageUnloader -> ImageDataEntry.unload` |
 | Orbital station shows a different image than its planet | `OrbitalStationSynchListener` / `ImageOnJumpLoader -> ImageHandler.applyPlanetImageToOrbitalStations` |
 | Image left on a dead or abandoned colony | `DecivImageRemover`, `NewColonyImageAdder.reportPlayerAbandonedColony`, `ImageHandler.cleanseLeftoverImagesFromRemovedMarkets` |
@@ -62,6 +62,7 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 | `$illustrated_entity_image` | entity tag and memory key (`ModPlugin.HAS_INTERACTION_IMAGE`) | entity has a mod image; memory value is the image id |
 | `$illustrated_entity_image_orbital` | entity tag and memory key (`ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE`) | orbital station mirrors its planet's image |
 | `$illent_vanilla_visual` | entity memory (`ModPlugin.VANILLA_VISUAL`) | vanilla illustration replaced by a mod image, restored on removal |
+| `$illent_player_pick` | entity memory (`ModPlugin.PLAYER_PICK`) | image was picked in `ImageSelectorPanel`; presets skip it; cleared by `ImageDataEntry.removeFromEntity` |
 | `$illustrated_entities_data_memory` | sector memory (`ImageDataMemory.IMAGE_MEMORY`) | `ImageDataMemory` instance |
 | `$illustrated_entities_text_memory` | sector memory (`TextDataMemory.TEXT_MEMORY`) | `TextDataMemory` instance |
 | `$Illent_TextMemoryID` | entity memory (`TextDataEntry.ID_MEM_KEY`) | number of the entity's edited description |
