@@ -114,7 +114,8 @@ public class ImageHandler {
 
                 if (t != null
                         && t.getMarket() != null
-                        && !t.getMarket().isPlanetConditionMarketOnly()) {
+                        && !t.getMarket().isPlanetConditionMarketOnly()
+                        && !t.getMemoryWithoutUpdate().getBoolean(ModPlugin.PLAYER_PICK)) {
 
                     boolean coversVanilla = hasImage(t) ? t.getMemoryWithoutUpdate().contains(ModPlugin.VANILLA_VISUAL) : t.getCustomInteractionDialogImageVisual() != null;
 

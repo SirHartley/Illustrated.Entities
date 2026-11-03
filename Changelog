@@ -12,6 +12,8 @@ Fixed - Planets now get a random image when no unused exact match exists
 Fixed - Images with a required station tag now show up on stations
 Fixed - Four images never showing up (tag typos)
 Fixed - An image showing up on hostile planets (tag typo)
+Fixed - Presets no longer replace a picked image when loading a save
+Note - Images picked before this update need to be picked again
 Fixed - "Add images" off now also applies to new colonies and orbital stations
 Fixed - Image button no longer shows with "Add images" off
 Fixed - "Add images" off no longer deletes vanilla illustrations under presets

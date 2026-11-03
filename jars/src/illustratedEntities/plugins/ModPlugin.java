@@ -27,6 +27,7 @@ public class ModPlugin extends BaseModPlugin {
     public static final String HAS_INTERACTION_IMAGE = "$illustrated_entity_image";
     public static final String ORBITAL_HAS_INTERACTION_IMAGE = "$illustrated_entity_image_orbital";
     public static final String VANILLA_VISUAL = "$illent_vanilla_visual";
+    public static final String PLAYER_PICK = "$illent_player_pick";
 
     @Override
     public void onApplicationLoad() {
