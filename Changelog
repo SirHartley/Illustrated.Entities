@@ -1,20 +1,28 @@
 2.0.d - UNRELEASED
-Added - Setting "Preset images replace vanilla illustrations", off by default. Before, preset images always replaced them
-Note - Saves that already ran the mod keep the preset image on those planets.
-Adjusted - Random images now favour images that match the planet's features instead of images with many exclusions
-Adjusted - The image selector lists the best matching images first
-Fixed - Planets got no random image when every fitting image was already in use or none matched the exact colony size
-Fixed - Images tagged for stations only as a required tag never showed up for stations
-Fixed - Four station images never showed up because of tag typos, and one image could appear on hostile planets
-Adjusted - Settings fall back to their defaults when a saved value is missing or invalid
-Adjusted - The description editor has one text box per description: click to place the cursor, Enter starts a new line, and the box scrolls once the text is longer than it
+
+General
+Adjusted - Settings fall back to their defaults when a saved value is invalid
+
+Images
+Added - Setting for presets to replace vanilla illustrations (default off)
+Note - Saves that already ran the mod keep the preset image on those planets
+Adjusted - Random images now favour images that match the planet's features
+Adjusted - Image selector lists the best matching images first
+Fixed - Planets now get a random image when no unused exact match exists
+Fixed - Images with a required station tag now show up on stations
+Fixed - Four images never showing up (tag typos)
+Fixed - An image showing up on hostile planets (tag typo)
+Fixed - "Add images" off now also applies to new colonies and orbital stations
+Fixed - Image button no longer shows with "Add images" off
+Fixed - "Add images" off no longer deletes vanilla illustrations under presets
+Note - Older saves need a new game to get those illustrations back
+
+Description editor
+Adjusted - One text box per description with a cursor, new lines and scrolling
 Note - Each description holds up to 5000 characters
-Fixed - Descriptions edited before the number of text lines was lowered were cut off
-Fixed - Crash when TASC upgraded a station whose description was edited before the number of text lines was raised
-Removed - The "Number of text lines" setting, the description editor no longer uses fixed lines
-Fixed - Turning off "Add images" now also stops images on new colonies, removes them from orbital stations and hides the image button
-Fixed - Turning off "Add images" no longer deletes the vanilla illustrations that preset images replaced
-Note - Only applies to illustrations replaced after this update. Saves that already ran the mod need a new game to get them back.
+Fixed - Descriptions no longer cut off after lowering the number of text lines
+Fixed - Crash when TASC upgrades a station with an edited description
+Removed - "Number of text lines" setting (editor no longer uses fixed lines)
 
 2.0.c
 Adjusted - Switched out the image for Madeira

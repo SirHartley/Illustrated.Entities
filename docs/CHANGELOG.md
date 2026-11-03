@@ -24,20 +24,26 @@ Adjusted - Switched out the image for Madeira
 ```
 
 - Version heading: the version alone on its line, optionally followed by ` - UNRELEASED`. No `v` prefix, no date, no Markdown. The release tooling reads these headings, so keep them in this form.
-- Entries: one change per line, starting `Added - `, `Adjusted - `, `Fixed - ` or `Removed - `.
+- Entries: one change per line, starting `Added - `, `Adjusted - `, `Fixed - ` or `Removed - `, in that order inside a category.
 - A `Note - ` line directly below an entry explains a limit or something the player must do.
-- Optional short category lines (`Images`, `Text editor`, `General`) when a version has many entries.
+- Category lines are in-game feature names (`Images`, `Description editor`), `General` first, a blank line between categories. A version with only a few entries needs none.
+- Never write or change the published heading's ` - CURRENT PUBLIC VERSION` suffix or the save compatibility line unasked.
 - Use a `Development` category for useful changes to the build or authoring tools. Do not present a refactor or a documentation edit as a gameplay change.
 - If no unreleased section exists, add one above the newest version. Ask the user which version comes next if it has not been chosen; do not invent a new version per commit.
 
 ## Wording
 
-Entries are player-facing: plain sentences in sentence case, not programmer speak.
+Entries are player-facing, in the user's own changelog voice. The `house-style` skill's "Changelog entries" section is the full reference and wins over this summary.
 
-- Say what changed and name the feature so a player can find it (`image selector`, `description editor`, a setting's name as shown in LunaLib).
-- For a fix, describe the broken behavior that is now fixed, not the internal call chain: `Fixed - Crash when abandoning a colony`.
-- Give old and new values for changed defaults or numbers.
-- No agent or model names, links, validation logs or commit hashes. No claims about how thoroughly anything was tested.
+- Short: stay under 80 characters, past 100 only for a new feature that needs its numbers. Capital letter after the dash, no full stop on a one-clause line.
+- In-game names and capitals: a setting's name as shown in LunaLib, `Image selector`, `Description editor`. What the player sees, never classes or the call chain.
+- Parentheses carry the short extra: `(was 3)`, `(default off)`, `(tag typos)`. No semicolons, no curly quotes, no hyphen as a dash.
+- Added: name, colon, what it does, or `Added - Setting to ...`.
+- Adjusted: numbers as old `->` new with the unit (`Adjusted - Railgun charge up 3s -> 5s`), otherwise a direction word (Reduced, Increased, Halved).
+- Fixed, most used forms first: `Fixed - X no longer does Y`, `Fixed - X is now properly ...`, `Fixed - Crash when ...`, or a short noun phrase (`Fixed - Typos`). Name the other mod in cross-mod bugs.
+- Removed: the thing, then the reason or replacement in parentheses.
+- Credits name real people only (`(thanks, name)`, `(reported by name)`). Keep the user's own lines verbatim, commentary included; agent lines have no first person, jokes, caps, exclamation marks or hedges.
+- No agent or model names, links, validation logs or commit hashes. Untested status goes in the PR, not the changelog.
 
 ## Amending versus adding
 
