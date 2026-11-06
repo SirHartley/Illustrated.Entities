@@ -45,6 +45,12 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 `tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. `tools/SettingsChecks.java` and `tools/ImagePickerChecks.java` run headless from the repository root against the classes `build` leaves in `out/release-build-*/classes`: `java -cp "out/release-build-<n>/classes:lib/*" illustratedEntities.tools.SettingsChecks` (same for `ImagePickerChecks`). They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
 
+### Live checks
+
+`native-smoke/live` is a test-only mod (id `live_checks`) from the `starsector-native-smoke` skill's `templates/live-check-mod`. It runs `IllustratedChecks` in a real campaign: groups `images`, `colony` and `text`. It sits outside `jars/src`, so the build never compiles it, and `ReleaseBuild.package` never ships it. `Runner` and `Ctx` differ from the template only by `Ctx.keepDialog`, which keeps a dialog open for a capture.
+
+`native-smoke/live/run.sh [groups]` builds the release jar, stages it, takes `C:\Modding\.smoke-lock` and starts the skill's `run-live-checks.sh`. Set `SMOKE_SCRIPTS` to `scripts/live` in a writable copy of the skill with `gamectl.exe` built there; the top of `run.sh` lists the other settings. Results and captures land in `<SMOKE_WORK>/runs/`. Look at each `check-*.png`, the checks cannot see what a dialog draws.
+
 ## Image data
 
 - Each row in `image_data.csv` is one image `graphics/illustrated_entities/images/<id>.png` (`ImageDataEntry.getImagePath`). The id is the save key; never renumber.

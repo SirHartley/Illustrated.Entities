@@ -26,6 +26,9 @@ Fixed - Edited descriptions cut off after lowering "Number of text lines"
 Fixed - Rare crash when TASC upgrades a station with an edited description
 Removed - "Number of text lines" setting (replaced by scrolling text boxes)
 
+Development
+Added - Live game checks for images, colonies and descriptions (not shipped)
+
 2.0.c
 Adjusted - Switched out the image for Madeira
 Fixed - Crash when editing the description of certain modded planets
