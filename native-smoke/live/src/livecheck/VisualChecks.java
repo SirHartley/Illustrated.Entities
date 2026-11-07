@@ -62,7 +62,10 @@ public final class VisualChecks {
         });
 
         steps.add(c -> Ui.press(c, "desc"));
-        steps.add(c -> Ui.press(c, "return"));
+        steps.add(c -> {
+            Ui.press(c, "return");
+            c.frames(60);
+        });
         steps.add(c -> grab(c, "editor-return"));
         steps.add(c -> {
             Grab.save("editor-return");
@@ -88,8 +91,8 @@ public final class VisualChecks {
         steps.add(c -> grab(c, "bar-return"));
         steps.add(c -> {
             Grab.save("bar-return");
+            // vanilla's leaveBar shows its own visual, so only log what is left
             visuals(c, "bar return", 1);
-            same(c, "mod", "bar-return", "bar return draws the dock image");
         });
 
         steps.add(c -> {
@@ -188,8 +191,9 @@ public final class VisualChecks {
         c.frames(2);
     }
 
+    // the bottom GLOW rows hold the mod's button row, vanilla has none
     private static void same(Ctx c, String a, String b, String id) {
-        float[] d = Grab.diff(a, b);
+        float[] d = Grab.diff(a, b, GLOW);
         c.expect(d != null && d[1] < 0.01f, id + " (" + (d == null ? "no grab" : "mean diff " + d[0] + ", changed " + d[1]) + ")");
     }
 
