@@ -24,8 +24,10 @@ public final class PanelChecks {
         steps.add(PanelChecks::selectorOrder);
         steps.add(PanelChecks::loadsVisibleOnly);
         steps.add(c -> c.shot("selector"));
+        // unloaded first, the rebuilt list would otherwise show the textures the first open loaded
         steps.add(c -> {
             Perf.holdImageLoads = true;
+            for (int id : listed()) Ui.memory().get(id).unload();
             Ui.press(c, "showFilter");
         });
         steps.add(c -> c.shot("selector-loading"));
