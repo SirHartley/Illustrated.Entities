@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.util.Pair;
 import illustratedEntities.dialogue.panel.InteractionDialogCustomPanelPlugin;
 import illustratedEntities.helper.ImageHandler;
 import illustratedEntities.helper.ImageTags;
@@ -44,6 +45,8 @@ public final class PerfChecks {
         for (int i = 0; i < JUMPS; i++) {
             int n = i;
             steps.add(c -> jump(c, n));
+            // a jump started during the last one's fade is dropped
+            steps.add(c -> c.days(1f));
         }
         steps.add(c -> Perf.dump("jump"));
 
@@ -166,10 +169,12 @@ public final class PerfChecks {
         memory.set(DUPES, true, 0f);
     }
 
-    // what a player gets by clicking every tag button in the filter
+    // what a player gets by clicking every tag button in the filter. stn and gas stay off, either one hides all other images
     private static void allTags() {
         Set<String> tags = new HashSet<>();
-        for (com.fs.starfarer.api.util.Pair<String, String> tag : ImageTags.tagNameList) tags.add(tag.one);
+        for (Pair<String, String> tag : ImageTags.tagNameList) tags.add(tag.one);
+        tags.remove("stn");
+        tags.remove("gas");
         Global.getSector().getMemoryWithoutUpdate().set(TAGS, tags, 0f);
     }
 }

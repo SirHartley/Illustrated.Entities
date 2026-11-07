@@ -41,8 +41,12 @@ public final class EditorChecks {
         steps.add(c -> {
             Perf.report("editor 5000 chars");
             Perf.dump("editor 5000 chars");
-            c.shot("editor-long");
+            Perf.textPixels.clear();
+            Perf.readText = true;
+            c.frames(10);
         });
+        steps.add(EditorChecks::textDrawn);
+        steps.add(c -> c.shot("editor-long"));
         steps.add(EditorChecks::apply);
         steps.add(EditorChecks::applied);
         steps.add(EditorChecks::resetRestores);
@@ -184,6 +188,15 @@ public final class EditorChecks {
         Perf.dump("typing at 5000");
         press(f, Keyboard.KEY_HOME, true, false);
         press(f, Keyboard.KEY_NEXT, false, false);
+    }
+
+    private static void textDrawn(Ctx c) throws Throwable {
+        Perf.readText = false;
+        for (int i = 0; i < 2; i++) {
+            int[] pixels = Perf.textPixels.get(field(i));
+            c.expect(pixels != null && pixels[0] > 1000, "long text draws in box " + (i + 1) + " (" + (pixels == null ? "none" : pixels[0]) + " bright pixels)");
+            c.expect(pixels != null && pixels[1] < 5, "long text stays inside box " + (i + 1) + " (" + (pixels == null ? "none" : pixels[1]) + " bright pixels around it)");
+        }
     }
 
     private static void apply(Ctx c) throws Throwable {

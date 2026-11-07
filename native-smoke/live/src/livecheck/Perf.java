@@ -1,11 +1,16 @@
 package livecheck;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.ui.PositionAPI;
 import illustratedEntities.memory.ImageDataEntry;
 import org.apache.log4j.Logger;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 import patchlib.api.context.HookContext;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,6 +19,8 @@ import java.util.TreeMap;
 // Display.update and sync, so a frame cap or vsync does not hide a cost. run.sh copies the PERF lines to perf.csv
 public final class Perf {
     private static final Logger log = Global.getLogger(Perf.class);
+    private static final int TEXT_STRIP = 4;
+    private static final int TEXT_GREEN = 120;
 
     static long displayNanos = 0;
     static long displayStart = 0;
@@ -25,6 +32,10 @@ public final class Perf {
 
     // the MultilineTextField that advanced last, 2.0.c has none
     public static volatile Object field = null;
+
+    // captures fail with the screen off, so read what a text box drew. [inside the box, the rows around it]
+    static boolean readText = false;
+    static final Map<Object, int[]> textPixels = new HashMap<>();
 
     private Perf() {
     }
@@ -90,6 +101,26 @@ public final class Perf {
             if (Boolean.TRUE.equals(entry.isLoaded)) flagged++;
         }
         line(section, "textures when=" + when + " loaded=" + loaded + " flagged=" + flagged);
+    }
+
+    static void readText(Object field, PositionAPI position) {
+        float scale = Global.getSettings().getScreenScaleMult();
+        int x = (int) (position.getX() * scale), y = (int) (position.getY() * scale);
+        int w = (int) (position.getWidth() * scale), h = (int) (position.getHeight() * scale);
+        int inside = bright(x + 2, y + 2, w - 8, h - 4);
+        int around = bright(x, y - TEXT_STRIP - 1, w, TEXT_STRIP) + bright(x, y + h + 1, w, TEXT_STRIP);
+        textPixels.put(field, new int[]{inside, around});
+    }
+
+    private static int bright(int x, int y, int w, int h) {
+        ByteBuffer pixels = BufferUtils.createByteBuffer(w * h * 3);
+        GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
+        GL11.glReadPixels(x, y, w, h, GL11.GL_RGB, GL11.GL_UNSIGNED_BYTE, pixels);
+        int count = 0;
+        for (int i = 1; i < pixels.capacity(); i += 3) {
+            if ((pixels.get(i) & 0xff) > TEXT_GREEN) count++;
+        }
+        return count;
     }
 
     static void line(String section, String text) {

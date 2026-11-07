@@ -1,5 +1,6 @@
 package livecheck;
 
+import com.fs.starfarer.api.ui.PositionAPI;
 import patchlib.api.context.AfterContext;
 import patchlib.api.context.BeforeContext;
 import patchlib.api.match.ClassMatch;
@@ -130,7 +131,10 @@ public final class Timers {
         public static void renderBefore(BeforeContext context) { Perf.start(context); }
 
         @After(target = @MethodMatch(methodName = "render"))
-        public static void renderAfter(AfterContext context) { Perf.stop(context, "MultilineTextField.render"); }
+        public static void renderAfter(AfterContext context) {
+            Perf.stop(context, "MultilineTextField.render");
+            if (Perf.readText) Perf.readText(context.getSelf(), context.<PositionAPI>getField("position").get());
+        }
 
         @Before(target = @MethodMatch(methodName = "processInput"))
         public static void inputBefore(BeforeContext context) { Perf.start(context); }
