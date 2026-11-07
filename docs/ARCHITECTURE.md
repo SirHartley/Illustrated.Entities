@@ -57,11 +57,12 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 | `editor` | `EditorChecks` | `MultilineTextField` keys sent to `processInput`, with Ctrl and Shift |
 | `clicks` | `ClickChecks` | real mouse and keyboard: it logs `LIVE_CHECK input` lines, `clicks.sh` does them with `gamectl` |
 | `settings` | `SettingChecks` | each setting through a reload. Run it last, settings stay changed |
+| `visual` | `VisualChecks` | market image against vanilla's image visual pixel by pixel (`Grab` reads the frame, see below), what stays shown after each return, founding a colony with the core UI open |
 | `perf` | `PerfChecks` | times the same steps on any build, see below |
 | `seed` | `SeedChecks` | leaves a save for `upgrade`, run on a release zip |
 | `upgrade` | `UpgradeChecks` | loads that save, checks the changelog `Note` lines |
 
-`native-smoke/live/run.sh [groups ...]` builds the release jar, stages it, takes `C:\Modding\.smoke-lock` and starts the skill's `run-live-checks.sh`, one game per argument. Set `SMOKE_SCRIPTS` to `scripts/live` in a writable copy of the skill with `gamectl.exe` built there; the top of `run.sh` lists the other settings. Results and captures land in `<SMOKE_WORK>/runs/`. Look at each `check-*.png`, the checks cannot see what a dialog draws.
+`native-smoke/live/run.sh [groups ...]` builds the release jar, stages it, takes `C:\Modding\.smoke-lock` and starts the skill's `run-live-checks.sh`, one game per argument. Set `SMOKE_SCRIPTS` to `scripts/live` in a writable copy of the skill with `gamectl.exe` built there; the top of `run.sh` lists the other settings. Results and captures land in `<SMOKE_WORK>/runs/`. Look at each `check-*.png`, the checks cannot see what a dialog draws. `Grab` reads screen regions from the back buffer instead, which works with the screen off, and writes them as `live_check_grab_*` text files to `<SMOKE_WORK>/run/saves/common`.
 
 Performance: every run appends its `PERF` and `PROFILE` lines to `perf.csv` in the main work folder, so report any `PROFILE WARN` and compare with the rows before it. `Timers` holds test-only PatchLib hooks on the mod's classes and on `Display.update` and `sync`; `Perf` turns them into per-call times and frame times, with the wait inside `Display` taken off, so no frame cap has to be turned off. The baseline is the last release, not `master`:
 
@@ -156,6 +157,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 |---|---|
 | `dialogue/rules/ShowDefaultVisualWithSelector.java` | Rule command; shows the image with the change button or falls back to vanilla `ShowDefaultVisual` behavior |
 | `dialogue/impl/ImageDisplayPanel.java` | Current image with change and "desc." buttons |
+| `dialogue/panel/ImageVisualPlugin.java` | Draws an `InteractionDialogImageVisual` the way `VisualPanelAPI.showImageVisual` does |
 | `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
 | `dialogue/impl/TextChangerPanel.java` | Description editor: one `MultilineTextField` per description, filled from `TextDataEntry.getText` or the vanilla `text1`/`text3`; Apply writes `TextDataEntry.setText` |
 | `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
@@ -174,6 +176,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 
 - Images are loaded on demand with `SettingsAPI.loadTexture` and freed with `GL11.glDeleteTextures` plus `unloadTexture` (`Importer`). Any code that shows an image must call `ImageDataEntry.load()` first or the visual renders white.
 - The visual size is fixed at `480 x 300` in `ImageDataEntry.addToEntity` and `addToOrbitalStation`.
+- `VisualPanelAPI.showImageVisual` and `showCustomPanel` both add their panel `rightOfTop` of the text panel, so a custom panel's top left is where vanilla draws an illustration. `ImageDisplayPanel` adds its `ImageVisualPlugin` panel there directly; a tooltip would move it, it draws its first element 5 px right of its origin.
 - `VisualCustomPanel` keeps static references to the panel and plugin. They must be cleared when the dialog closes or they leak; `PostDialogueVisualPanelCleaner` does this with a `DelayedActionScript`.
 - `VisualPanelAPI.showCustomPanel` adds the custom panel to the dialog after the option list, and panels hand input to their children last added first, dropping consumed events. A focused `MultilineTextField` consumes every keyboard event, so option hotkeys (number keys, space, Esc) and the dialog never see them. Option shortcuts fire on key down.
 - The stock scroller around `VisualCustomPanel`'s tooltip (`ScrollPanelAPI`) takes the mouse wheel before its children whenever its content is taller than its view. `TextChangerPanel` builds its tooltip without a scroller (`VisualCustomPanel.createPanel(dialog, true, false)`) so the wheel always reaches a `MultilineTextField`; its page must fit `VisualCustomPanel.PANEL_HEIGHT`.
