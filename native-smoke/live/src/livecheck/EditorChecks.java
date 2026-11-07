@@ -39,6 +39,15 @@ public final class EditorChecks {
         steps.add(EditorChecks::cap);
         steps.add(EditorChecks::navigation);
         steps.add(EditorChecks::selection);
+        steps.add(c -> {
+            MultilineTextField f = field(0);
+            focus(f);
+            clear(f);
+            type(f, "selected text shows a highlight");
+            press(f, Keyboard.KEY_HOME, false, false);
+            press(f, Keyboard.KEY_RIGHT, true, true);
+            c.shot("editor-selection");
+        });
         steps.add(EditorChecks::clipboard);
         steps.add(EditorChecks::undo);
         steps.add(EditorChecks::mouse);
