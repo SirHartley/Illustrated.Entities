@@ -57,10 +57,28 @@ public final class EditorChecks {
         });
         steps.add(c -> {
             c.expect("apply text".equals(field(0).getText()), "reset after clear brings the saved text back");
+            Perf.popupCallback = null;
             Ui.press(c, "delete");
         });
-        steps.add(c -> Ui.press(c, "delete"));
         steps.add(c -> {
+            c.expect(Perf.popupCallback != null, "delete opens the popup");
+            c.expect(Ui.hasButton("confirm"), "editor stays open behind the popup");
+            if (Perf.popupCallback != null) Perf.popupCallback.dismissCustomDialog(1);
+            c.frames(30);
+        });
+        steps.add(c -> {
+            c.expect("cancel".equals(Perf.popupResult), "popup cancels");
+            c.expect(TextHandler.getDataForEntity(Ui.entity(c, "editorColony")) != null, "cancel keeps the description");
+            c.expect("apply text".equals(field(0).getText()), "cancel keeps the text in the box");
+            Perf.popupCallback = null;
+            Ui.press(c, "delete");
+        });
+        steps.add(c -> {
+            if (Perf.popupCallback != null) Perf.popupCallback.dismissCustomDialog(0);
+            c.frames(30);
+        });
+        steps.add(c -> {
+            c.expect("confirm".equals(Perf.popupResult), "popup confirms");
             c.expect(TextHandler.getDataForEntity(Ui.entity(c, "editorColony")) == null, "delete button removes the description");
             c.expect(field(0).getText().isEmpty(), "editor is empty after delete");
             Ui.press(c, "return");

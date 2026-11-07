@@ -22,9 +22,19 @@ public final class PanelChecks {
         steps.add(PanelChecks::openColony);
         steps.add(c -> Ui.press(c, "change_interaction_visual"));
         steps.add(PanelChecks::selectorOrder);
+        steps.add(PanelChecks::loadsVisibleOnly);
         steps.add(c -> c.shot("selector"));
-        steps.add(c -> Ui.press(c, "showFilter"));
+        steps.add(c -> {
+            Perf.holdImageLoads = true;
+            Ui.press(c, "showFilter");
+        });
+        steps.add(c -> c.shot("selector-loading"));
+        steps.add(c -> {
+            Perf.holdImageLoads = false;
+            c.frames(60);
+        });
         steps.add(c -> c.shot("selector-filter"));
+        steps.add(PanelChecks::previewLoads);
         steps.add(PanelChecks::applyImage);
         steps.add(c -> Ui.press(c, "desc"));
         steps.add(c -> c.shot("editor"));
@@ -57,6 +67,39 @@ public final class PanelChecks {
             else last = score;
         }
         c.expect(shown > 0 && wrong == 0, "selector lists the best matches first (" + shown + " images, " + wrong + " out of order)");
+    }
+
+    // the scroller only renders rows in view, so rows below the fold stay unloaded
+    private static void loadsVisibleOnly(Ctx c) {
+        List<Integer> ids = listed();
+        int loaded = 0, top = 0;
+        for (int i = 0; i < ids.size(); i++) {
+            boolean in = Boolean.TRUE.equals(Ui.memory().get(ids.get(i)).isLoaded);
+            if (in) loaded++;
+            if (in && i < 4) top++;
+        }
+        c.expect(top == Math.min(4, ids.size()), "the first two rows load on their own (" + top + " of 4)");
+        c.expect(ids.size() <= 16 || loaded < ids.size(), "selector loads only the images in view (" + loaded + " of " + ids.size() + ")");
+    }
+
+    private static void previewLoads(Ctx c) {
+        int id = -1;
+        for (int listed : listed()) {
+            if (!Boolean.TRUE.equals(Ui.memory().get(listed).isLoaded)) id = listed;
+        }
+        c.expect(id >= 0, "an image below the fold is not loaded yet");
+        if (id < 0) return;
+        int preview = id;
+        Ui.press(c, preview + "_preview");
+        c.hold(() -> Boolean.TRUE.equals(Ui.memory().get(preview).isLoaded), 10f, "preview loads its image");
+    }
+
+    private static List<Integer> listed() {
+        List<Integer> ids = new ArrayList<>();
+        for (InteractionDialogCustomPanelPlugin.ButtonEntry entry : Ui.buttons()) {
+            if (entry.id.endsWith("_set")) ids.add(Integer.parseInt(entry.id.substring(0, entry.id.indexOf('_'))));
+        }
+        return ids;
     }
 
     private static void applyImage(Ctx c) {

@@ -58,26 +58,27 @@ public final class PerfChecks {
         steps.add(c -> Perf.dump("market open"));
 
         steps.add(c -> Ui.openDialog(c, Ui.entity(c, "perfColony")));
+        // frames are sampled from the press on, so the frame that builds the list counts
         steps.add(c -> {
             Perf.textures("selector default", "before");
             Ui.press(c, "change_interaction_visual");
+            Perf.sample(c, FRAMES);
         });
-        steps.add(c -> selectorOpen(c, "selector default"));
         steps.add(c -> selectorDone("selector default"));
 
         steps.add(c -> {
             anyMatch();
             Ui.press(c, "showFilter");
+            Perf.sample(c, FRAMES);
         });
-        steps.add(c -> selectorOpen(c, "selector any"));
         steps.add(c -> selectorDone("selector any"));
 
         steps.add(c -> {
             anyMatch();
             allTags();
             Ui.press(c, "showFilter");
+            Perf.sample(c, FRAMES);
         });
-        steps.add(c -> selectorOpen(c, "selector all tags"));
         steps.add(c -> selectorDone("selector all tags"));
 
         steps.add(c -> {
@@ -148,17 +149,13 @@ public final class PerfChecks {
         c.frames(30);
     }
 
-    private static void selectorOpen(Ctx c, String section) {
+    private static void selectorDone(String section) {
         int listed = 0;
         for (InteractionDialogCustomPanelPlugin.ButtonEntry entry : Ui.buttons()) {
             if (entry.id.endsWith("_set")) listed++;
         }
         Perf.line(section, "listed images=" + listed);
         Perf.textures(section, "open");
-        Perf.sample(c, FRAMES);
-    }
-
-    private static void selectorDone(String section) {
         Perf.report(section);
         Perf.dump(section);
     }

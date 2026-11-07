@@ -1,5 +1,7 @@
 package livecheck;
 
+import com.fs.starfarer.api.campaign.CustomDialogDelegate;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import patchlib.api.context.AfterContext;
 import patchlib.api.context.BeforeContext;
@@ -102,6 +104,41 @@ public final class Timers {
 
         @After(target = @MethodMatch(methodName = "showPanel"))
         public static void after(AfterContext context) { Perf.stop(context, "ImageSelectorPanel.showPanel"); }
+    }
+
+    @Patch(target = @ClassMatch(typeName = "illustratedEntities.dialogue.impl.DeleteDescriptionDialog"))
+    public static final class DeletePopup {
+        @Before(target = @MethodMatch(methodName = "createCustomDialog"))
+        public static void open(BeforeContext context) {
+            Perf.popupPanel = (CustomPanelAPI) context.getArg(0);
+            Perf.popupCallback = (CustomDialogDelegate.CustomDialogCallback) context.getArg(1);
+            Perf.popupResult = null;
+        }
+
+        @After(target = @MethodMatch(methodName = "customDialogConfirm"))
+        public static void confirm(AfterContext context) { Perf.popupResult = "confirm"; }
+    }
+
+    // the popup inherits cancel from the api base class, so that is where it is declared
+    @Patch(target = @ClassMatch(typeName = "com.fs.starfarer.api.campaign.BaseCustomDialogDelegate"))
+    public static final class PopupCancel {
+        @After(target = @MethodMatch(methodName = "customDialogCancel"))
+        public static void cancel(AfterContext context) {
+            if (context.getSelf().getClass().getName().endsWith(".DeleteDescriptionDialog")) Perf.popupResult = "cancel";
+        }
+    }
+
+    // Perf.holdImageLoads keeps the tiles on their spinner for a capture
+    @Patch(target = @ClassMatch(typeName = "illustratedEntities.dialogue.panel.ImageListPanelPlugin"))
+    public static final class ImageLoads {
+        @Before(target = @MethodMatch(methodName = "advance"))
+        public static void before(BeforeContext context) {
+            if (Perf.holdImageLoads) context.skipOriginal(null);
+            else Perf.start(context);
+        }
+
+        @After(target = @MethodMatch(methodName = "advance"))
+        public static void after(AfterContext context) { Perf.stop(context, "ImageListPanelPlugin.advance"); }
     }
 
     @Patch(target = @ClassMatch(typeName = "illustratedEntities.dialogue.impl.TextChangerPanel"))

@@ -36,9 +36,22 @@ public final class ClickChecks {
         steps.add(ClickChecks::enterAndBackspace);
         steps.add(c -> button(c, "confirm", () -> saved(c, "live click\nsecond lin"), "click on apply saves the typed text"));
         steps.add(ClickChecks::scrollTrack);
-        steps.add(c -> button(c, "delete", () -> !Ui.hasButton("confirm"), "click opens the delete prompt"));
-        steps.add(c -> button(c, "delete", () -> TextHandler.getDataForEntity(Ui.entity(c, "clickColony")) == null, "click on delete removes the description"));
-        steps.add(c -> c.frames(30));
+        steps.add(c -> {
+            Perf.popupPanel = null;
+            button(c, "delete", () -> Perf.popupPanel != null, "click on delete opens the popup");
+        });
+        // the popup fades in, buttons ignore clicks until it is idle
+        steps.add(c -> c.frames(60));
+        steps.add(c -> popupButton(c, false, () -> "cancel".equals(Perf.popupResult) && saved(c, "live click\nsecond lin"), "click on cancel keeps the description"));
+        steps.add(c -> c.frames(60));
+        steps.add(c -> {
+            Perf.popupPanel = null;
+            button(c, "delete", () -> Perf.popupPanel != null, "click on delete opens the popup again");
+        });
+        steps.add(c -> c.frames(60));
+        steps.add(c -> c.shot("delete-popup"));
+        steps.add(c -> popupButton(c, true, () -> TextHandler.getDataForEntity(Ui.entity(c, "clickColony")) == null, "click on the popup delete removes the description"));
+        steps.add(c -> c.frames(60));
         steps.add(c -> button(c, "return", () -> Ui.hasButton("desc"), "click on return leaves the editor"));
         steps.add(Ui::closeDialog);
         return steps;
@@ -104,6 +117,16 @@ public final class ClickChecks {
         if (entry == null) return;
         PositionAPI p = entry.button.getPosition();
         click(c, p.getCenterX(), p.getCenterY());
+        c.hold(done, WAIT, check);
+    }
+
+    // 0.98a-RC8 lays the popup out as: our panel 10 from the top left, 150 by 25 buttons 10 from the bottom right,
+    // cancel in the corner and confirm 10 left of it. read from the obfuscated dialog class, recheck after a game update
+    private static void popupButton(Ctx c, boolean confirm, BooleanSupplier done, String check) {
+        PositionAPI p = Perf.popupPanel.getPosition();
+        float cancelX = p.getX() + p.getWidth() - 75f;
+        float y = p.getY() - 22.5f;
+        click(c, confirm ? cancelX - 160f : cancelX, y);
         c.hold(done, WAIT, check);
     }
 
