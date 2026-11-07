@@ -36,6 +36,9 @@ public final class Groups {
                 case "clicks":
                     all.addAll(ClickChecks.clicks());
                     break;
+                case "visual":
+                    all.addAll(VisualChecks.visual());
+                    break;
                 case "perf":
                     all.addAll(PerfChecks.perf());
                     break;
