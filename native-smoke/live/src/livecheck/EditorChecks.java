@@ -145,6 +145,7 @@ public final class EditorChecks {
         c.expect(cursor(f) == f.getText().length(), "down keeps the column (" + cursor(f) + ")");
         press(f, Keyboard.KEY_BACK, false, true);
         c.expect("two \na".equals(f.getText()), "shift backspace works like backspace");
+        clear(f);
     }
 
     private static void focus(Ctx c) throws Throwable {
