@@ -64,6 +64,7 @@ After reading this file, use the task to choose the next document. Read the rele
 - Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
 - Use the connected GitHub app to create, inspect, and merge pull requests.
 - Fetch current remote `master` before branching and again before merging. Merge intervening changes, push the exact final commit, and verify the merged remote revision.
+- New changes and bug fixes may be committed and merged to `dev` without asking. For that work, fetch `dev` instead of `master`.
 
 ### Branch cleanup
 
