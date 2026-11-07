@@ -21,6 +21,7 @@ Note - Older saves need a new game to get those illustrations back
 Fixed - Orbital stations now pick up the planet image when leaving the colony
 Fixed - Images from the selector no longer stay in memory after loading a save
 Fixed - Images now sit exactly where vanilla illustrations do
+Fixed - Images now have the vanilla illustration border
 
 Description editor
 Adjusted - Description editor uses one scrolling text box per description

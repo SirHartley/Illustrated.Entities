@@ -157,7 +157,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 |---|---|
 | `dialogue/rules/ShowDefaultVisualWithSelector.java` | Rule command; shows the image with the change button or falls back to vanilla `ShowDefaultVisual` behavior |
 | `dialogue/impl/ImageDisplayPanel.java` | Current image with change and "desc." buttons |
-| `dialogue/panel/ImageVisualPlugin.java` | Draws an `InteractionDialogImageVisual` the way `VisualPanelAPI.showImageVisual` does |
+| `dialogue/panel/ImageVisualPlugin.java` | Draws an `InteractionDialogImageVisual` the way `VisualPanelAPI.showImageVisual` does, with its border: a 25 px additive glow from the `planets` `atmosphere` texture in the `buttonText` colour at 35% alpha |
 | `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
 | `dialogue/impl/TextChangerPanel.java` | Description editor: one `MultilineTextField` per description, filled from `TextDataEntry.getText` or the vanilla `text1`/`text3`; Apply writes `TextDataEntry.setText` |
 | `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
