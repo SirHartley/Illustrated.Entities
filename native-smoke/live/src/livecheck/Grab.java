@@ -63,13 +63,15 @@ public final class Grab {
         }
     }
 
-    // [mean channel difference, share of pixels that differ by more than 24 in any channel]
-    static float[] diff(String a, String b) {
+    // [mean channel difference, share of pixels that differ by more than 24 in any channel], bottom rows left out
+    static float[] diff(String a, String b, float skipBottom) {
         byte[] pa = pixels.get(a), pb = pixels.get(b);
+        int[] r = regions.get(a);
         if (pa == null || pb == null || pa.length != pb.length) return null;
+        int start = (int) (skipBottom * Global.getSettings().getScreenScaleMult()) * r[2] * 3;
         long sum = 0;
         int changed = 0;
-        for (int i = 0; i < pa.length; i += 3) {
+        for (int i = start; i < pa.length; i += 3) {
             int max = 0;
             for (int k = 0; k < 3; k++) {
                 int d = Math.abs((pa[i + k] & 0xff) - (pb[i + k] & 0xff));
@@ -78,7 +80,7 @@ public final class Grab {
             }
             if (max > 24) changed++;
         }
-        return new float[]{sum / (float) pa.length, changed * 3f / pa.length};
+        return new float[]{sum / (float) (pa.length - start), changed * 3f / (pa.length - start)};
     }
 
     @Patch(target = @ClassMatch(typeName = "org.lwjgl.opengl.Display"))
