@@ -5,6 +5,11 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import patchlib.api.context.AfterContext;
 import patchlib.api.context.BeforeContext;
+import patchlib.api.context.MethodCallContext;
+import patchlib.api.patch.RedirectMethodCall;
+
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import patchlib.api.match.ClassMatch;
 import patchlib.api.match.MethodMatch;
 import patchlib.api.patch.After;
@@ -184,6 +189,27 @@ public final class Timers {
 
         @After(target = @MethodMatch(methodName = "relayout"))
         public static void layoutAfter(AfterContext context) { Perf.stop(context, "MultilineTextField.relayout"); }
+    }
+
+    // the clipboard belongs to whoever sits at the pc, so copy and paste in a run use Perf.clipboard
+    @Patch(target = @ClassMatch(typeName = "illustratedEntities.dialogue.panel.MultilineTextField"))
+    public static final class FakeClipboard {
+        @RedirectMethodCall(target = @MethodMatch(methodName = "copy"), call = @MethodMatch(methodName = "setContents"),
+                owner = @ClassMatch(typeName = "java.awt.datatransfer.Clipboard"))
+        public static void set(MethodCallContext context) {
+            try {
+                Perf.clipboard = (String) ((Transferable) context.getCallArg(0)).getTransferData(DataFlavor.stringFlavor);
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+            context.setResult(null);
+        }
+
+        @RedirectMethodCall(target = @MethodMatch(methodName = "paste"), call = @MethodMatch(methodName = "getData"),
+                owner = @ClassMatch(typeName = "java.awt.datatransfer.Clipboard"))
+        public static void get(MethodCallContext context) {
+            context.setResult(Perf.clipboard);
+        }
     }
 
     // waiting for the driver happens in here, Perf.frame takes it off the frame time

@@ -36,6 +36,7 @@ public final class Perf {
     public static volatile Object field = null;
 
     static boolean holdImageLoads = false;
+    static volatile String clipboard = "";
 
     // DeleteDescriptionDialog as Timers saw it: the panel inside the popup, its callback and how it closed
     static volatile CustomPanelAPI popupPanel = null;
