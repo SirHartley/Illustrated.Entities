@@ -159,7 +159,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 | `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply. Preview and apply load their image first |
 | `dialogue/panel/ImageListPanelPlugin.java`, `ImageTilePlugin.java` | Selector images: a tile draws a black square with a spinner until its image loads. The list's plugin loads 2 tiles per frame, only tiles inside the list: the scroller renders every row and only clips them |
 | `dialogue/impl/TextChangerPanel.java` | Description editor: one `MultilineTextField` per description, filled from `TextDataEntry.getText` or the vanilla `text1`/`text3`; Apply writes `TextDataEntry.setText` |
-| `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
+| `dialogue/impl/DeleteDescriptionDialog.java` | Delete confirmation popup for edited descriptions (`InteractionDialogAPI.showCustomDialog`) |
 | `dialogue/panel/MultilineTextField.java` | Multiline text box (`CustomUIPanelPlugin`): own word wrap and rendering with LazyLib `LazyFont`, cursor, new lines, scroll bar, `MAX_CHARS` cap; fields sharing a focus group unfocus each other |
 | `dialogue/panel/*` | Custom panel plumbing adapted from Histidine's code: `VisualCustomPanel` holds the static panel, tooltip and plugin |
 
