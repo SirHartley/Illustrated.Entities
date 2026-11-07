@@ -24,7 +24,7 @@ Fixed - Images from the selector no longer stay in memory after loading a save
 Fixed - Image selector no longer freezes the game while it loads images
 
 Description editor
-Adjusted - Description editor uses one scrolling text box per description
+Adjusted - Description editor uses one scrolling text box per description, with selection, copy, paste and undo
 Note - Each description holds up to 5000 characters, Enter starts a new line
 Adjusted - Deleting a description asks in a popup
 Fixed - Edited descriptions cut off after lowering "Number of text lines"
