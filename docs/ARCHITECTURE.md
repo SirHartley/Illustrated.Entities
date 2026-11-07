@@ -182,7 +182,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 
 ### Save data
 
-- `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`.
+- `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`. Textures outlive a save load, so `forceRefresh` sets `isLoaded` from the texture cache.
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
 - `ImageDataEntry.addToEntity` stores a vanilla illustration it replaces in `$illent_vanilla_visual`; `removeFromEntity` puts it back. Entities overwritten before this key existed have no copy and lose the vanilla illustration on removal.
 - `TextDataEntry.apply` stores a vanilla description id it replaces in `$illent_vanilla_description`; `TextHandler.deleteDescription` puts it back. Entities edited before this key existed have no copy and lose the vanilla description on delete.

@@ -176,6 +176,13 @@ public final class IllustratedChecks {
         ImageHandler.setImage(t, picked, false);
         t.getMemoryWithoutUpdate().set(ModPlugin.PLAYER_PICK, true);
         c.put("pick", picked.id);
+
+        for (ImageDataEntry entry : memory().getDataMap().values()) {
+            if (entry == picked || entry.isUsed() || !entry.planetId.isEmpty()) continue;
+            entry.load();
+            c.put("loadedEntry", entry.id);
+            break;
+        }
         c.reload();
     }
 
@@ -183,6 +190,7 @@ public final class IllustratedChecks {
         SectorEntityToken t = entity(c, "preset");
         c.expect(ImageHandler.getImageId(t) == (Integer) c.get("pick"), "picked image kept over the preset after reload");
         c.expect(path(t).equals(image(t).getImagePath()), "picked image still shown after reload");
+        c.expect(Boolean.TRUE.equals(memory().get((Integer) c.get("loadedEntry")).isLoaded), "texture loaded before a reload can still be unloaded");
     }
 
     private static void newColonies(Ctx c) {
