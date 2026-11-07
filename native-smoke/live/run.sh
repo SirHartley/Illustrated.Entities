@@ -101,8 +101,9 @@ for groups in "${RUNS[@]}"; do
         bash native-smoke/live/clicks.sh "$WORK/run" "$SMOKE_SCRIPTS/gamectl.exe" &
         bridge=$!
     fi
+    # lunalib in the install ships sources newer than its libs jar, our own jar is built above
     CHECK_JARS="$(cygpath -m "$STAGE/jars/src.jar");$GAME/mods/LunaLib/jars/LunaLib.jar;$GAME/mods/LazyLib/jars/LazyLib.jar;$GAME/mods/LazyLib/jars/internal/Kotlin-Runtime.jar;$GAME/mods/PatchLib/jars/PatchLibAPI.jar" \
-    PROFILE_PKG=illustratedEntities SMOKE_SLOT=$slot SMOKE_OWNER=$OWNER PERF=$([[ $mode == --perf ]] && echo 1 || echo 0) \
+    SMOKE_STALE_OK=1 PROFILE_PKG=illustratedEntities SMOKE_SLOT=$slot SMOKE_OWNER=$OWNER PERF=$([[ $mode == --perf ]] && echo 1 || echo 0) \
         bash "$SMOKE_SCRIPTS/run-live-checks.sh" "$GAME" "$WORK" "$CHECK" "$groups" patchlib lw_lazylib lunalib ${SMOKE_MODS:-} "$STAGE" || status=1
     record "$groups"
     unstage
