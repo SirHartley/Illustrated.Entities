@@ -67,6 +67,12 @@ public class Runner implements EveryFrameScript {
             Time.fast(false);
             sector.setPaused(true);
         }
+        if (ctx.hold != null) {
+            boolean met = ctx.hold.getAsBoolean();
+            if (!met && System.currentTimeMillis() < ctx.holdEnd) return;
+            ctx.expect(met, ctx.holdId);
+            ctx.hold = null;
+        }
         if (ctx.waitFrames > 0) {
             ctx.waitFrames--;
             return;

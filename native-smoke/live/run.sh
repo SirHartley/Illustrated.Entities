@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # builds the jar, stages it, runs the checks under the machine wide lock. git bash on windows
-#   run.sh [groups]    default images,colony,text
+#   run.sh [groups]    default images,colony,text,panels,stations,settings
 # SMOKE_SCRIPTS    scripts/live in a writable copy of the starsector-native-smoke skill, with gamectl.exe built there
 # SMOKE_GAME       game root
 # SMOKE_WORK       scratch folder, keeps the base save. no spaces, run-live-checks.sh passes it through SMOKE_JAVA_ARGS
@@ -8,7 +8,7 @@
 set -euo pipefail
 : "${SMOKE_SCRIPTS:?set SMOKE_SCRIPTS to the scripts/live folder of a skill copy}"
 ROOT=$(cd -- "$(dirname -- "$0")/../.." && pwd)
-CHECK_GROUPS=${1:-images,colony,text}
+CHECK_GROUPS=${1:-images,colony,text,panels,stations,settings}
 GAME=${SMOKE_GAME:-E:/Games/Starsector 0.98/Starsector 098a-RC8 - Modding}
 WORK=${SMOKE_WORK:-/c/Modding/.smoke-work/Illustrated.Entities}
 LOCK=/c/Modding/.smoke-lock
@@ -44,6 +44,6 @@ for dir in data graphics; do
     MSYS_NO_PATHCONV=1 cmd.exe /c mklink /J "$(cygpath -w "$STAGE/$dir")" "$(cygpath -w "$ROOT/$dir")" >/dev/null
 done
 
-CHECK_JARS="$(cygpath -m "$STAGE/jars/src.jar");$GAME/mods/LunaLib/jars/LunaLib.jar;$GAME/mods/LazyLib/jars/LazyLib.jar" \
+CHECK_JARS="$(cygpath -m "$STAGE/jars/src.jar");$GAME/mods/LunaLib/jars/LunaLib.jar;$GAME/mods/LazyLib/jars/LazyLib.jar;$GAME/mods/LazyLib/jars/internal/Kotlin-Runtime.jar" \
 PROFILE_PKG=illustratedEntities \
     bash "$SMOKE_SCRIPTS/run-live-checks.sh" "$GAME" "$WORK" "$ROOT/native-smoke/live" "$CHECK_GROUPS" lw_lazylib lunalib "$STAGE"

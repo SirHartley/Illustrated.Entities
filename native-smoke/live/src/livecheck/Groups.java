@@ -18,6 +18,15 @@ public final class Groups {
                 case "colony":
                     all.addAll(IllustratedChecks.colony());
                     break;
+                case "panels":
+                    all.addAll(PanelChecks.panels());
+                    break;
+                case "stations":
+                    all.addAll(StationChecks.stations());
+                    break;
+                case "settings":
+                    all.addAll(SettingChecks.settings());
+                    break;
                 case "text":
                     all.addAll(IllustratedChecks.text());
                     break;

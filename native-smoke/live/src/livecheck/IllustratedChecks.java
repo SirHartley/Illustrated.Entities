@@ -148,13 +148,13 @@ public final class IllustratedChecks {
         c.until(() -> sector.getCurrentLocation() == location && Boolean.TRUE.equals(entry.isLoaded), 30f, "jump loads the images of the new system");
     }
 
-    private static void openDialog(Ctx c, SectorEntityToken t) {
+    static void openDialog(Ctx c, SectorEntityToken t) {
         c.keepDialog = true;
         c.expect(Global.getSector().getCampaignUI().showInteractionDialog(t), "market dialog opens on " + t.getId());
         c.frames(90);
     }
 
-    private static void closeDialog(Ctx c) {
+    static void closeDialog(Ctx c) {
         CampaignUIAPI ui = Global.getSector().getCampaignUI();
         InteractionDialogAPI dialog = ui.getCurrentInteractionDialog();
         c.expect(dialog != null, "market dialog stayed open");
@@ -241,7 +241,8 @@ public final class IllustratedChecks {
     private static void editDescription(Ctx c) {
         SectorEntityToken t = Global.getSector().getEntityById("jangala");
         c.expect(t != null && t.getMarket() != null && !t.getMarket().isPlanetConditionMarketOnly(), "jangala is a real market");
-        c.note("description id before the edit " + t.getCustomDescriptionId());
+        c.expect(t.getCustomDescriptionId() != null, "jangala has a vanilla description id");
+        c.put("textOriginal", t.getCustomDescriptionId());
 
         TextDataMemory memory = TextDataMemory.getInstance();
         TextDataEntry data = new TextDataEntry(memory.getNexFreetNum(), t.getId());
@@ -277,13 +278,14 @@ public final class IllustratedChecks {
         c.expect(TextHandler.deleteDescription(t), "edited description deleted");
         c.expect(TextDataMemory.getInstance().get(num) == null, "description slot freed");
         c.expect(!t.getMemoryWithoutUpdate().contains(TextDataEntry.ID_MEM_KEY), "text memory key removed");
+        c.expect(c.get("textOriginal").equals(t.getCustomDescriptionId()), "vanilla description back after delete (got " + t.getCustomDescriptionId() + ")");
     }
 
-    private static ImageDataMemory memory() {
+    static ImageDataMemory memory() {
         return ImageDataMemory.getInstance();
     }
 
-    private static List<ImageDataEntry> presets() {
+    static List<ImageDataEntry> presets() {
         List<ImageDataEntry> presets = new ArrayList<>();
         for (ImageDataEntry entry : memory().getDataMap().values()) {
             if (entry.planetId.isEmpty()) continue;
@@ -293,15 +295,15 @@ public final class IllustratedChecks {
         return presets;
     }
 
-    private static SectorEntityToken entity(Ctx c, String key) {
+    static SectorEntityToken entity(Ctx c, String key) {
         return Global.getSector().getEntityById((String) c.get(key));
     }
 
-    private static ImageDataEntry image(SectorEntityToken t) {
+    static ImageDataEntry image(SectorEntityToken t) {
         return memory().get(ImageHandler.getImageId(t));
     }
 
-    private static String path(SectorEntityToken t) {
+    static String path(SectorEntityToken t) {
         return t.getCustomInteractionDialogImageVisual().getSpriteName();
     }
 }

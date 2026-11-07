@@ -16,6 +16,9 @@ public final class Ctx {
     int waitFrames = 0;
     boolean reload = false;
     public boolean keepDialog = false;
+    java.util.function.BooleanSupplier hold = null;
+    String holdId = null;
+    long holdEnd = 0L;
     java.util.function.BooleanSupplier until = null;
     Runnable onFrame = null;
     String untilId = null;
@@ -64,6 +67,13 @@ public final class Ctx {
 
     public void until(java.util.function.BooleanSupplier condition, float maxDays, String id) {
         until(condition, maxDays, id, null);
+    }
+
+    // real seconds, works while paused and with a dialog open
+    public void hold(java.util.function.BooleanSupplier condition, float seconds, String id) {
+        hold = condition;
+        holdId = id;
+        holdEnd = System.currentTimeMillis() + (long) (seconds * 1000f);
     }
 
     public void reload() {
