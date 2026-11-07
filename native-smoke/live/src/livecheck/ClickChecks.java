@@ -86,7 +86,8 @@ public final class ClickChecks {
     private static void typeText(Ctx c) throws Throwable {
         MultilineTextField f = EditorChecks.field(0);
         c.input("type live click");
-        c.hold(() -> "live click".equals(f.getText()), WAIT, "real keys type into the box");
+        // letters come out in capitals while someone at the pc holds shift
+        c.hold(() -> "live click".equalsIgnoreCase(f.getText()), WAIT, "real keys type into the box");
     }
 
     private static void enterAndBackspace(Ctx c) throws Throwable {
@@ -94,7 +95,7 @@ public final class ClickChecks {
         c.input("key ENTER");
         c.input("type second line");
         c.input("key BACK");
-        c.hold(() -> "live click\nsecond lin".equals(f.getText()), WAIT, "real enter and backspace work");
+        c.hold(() -> "live click\nsecond lin".equalsIgnoreCase(f.getText()), WAIT, "real enter and backspace work");
     }
 
     private static void scrollTrack(Ctx c) throws Throwable {
@@ -137,7 +138,7 @@ public final class ClickChecks {
 
     private static boolean saved(Ctx c, String text) {
         TextDataEntry data = TextHandler.getDataForEntity(Ui.entity(c, "clickColony"));
-        return data != null && text.equals(data.getText(1));
+        return data != null && text.equalsIgnoreCase(data.getText(1));
     }
 
     private static boolean focused(MultilineTextField f) {

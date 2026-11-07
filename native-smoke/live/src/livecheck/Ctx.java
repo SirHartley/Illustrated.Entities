@@ -14,6 +14,7 @@ public final class Ctx {
     float waitDays = 0f;
     long waitStart = 0L;
     int waitFrames = 0;
+    long waitUntil = 0L;
     boolean reload = false;
     public boolean keepDialog = false;
     java.util.function.BooleanSupplier hold = null;
@@ -57,7 +58,8 @@ public final class Ctx {
 
     public void shot(String name) {
         log.info("LIVE_CHECK shot " + name);
-        waitFrames = 500;
+        // real time, run-live-checks.sh captures from its own loop and that falls behind on a busy pc
+        waitUntil = System.currentTimeMillis() + 10000L;
     }
 
     public void frames(int frames) {
