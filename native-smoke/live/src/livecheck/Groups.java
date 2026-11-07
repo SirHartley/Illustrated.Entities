@@ -30,6 +30,21 @@ public final class Groups {
                 case "text":
                     all.addAll(IllustratedChecks.text());
                     break;
+                case "editor":
+                    all.addAll(EditorChecks.editor());
+                    break;
+                case "clicks":
+                    all.addAll(ClickChecks.clicks());
+                    break;
+                case "perf":
+                    all.addAll(PerfChecks.perf());
+                    break;
+                case "seed":
+                    all.addAll(SeedChecks.seed());
+                    break;
+                case "upgrade":
+                    all.addAll(UpgradeChecks.upgrade());
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown group " + one);
             }

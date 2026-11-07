@@ -2,8 +2,6 @@ package livecheck;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.InteractionDialogImageVisual;
-import com.fs.starfarer.api.campaign.CampaignUIAPI;
-import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.JumpPointAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
@@ -19,13 +17,14 @@ import illustratedEntities.helper.ImageTags;
 import illustratedEntities.helper.Settings;
 import illustratedEntities.helper.TextHandler;
 import illustratedEntities.memory.ImageDataEntry;
-import illustratedEntities.memory.ImageDataMemory;
 import illustratedEntities.memory.TextDataEntry;
 import illustratedEntities.memory.TextDataMemory;
 import illustratedEntities.plugins.ModPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static livecheck.Ui.*;
 
 // each step runs once. c.days, c.until and c.reload hold the next step back. keep ids in c.put, it survives a reload
 public final class IllustratedChecks {
@@ -41,10 +40,11 @@ public final class IllustratedChecks {
         steps.add(IllustratedChecks::presetsApplied);
         steps.add(IllustratedChecks::presetTexturesLoad);
         steps.add(IllustratedChecks::pickerCoversSector);
+        steps.add(IllustratedChecks::pickerFallsBack);
         steps.add(IllustratedChecks::jumpToPreset);
         steps.add(c -> openDialog(c, entity(c, "preset")));
         steps.add(c -> c.shot("preset-dialog"));
-        steps.add(IllustratedChecks::closeDialog);
+        steps.add(Ui::closeDialog);
         steps.add(IllustratedChecks::pickImage);
         steps.add(IllustratedChecks::pickKeptAfterReload);
         return steps;
@@ -74,6 +74,9 @@ public final class IllustratedChecks {
         steps.add(IllustratedChecks::editDescription);
         steps.add(IllustratedChecks::descriptionAfterReload);
         steps.add(IllustratedChecks::deleteDescription);
+        steps.add(IllustratedChecks::longDescription);
+        steps.add(IllustratedChecks::longDescriptionAfterReload);
+        steps.add(IllustratedChecks::tascCopy);
         return steps;
     }
 
@@ -130,6 +133,20 @@ public final class IllustratedChecks {
         c.expect(unknown == 0, "picker only returns known images (" + unknown + " unknown)");
     }
 
+    // every image used: the exact pass finds nothing, so the fallbacks have to find one
+    private static void pickerFallsBack(Ctx c) {
+        SectorEntityToken t = Global.getSector().getEntityById("jangala");
+        List<ImageDataEntry> marked = new ArrayList<>();
+        for (ImageDataEntry entry : memory().getDataMap().values()) {
+            if (entry.isUsed()) continue;
+            entry.usedEntityIds.add("live_check");
+            marked.add(entry);
+        }
+        ImagePicker picker = new ImagePicker(t, true, ImageTags.MatchMode.EXACT, true);
+        for (ImageDataEntry entry : marked) entry.usedEntityIds.remove("live_check");
+        c.expect(!picker.isEmpty() && memory().get(picker.pick()) != null, "picker falls back when no unused image is left");
+    }
+
     private static void jumpToPreset(Ctx c) {
         SectorAPI sector = Global.getSector();
         SectorEntityToken target = null;
@@ -146,20 +163,6 @@ public final class IllustratedChecks {
         c.expect(!Boolean.TRUE.equals(entry.isLoaded), "preset texture not loaded before the jump");
         sector.doHyperspaceTransition(sector.getPlayerFleet(), sector.getPlayerFleet(), new JumpPointAPI.JumpDestination(target, "live check"));
         c.until(() -> sector.getCurrentLocation() == location && Boolean.TRUE.equals(entry.isLoaded), 30f, "jump loads the images of the new system");
-    }
-
-    static void openDialog(Ctx c, SectorEntityToken t) {
-        c.keepDialog = true;
-        c.expect(Global.getSector().getCampaignUI().showInteractionDialog(t), "market dialog opens on " + t.getId());
-        c.frames(90);
-    }
-
-    static void closeDialog(Ctx c) {
-        CampaignUIAPI ui = Global.getSector().getCampaignUI();
-        InteractionDialogAPI dialog = ui.getCurrentInteractionDialog();
-        c.expect(dialog != null, "market dialog stayed open");
-        c.keepDialog = false;
-        if (dialog != null) dialog.dismiss();
     }
 
     // what the Apply button in ImageSelectorPanel does
@@ -281,29 +284,50 @@ public final class IllustratedChecks {
         c.expect(c.get("textOriginal").equals(t.getCustomDescriptionId()), "vanilla description back after delete (got " + t.getCustomDescriptionId() + ")");
     }
 
-    static ImageDataMemory memory() {
-        return ImageDataMemory.getInstance();
+    private static void longDescription(Ctx c) {
+        SectorEntityToken t = Global.getSector().getEntityById("gilead");
+        TextDataMemory memory = TextDataMemory.getInstance();
+        TextDataEntry data = new TextDataEntry(memory.getNexFreetNum(), t.getId());
+        data.setText(1, longText());
+        data.setText(2, longText());
+        data.apply();
+        memory.set(data.descriptionNum, data);
+        data.getDescription().setText1("stale");
+        c.put("longNum", data.descriptionNum);
+        c.reload();
     }
 
-    static List<ImageDataEntry> presets() {
-        List<ImageDataEntry> presets = new ArrayList<>();
-        for (ImageDataEntry entry : memory().getDataMap().values()) {
-            if (entry.planetId.isEmpty()) continue;
-            SectorEntityToken t = Global.getSector().getEntityById(entry.planetId);
-            if (t != null && t.getMarket() != null && !t.getMarket().isPlanetConditionMarketOnly()) presets.add(entry);
+    private static void longDescriptionAfterReload(Ctx c) {
+        SectorEntityToken t = Global.getSector().getEntityById("gilead");
+        TextDataEntry data = TextDataMemory.getInstance().get((Integer) c.get("longNum"));
+        c.expect(data != null && longText().equals(data.getText(1)) && longText().equals(data.getText(2)), "5000 characters saved");
+        if (data == null) return;
+        c.expect(longText().equals(data.getDescription().getText1()), "5000 characters written back on load");
+        c.expect(TextHandler.deleteDescription(t), "long description deleted");
+    }
+
+    // tasc copies lines to the upgraded station by number and writes null for a line the entry does not have
+    private static void tascCopy(Ctx c) {
+        SectorEntityToken t = Global.getSector().getEntityById("gilead");
+        TextDataMemory memory = TextDataMemory.getInstance();
+        TextDataEntry source = new TextDataEntry(memory.getNexFreetNum(), t.getId());
+        source.setText(1, PLANET_TEXT);
+        source.setText(2, COLONY_TEXT);
+        TextDataEntry copy = new TextDataEntry(memory.getNexFreetNum(), t.getId());
+        for (int text = 1; text <= 2; text++) {
+            for (int line = 1; line <= Settings.getInt(Settings.TEXT_LINE_NUM); line++) copy.setString(text, line, source.getString(text, line));
         }
-        return presets;
+        c.expect(copy.isValid(), "line by line copy is valid");
+        copy.apply();
+        memory.set(copy.descriptionNum, copy);
+        c.expect(PLANET_TEXT.equals(copy.getText(1)) && COLONY_TEXT.equals(copy.getText(2)), "line by line copy keeps the text");
+        c.expect(PLANET_TEXT.equals(copy.getDescription().getText1()), "line by line copy shows the text");
+        c.expect(TextHandler.deleteDescription(t), "line by line copy deleted");
     }
 
-    static SectorEntityToken entity(Ctx c, String key) {
-        return Global.getSector().getEntityById((String) c.get(key));
-    }
-
-    static ImageDataEntry image(SectorEntityToken t) {
-        return memory().get(ImageHandler.getImageId(t));
-    }
-
-    static String path(SectorEntityToken t) {
-        return t.getCustomInteractionDialogImageVisual().getSpriteName();
+    private static String longText() {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; out.length() < 5000; i++) out.append(i % 40 == 39 ? "\n\n" : "word" + i + " ");
+        return out.substring(0, 4999) + ".";
     }
 }

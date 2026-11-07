@@ -10,8 +10,9 @@ import java.util.List;
 
 public class Runner implements EveryFrameScript {
     private static final Logger log = Global.getLogger(Runner.class);
-    private static final String PHASE = "live_check_phase";
+    private static final String PHASE = "live_check_phase_";
 
+    private final String phaseKey;
     private final List<Step> steps;
     private final Ctx ctx = new Ctx();
     private int index;
@@ -21,7 +22,8 @@ public class Runner implements EveryFrameScript {
 
     public Runner(String group) {
         steps = Groups.get(group);
-        Object saved = Global.getSector().getPersistentData().get(PHASE);
+        phaseKey = PHASE + group;
+        Object saved = Global.getSector().getPersistentData().get(phaseKey);
         index = saved == null ? 0 : (Integer) saved;
         Global.getSettings().setDevMode(false);
     }
@@ -38,6 +40,7 @@ public class Runner implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
+        Perf.frame();
         if (stopped) return;
         if (++frames < 60) return;
 
@@ -105,7 +108,7 @@ public class Runner implements EveryFrameScript {
 
     private void reloadStep(SectorAPI sector) {
         if (reloadState == 0) {
-            sector.getPersistentData().put(PHASE, index);
+            sector.getPersistentData().put(phaseKey, index);
             sector.setPaused(true);
             log.info("LIVE_CHECK saving, cmdSave=" + sector.getCampaignUI().cmdSave());
             reloadState = 1;

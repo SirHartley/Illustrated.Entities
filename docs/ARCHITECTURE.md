@@ -47,9 +47,30 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 ### Live checks
 
-`native-smoke/live` is a test-only mod (id `live_checks`) from the `starsector-native-smoke` skill's `templates/live-check-mod`. It runs `IllustratedChecks` in a real campaign: groups `images`, `colony` and `text`. It sits outside `jars/src`, so the build never compiles it, and `ReleaseBuild.package` never ships it. `Runner` and `Ctx` differ from the template only by `Ctx.keepDialog`, which keeps a dialog open for a capture.
+`native-smoke/live` is a test-only mod (id `live_checks`) from the `starsector-native-smoke` skill's `templates/live-check-mod`. It sits outside `jars/src`, so the build never compiles it, and `ReleaseBuild.package` never ships it. `Ui` holds the helpers the groups share.
 
-`native-smoke/live/run.sh [groups]` builds the release jar, stages it, takes `C:\Modding\.smoke-lock` and starts the skill's `run-live-checks.sh`. Set `SMOKE_SCRIPTS` to `scripts/live` in a writable copy of the skill with `gamectl.exe` built there; the top of `run.sh` lists the other settings. Results and captures land in `<SMOKE_WORK>/runs/`. Look at each `check-*.png`, the checks cannot see what a dialog draws.
+| Group | Class | Covers |
+|---|---|---|
+| `images`, `colony`, `text` | `IllustratedChecks` | presets, picker, colonies, descriptions through a reload |
+| `panels` | `PanelChecks` | selector and editor panels, buttons pressed with `setChecked` |
+| `stations` | `StationChecks` | orbital station sync, station images |
+| `editor` | `EditorChecks` | `MultilineTextField` keys sent to `processInput`, with Ctrl and Shift |
+| `clicks` | `ClickChecks` | real mouse and keyboard: it logs `LIVE_CHECK input` lines, `clicks.sh` does them with `gamectl` |
+| `settings` | `SettingChecks` | each setting through a reload. Run it last, settings stay changed |
+| `perf` | `PerfChecks` | times the same steps on any build, see below |
+| `seed` | `SeedChecks` | leaves a save for `upgrade`, run on a release zip |
+| `upgrade` | `UpgradeChecks` | loads that save, checks the changelog `Note` lines |
+
+`native-smoke/live/run.sh [groups ...]` builds the release jar, stages it, takes `C:\Modding\.smoke-lock` and starts the skill's `run-live-checks.sh`, one game per argument. Set `SMOKE_SCRIPTS` to `scripts/live` in a writable copy of the skill with `gamectl.exe` built there; the top of `run.sh` lists the other settings. Results and captures land in `<SMOKE_WORK>/runs/`. Look at each `check-*.png`, the checks cannot see what a dialog draws.
+
+Performance: every run appends its `PERF` and `PROFILE` lines to `perf.csv` in the main work folder, so report any `PROFILE WARN` and compare with the rows before it. `Timers` holds test-only PatchLib hooks on the mod's classes and on `Display.update` and `sync`; `Perf` turns them into per-call times and frame times, with the wait inside `Display` taken off, so no frame cap has to be turned off. The baseline is the last release, not `master`:
+
+```sh
+SMOKE_ZIP=<release zip> SMOKE_WORK=/c/Modding/.smoke-work/Illustrated.Entities.2.0.c bash native-smoke/live/run.sh seed
+SMOKE_WORK=/c/Modding/.smoke-work/Illustrated.Entities.upgrade SMOKE_SAVE=/c/Modding/.smoke-work/Illustrated.Entities.2.0.c bash native-smoke/live/run.sh upgrade
+```
+
+`run.sh` swaps in `native-smoke/baseline/Groups.java` for a zip, because only `seed` and `perf` compile against the 2.0.c jar. Update the classes it removes when a group changes that.
 
 ## Image data
 
@@ -117,7 +138,7 @@ Use `rg --files jars/src` for the full inventory. The entries below name state a
 
 ### `listeners`
 
-Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transient listeners (`addTransientListener`) and listener manager entries registered with `true` (transient) are re-added on every load.
+Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transient listeners (`addTransientListener`) and listener manager entries registered with `true` (transient) are re-added on every load. A `BaseCampaignEventListener` needs `addTransientListener`: the listener manager only calls its own interfaces, such as `EconomyTickListener`, and would never call it.
 
 | File | Owner / connection |
 |---|---|

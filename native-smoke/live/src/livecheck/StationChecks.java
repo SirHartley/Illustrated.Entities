@@ -3,6 +3,7 @@ package livecheck;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.JumpPointAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
+import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -16,6 +17,7 @@ import illustratedEntities.plugins.ModPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public final class StationChecks {
     private StationChecks() {
@@ -29,8 +31,8 @@ public final class StationChecks {
         steps.add(c -> {
             String expected = (String) c.get("stationPath");
             SectorEntityToken station = station(market(c));
-            IllustratedChecks.closeDialog(c);
-            c.hold(() -> expected.equals(IllustratedChecks.path(station)), 10f, "closing the market syncs the station image");
+            Ui.closeDialog(c);
+            c.hold(() -> expected.equals(Ui.path(station)), 10f, "closing the market syncs the station image");
         });
         steps.add(StationChecks::pickerOnStation);
         return steps;
@@ -58,29 +60,42 @@ public final class StationChecks {
         MarketAPI market = market(c);
         SectorEntityToken station = station(market);
         c.expect(station.hasTag(ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE), "station has the orbital tag");
-        c.expect(IllustratedChecks.path(market.getPrimaryEntity()).equals(IllustratedChecks.path(station)), "station shows the planet image");
+        c.expect(Ui.path(market.getPrimaryEntity()).equals(Ui.path(station)), "station shows the planet image");
     }
 
     private static void changePlanetImage(Ctx c) {
         MarketAPI market = market(c);
         SectorEntityToken primary = market.getPrimaryEntity();
         ImageDataEntry other = null;
-        for (ImageDataEntry entry : IllustratedChecks.memory().getDataMap().values()) {
+        for (ImageDataEntry entry : Ui.memory().getDataMap().values()) {
             if (entry.planetId.isEmpty() && !entry.isUsed()) other = entry;
         }
         ImageHandler.removeImageFrom(primary);
         ImageHandler.setImage(primary, other, false);
         c.put("stationPath", other.getImagePath());
-        c.expect(!other.getImagePath().equals(IllustratedChecks.path(station(market))), "station still shows the old image before the sync");
-        IllustratedChecks.openDialog(c, primary);
+        c.expect(!other.getImagePath().equals(Ui.path(station(market))), "station still shows the old image before the sync");
+        Ui.openDialog(c, primary);
     }
 
+    // a built orbital station copies its planet, only a market on a station entity gets the stn tag
     private static void pickerOnStation(Ctx c) {
-        ImagePicker picker = new ImagePicker(station(market(c)), false, ImageTags.MatchMode.BROAD, true);
-        c.expect(!picker.isEmpty(), "picker finds an image for a station");
-        if (picker.isEmpty()) return;
-        ImageDataEntry entry = IllustratedChecks.memory().get(picker.pick());
-        c.expect(entry.optionalTags.contains(ImageTags.STATION) || entry.requiredTags.contains(ImageTags.STATION), "station image has the station tag");
+        int stations = 0, empty = 0, wrong = 0, required = 0;
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            SectorEntityToken t = market.getPrimaryEntity();
+            if (t instanceof PlanetAPI) continue;
+            stations++;
+            Map<Integer, Integer> choices = ImagePicker.generateChoices(ImagePicker.getTags(t), market.getFactionId(), false, ImageTags.MatchMode.BROAD);
+            if (choices.isEmpty()) empty++;
+            for (int id : choices.keySet()) {
+                ImageDataEntry entry = Ui.memory().get(id);
+                if (entry.requiredTags.contains(ImageTags.STATION)) required++;
+                else if (!entry.optionalTags.contains(ImageTags.STATION)) wrong++;
+            }
+        }
+        c.expect(stations > 0, "markets on stations found (" + stations + ")");
+        c.expect(empty == 0, "picker finds an image for every station market (" + empty + " empty)");
+        c.expect(wrong == 0, "station images all carry the station tag (" + wrong + " wrong)");
+        c.expect(required > 0, "images with a required station tag show up on stations (" + required + ")");
     }
 
     private static MarketAPI market(Ctx c) {

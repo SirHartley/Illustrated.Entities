@@ -39,6 +39,13 @@ public final class Ctx {
         expect(Math.abs(actual - expected) <= tolerance, id + " (got " + actual + ", want " + expected + ")");
     }
 
+    private static int inputs = 0;
+
+    // clicks.sh reads these lines and does them with gamectl
+    public void input(String what) {
+        log.info("LIVE_CHECK input " + (++inputs) + " " + what);
+    }
+
     public void note(String text) {
         log.info("LIVE_CHECK note: " + text);
     }

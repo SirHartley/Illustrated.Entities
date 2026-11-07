@@ -1,5 +1,5 @@
 package livecheck;
 
 public interface Step {
-    void run(Ctx c) throws Exception;
+    void run(Ctx c) throws Throwable;
 }
