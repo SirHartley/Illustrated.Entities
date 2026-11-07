@@ -50,7 +50,7 @@ After reading this file, use the task to choose the next document. Read the rele
 - Do not deploy or synchronize after merge unless the user explicitly requests it.
 - The mod is published and players keep long saves. Anything stored in sector memory (`ImageDataMemory`, `TextDataMemory`, entity tags and memory keys) is save data: keep field names and keys stable, and say in the PR when a change affects existing saves.
 - Image files are referenced by numeric id (`graphics/illustrated_entities/images/<id>.png`). Never renumber or reuse an id; saves store it.
-- Keep all tools and automated checks under `jars/src/illustratedEntities/tools`, in the normal module. Do not add separate test source trees or duplicate platform classes. Tools may read existing constants and types; do not change runtime classes to support them.
+- Keep all tools and automated checks under `jars/src/illustratedEntities/tools`, in the normal module. Do not add separate test source trees or duplicate platform classes. Tools may read existing constants and types; do not change runtime classes to support them. The one exception is `native-smoke`, a test-only mod that needs the running game (see [ARCHITECTURE.md](docs/ARCHITECTURE.md#live-checks)).
 - Prefer listeners and existing callbacks over polling. Before adding or retaining a polling solution, verify against the exact source that no existing callback covers the requirement. Document the missing coverage and keep the scan scope and frequency to what the behavior needs.
 
 ### Validate and merge
@@ -64,6 +64,7 @@ After reading this file, use the task to choose the next document. Read the rele
 - Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
 - Use the connected GitHub app to create, inspect, and merge pull requests.
 - Fetch current remote `master` before branching and again before merging. Merge intervening changes, push the exact final commit, and verify the merged remote revision.
+- New changes and bug fixes may be committed and merged to `dev` without asking. For that work, fetch `dev` instead of `master`.
 
 ### Branch cleanup
 

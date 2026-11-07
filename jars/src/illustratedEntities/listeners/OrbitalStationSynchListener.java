@@ -8,7 +8,7 @@ import illustratedEntities.helper.ImageHandler;
 public class OrbitalStationSynchListener extends BaseCampaignEventListener {
 
     public static void register(){
-        Global.getSector().getListenerManager().addListener(new OrbitalStationSynchListener(), true);
+        Global.getSector().addTransientListener(new OrbitalStationSynchListener());
     }
 
     public OrbitalStationSynchListener() {

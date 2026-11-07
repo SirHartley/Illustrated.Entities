@@ -24,7 +24,8 @@ public class TextHandler {
         TextDataEntry e = getDataForEntity(t);
         if (e == null) return false;
 
-        t.setCustomDescriptionId(null);
+        t.setCustomDescriptionId((String) t.getMemoryWithoutUpdate().get(ModPlugin.VANILLA_DESCRIPTION));
+        t.getMemoryWithoutUpdate().unset(ModPlugin.VANILLA_DESCRIPTION);
         t.getMemoryWithoutUpdate().unset(TextDataEntry.ID_MEM_KEY);
         TextDataMemory.getInstance().remove(e.descriptionNum);
 

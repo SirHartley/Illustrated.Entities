@@ -45,6 +45,33 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 `tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. `tools/SettingsChecks.java` and `tools/ImagePickerChecks.java` run headless from the repository root against the classes `build` leaves in `out/release-build-*/classes`: `java -cp "out/release-build-<n>/classes:lib/*" illustratedEntities.tools.SettingsChecks` (same for `ImagePickerChecks`). They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
 
+### Live checks
+
+`native-smoke/live` is a test-only mod (id `live_checks`) from the `starsector-native-smoke` skill's `templates/live-check-mod`. It sits outside `jars/src`, so the build never compiles it, and `ReleaseBuild.package` never ships it. `Ui` holds the helpers the groups share.
+
+| Group | Class | Covers |
+|---|---|---|
+| `images`, `colony`, `text` | `IllustratedChecks` | presets, picker, colonies, descriptions through a reload |
+| `panels` | `PanelChecks` | selector and editor panels, buttons pressed with `setChecked` |
+| `stations` | `StationChecks` | orbital station sync, station images |
+| `editor` | `EditorChecks` | `MultilineTextField` keys sent to `processInput`, with Ctrl and Shift |
+| `clicks` | `ClickChecks` | real mouse and keyboard: it logs `LIVE_CHECK input` lines, `clicks.sh` does them with `gamectl` |
+| `settings` | `SettingChecks` | each setting through a reload. Run it last, settings stay changed |
+| `perf` | `PerfChecks` | times the same steps on any build, see below |
+| `seed` | `SeedChecks` | leaves a save for `upgrade`, run on a release zip |
+| `upgrade` | `UpgradeChecks` | loads that save, checks the changelog `Note` lines |
+
+`native-smoke/live/run.sh [groups ...]` builds the release jar, stages it, takes `C:\Modding\.smoke-lock` and starts the skill's `run-live-checks.sh`, one game per argument. Set `SMOKE_SCRIPTS` to `scripts/live` in a writable copy of the skill with `gamectl.exe` built there; the top of `run.sh` lists the other settings. Results and captures land in `<SMOKE_WORK>/runs/`. Look at each `check-*.png`, the checks cannot see what a dialog draws.
+
+Performance: every run appends its `PERF` and `PROFILE` lines to `perf.csv` in the main work folder, so report any `PROFILE WARN` and compare with the rows before it. `Timers` holds test-only PatchLib hooks on the mod's classes and on `Display.update` and `sync`; `Perf` turns them into per-call times and frame times, with the wait inside `Display` taken off, so no frame cap has to be turned off. The baseline is the last release, not `master`:
+
+```sh
+SMOKE_ZIP=<release zip> SMOKE_WORK=/c/Modding/.smoke-work/Illustrated.Entities.2.0.c bash native-smoke/live/run.sh seed
+SMOKE_WORK=/c/Modding/.smoke-work/Illustrated.Entities.upgrade SMOKE_SAVE=/c/Modding/.smoke-work/Illustrated.Entities.2.0.c bash native-smoke/live/run.sh upgrade
+```
+
+`run.sh` swaps in `native-smoke/baseline/Groups.java` for a zip, because only `seed` and `perf` compile against the 2.0.c jar. Update the classes it removes when a group changes that.
+
 ## Image data
 
 - Each row in `image_data.csv` is one image `graphics/illustrated_entities/images/<id>.png` (`ImageDataEntry.getImagePath`). The id is the save key; never renumber.
@@ -62,6 +89,7 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 | `$illustrated_entity_image` | entity tag and memory key (`ModPlugin.HAS_INTERACTION_IMAGE`) | entity has a mod image; memory value is the image id |
 | `$illustrated_entity_image_orbital` | entity tag and memory key (`ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE`) | orbital station mirrors its planet's image |
 | `$illent_vanilla_visual` | entity memory (`ModPlugin.VANILLA_VISUAL`) | vanilla illustration replaced by a mod image, restored on removal |
+| `$illent_vanilla_description` | entity memory (`ModPlugin.VANILLA_DESCRIPTION`) | vanilla description id replaced by an edited description, restored on delete |
 | `$illent_player_pick` | entity memory (`ModPlugin.PLAYER_PICK`) | image was picked in `ImageSelectorPanel`; presets skip it; cleared by `ImageDataEntry.removeFromEntity` |
 | `$illustrated_entities_data_memory` | sector memory (`ImageDataMemory.IMAGE_MEMORY`) | `ImageDataMemory` instance |
 | `$illustrated_entities_text_memory` | sector memory (`TextDataMemory.TEXT_MEMORY`) | `TextDataMemory` instance |
@@ -110,7 +138,7 @@ Use `rg --files jars/src` for the full inventory. The entries below name state a
 
 ### `listeners`
 
-Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transient listeners (`addTransientListener`) and listener manager entries registered with `true` (transient) are re-added on every load.
+Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transient listeners (`addTransientListener`) and listener manager entries registered with `true` (transient) are re-added on every load. A `BaseCampaignEventListener` needs `addTransientListener`: the listener manager only calls its own interfaces, such as `EconomyTickListener`, and would never call it.
 
 | File | Owner / connection |
 |---|---|
@@ -154,9 +182,10 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 
 ### Save data
 
-- `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`.
+- `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`. Textures outlive a save load, so `forceRefresh` sets `isLoaded` from the texture cache.
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
 - `ImageDataEntry.addToEntity` stores a vanilla illustration it replaces in `$illent_vanilla_visual`; `removeFromEntity` puts it back. Entities overwritten before this key existed have no copy and lose the vanilla illustration on removal.
+- `TextDataEntry.apply` stores a vanilla description id it replaces in `$illent_vanilla_description`; `TextHandler.deleteDescription` puts it back. Entities edited before this key existed have no copy and lose the vanilla description on delete.
 - `TextDataEntry.stringMap1/2` are save data and TASC copies them line by line. `setText` stores a description's whole text in line 1; entries from older saves keep one entry per line until the player applies an edit. `parseStringMap` reads up to the highest line key and treats a null line as empty.
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
 - LunaLib's multiline `LunaTextfield` (`LunaLib-Kotlin.jar`, unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height. `MultilineTextField` is a Java rewrite of it without those limits; do not swap it back.
