@@ -18,6 +18,7 @@ Fixed - "Add images" off now also applies to new colonies and orbital stations
 Fixed - Image button no longer shows with "Add images" off
 Fixed - "Add images" off no longer deletes vanilla illustrations under presets
 Note - Older saves need a new game to get those illustrations back
+Fixed - Orbital stations now pick up the planet image when leaving the colony
 
 Description editor
 Adjusted - Description editor uses one scrolling text box per description
@@ -29,7 +30,7 @@ Note - Descriptions edited before this update can't get the vanilla text back
 Removed - "Number of text lines" setting (replaced by scrolling text boxes)
 
 Development
-Added - Live game checks for images, colonies and descriptions (not shipped)
+Added - Live game checks for images, colonies, descriptions and performance (not shipped)
 
 2.0.c
 Adjusted - Switched out the image for Madeira
