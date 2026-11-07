@@ -36,9 +36,22 @@ public final class ClickChecks {
         steps.add(ClickChecks::enterAndBackspace);
         steps.add(c -> button(c, "confirm", () -> saved(c, "live click\nsecond lin"), "click on apply saves the typed text"));
         steps.add(ClickChecks::scrollTrack);
-        steps.add(c -> button(c, "delete", () -> !Ui.hasButton("confirm"), "click opens the delete prompt"));
-        steps.add(c -> button(c, "delete", () -> TextHandler.getDataForEntity(Ui.entity(c, "clickColony")) == null, "click on delete removes the description"));
-        steps.add(c -> c.frames(30));
+        steps.add(c -> {
+            Perf.popupPanel = null;
+            button(c, "delete", () -> Perf.popupPanel != null, "click on delete opens the popup");
+        });
+        // the popup fades in, buttons ignore clicks until it is idle
+        steps.add(c -> c.frames(60));
+        steps.add(c -> popupButton(c, false, () -> "cancel".equals(Perf.popupResult) && saved(c, "live click\nsecond lin"), "click on cancel keeps the description"));
+        steps.add(c -> c.frames(60));
+        steps.add(c -> {
+            Perf.popupPanel = null;
+            button(c, "delete", () -> Perf.popupPanel != null, "click on delete opens the popup again");
+        });
+        steps.add(c -> c.frames(60));
+        steps.add(c -> c.shot("delete-popup"));
+        steps.add(c -> popupButton(c, true, () -> TextHandler.getDataForEntity(Ui.entity(c, "clickColony")) == null, "click on the popup delete removes the description"));
+        steps.add(c -> c.frames(60));
         steps.add(c -> button(c, "return", () -> Ui.hasButton("desc"), "click on return leaves the editor"));
         steps.add(Ui::closeDialog);
         return steps;
@@ -73,7 +86,8 @@ public final class ClickChecks {
     private static void typeText(Ctx c) throws Throwable {
         MultilineTextField f = EditorChecks.field(0);
         c.input("type live click");
-        c.hold(() -> "live click".equals(f.getText()), WAIT, "real keys type into the box");
+        // letters come out in capitals while someone at the pc holds shift
+        c.hold(() -> "live click".equalsIgnoreCase(f.getText()), WAIT, "real keys type into the box");
     }
 
     private static void enterAndBackspace(Ctx c) throws Throwable {
@@ -81,7 +95,7 @@ public final class ClickChecks {
         c.input("key ENTER");
         c.input("type second line");
         c.input("key BACK");
-        c.hold(() -> "live click\nsecond lin".equals(f.getText()), WAIT, "real enter and backspace work");
+        c.hold(() -> "live click\nsecond lin".equalsIgnoreCase(f.getText()), WAIT, "real enter and backspace work");
     }
 
     private static void scrollTrack(Ctx c) throws Throwable {
@@ -107,6 +121,16 @@ public final class ClickChecks {
         c.hold(done, WAIT, check);
     }
 
+    // 0.98a-RC8 lays the popup out as: our panel 10 from the top left, 150 by 25 buttons 10 from the bottom right,
+    // cancel in the corner and confirm 10 left of it. read from the obfuscated dialog class, recheck after a game update
+    private static void popupButton(Ctx c, boolean confirm, BooleanSupplier done, String check) {
+        PositionAPI p = Perf.popupPanel.getPosition();
+        float cancelX = p.getX() + p.getWidth() - 75f;
+        float y = p.getY() - 22.5f;
+        click(c, confirm ? cancelX - 160f : cancelX, y);
+        c.hold(done, WAIT, check);
+    }
+
     private static void click(Ctx c, float x, float y) {
         float scale = Global.getSettings().getScreenScaleMult();
         c.input("click " + Math.round(x * scale) + " " + Math.round(Global.getSettings().getScreenHeightPixels() - y * scale));
@@ -114,7 +138,7 @@ public final class ClickChecks {
 
     private static boolean saved(Ctx c, String text) {
         TextDataEntry data = TextHandler.getDataForEntity(Ui.entity(c, "clickColony"));
-        return data != null && text.equals(data.getText(1));
+        return data != null && text.equalsIgnoreCase(data.getText(1));
     }
 
     private static boolean focused(MultilineTextField f) {

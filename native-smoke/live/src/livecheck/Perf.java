@@ -1,6 +1,8 @@
 package livecheck;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CustomDialogDelegate;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import illustratedEntities.memory.ImageDataEntry;
 import org.apache.log4j.Logger;
@@ -32,6 +34,14 @@ public final class Perf {
 
     // the MultilineTextField that advanced last, 2.0.c has none
     public static volatile Object field = null;
+
+    static boolean holdImageLoads = false;
+    static volatile String clipboard = "";
+
+    // DeleteDescriptionDialog as Timers saw it: the panel inside the popup, its callback and how it closed
+    static volatile CustomPanelAPI popupPanel = null;
+    static volatile CustomDialogDelegate.CustomDialogCallback popupCallback = null;
+    static volatile String popupResult = null;
 
     // captures fail with the screen off, so read what a text box drew. [inside the box, the rows around it]
     static boolean readText = false;

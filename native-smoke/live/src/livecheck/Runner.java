@@ -76,6 +76,7 @@ public class Runner implements EveryFrameScript {
             ctx.expect(met, ctx.holdId);
             ctx.hold = null;
         }
+        if (System.currentTimeMillis() < ctx.waitUntil) return;
         if (ctx.waitFrames > 0) {
             ctx.waitFrames--;
             return;

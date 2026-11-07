@@ -1,8 +1,15 @@
 package livecheck;
 
+import com.fs.starfarer.api.campaign.CustomDialogDelegate;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import patchlib.api.context.AfterContext;
 import patchlib.api.context.BeforeContext;
+import patchlib.api.context.MethodCallContext;
+import patchlib.api.patch.RedirectMethodCall;
+
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import patchlib.api.match.ClassMatch;
 import patchlib.api.match.MethodMatch;
 import patchlib.api.patch.After;
@@ -104,6 +111,41 @@ public final class Timers {
         public static void after(AfterContext context) { Perf.stop(context, "ImageSelectorPanel.showPanel"); }
     }
 
+    @Patch(target = @ClassMatch(typeName = "illustratedEntities.dialogue.impl.DeleteDescriptionDialog"))
+    public static final class DeletePopup {
+        @Before(target = @MethodMatch(methodName = "createCustomDialog"))
+        public static void open(BeforeContext context) {
+            Perf.popupPanel = (CustomPanelAPI) context.getArg(0);
+            Perf.popupCallback = (CustomDialogDelegate.CustomDialogCallback) context.getArg(1);
+            Perf.popupResult = null;
+        }
+
+        @After(target = @MethodMatch(methodName = "customDialogConfirm"))
+        public static void confirm(AfterContext context) { Perf.popupResult = "confirm"; }
+    }
+
+    // the popup inherits cancel from the api base class, so that is where it is declared
+    @Patch(target = @ClassMatch(typeName = "com.fs.starfarer.api.campaign.BaseCustomDialogDelegate"))
+    public static final class PopupCancel {
+        @After(target = @MethodMatch(methodName = "customDialogCancel"))
+        public static void cancel(AfterContext context) {
+            if (context.getSelf().getClass().getName().endsWith(".DeleteDescriptionDialog")) Perf.popupResult = "cancel";
+        }
+    }
+
+    // Perf.holdImageLoads keeps the tiles on their spinner for a capture
+    @Patch(target = @ClassMatch(typeName = "illustratedEntities.dialogue.panel.ImageListPanelPlugin"))
+    public static final class ImageLoads {
+        @Before(target = @MethodMatch(methodName = "advance"))
+        public static void before(BeforeContext context) {
+            if (Perf.holdImageLoads) context.skipOriginal(null);
+            else Perf.start(context);
+        }
+
+        @After(target = @MethodMatch(methodName = "advance"))
+        public static void after(AfterContext context) { Perf.stop(context, "ImageListPanelPlugin.advance"); }
+    }
+
     @Patch(target = @ClassMatch(typeName = "illustratedEntities.dialogue.impl.TextChangerPanel"))
     public static final class Editor {
         @Before(target = @MethodMatch(methodName = "showPanel"))
@@ -147,6 +189,27 @@ public final class Timers {
 
         @After(target = @MethodMatch(methodName = "relayout"))
         public static void layoutAfter(AfterContext context) { Perf.stop(context, "MultilineTextField.relayout"); }
+    }
+
+    // the clipboard belongs to whoever sits at the pc, so copy and paste in a run use Perf.clipboard
+    @Patch(target = @ClassMatch(typeName = "illustratedEntities.dialogue.panel.MultilineTextField"))
+    public static final class FakeClipboard {
+        @RedirectMethodCall(target = @MethodMatch(methodName = "copy"), call = @MethodMatch(methodName = "setContents"),
+                owner = @ClassMatch(typeName = "java.awt.datatransfer.Clipboard"))
+        public static void set(MethodCallContext context) {
+            try {
+                Perf.clipboard = (String) ((Transferable) context.getCallArg(0)).getTransferData(DataFlavor.stringFlavor);
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+            context.setResult(null);
+        }
+
+        @RedirectMethodCall(target = @MethodMatch(methodName = "paste"), call = @MethodMatch(methodName = "getData"),
+                owner = @ClassMatch(typeName = "java.awt.datatransfer.Clipboard"))
+        public static void get(MethodCallContext context) {
+            context.setResult(Perf.clipboard);
+        }
     }
 
     // waiting for the driver happens in here, Perf.frame takes it off the frame time

@@ -54,7 +54,7 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 | `images`, `colony`, `text` | `IllustratedChecks` | presets, picker, colonies, descriptions through a reload |
 | `panels` | `PanelChecks` | selector and editor panels, buttons pressed with `setChecked` |
 | `stations` | `StationChecks` | orbital station sync, station images |
-| `editor` | `EditorChecks` | `MultilineTextField` keys sent to `processInput`, with Ctrl and Shift |
+| `editor` | `EditorChecks` | `MultilineTextField` keys and mouse sent to `processInput`, with Ctrl and Shift. `Timers.FakeClipboard` keeps the real clipboard out of the run |
 | `clicks` | `ClickChecks` | real mouse and keyboard: it logs `LIVE_CHECK input` lines, `clicks.sh` does them with `gamectl` |
 | `settings` | `SettingChecks` | each setting through a reload. Run it last, settings stay changed |
 | `visual` | `VisualChecks` | market image against vanilla's image visual pixel by pixel (`Grab` reads the frame, see below), what stays shown after each return, founding a colony with the core UI open |
@@ -158,10 +158,11 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 | `dialogue/rules/ShowDefaultVisualWithSelector.java` | Rule command; shows the image with the change button or falls back to vanilla `ShowDefaultVisual` behavior |
 | `dialogue/impl/ImageDisplayPanel.java` | Current image with change and "desc." buttons |
 | `dialogue/panel/ImageVisualPlugin.java` | Draws an `InteractionDialogImageVisual` the way `VisualPanelAPI.showImageVisual` does, with its border: a 25 px additive glow from the `planets` `atmosphere` texture in the `buttonText` colour at 35% alpha |
-| `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
+| `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply. Preview and apply load their image first |
+| `dialogue/panel/ImageListPanelPlugin.java`, `ImageTilePlugin.java` | Selector images: a tile draws a black square with a spinner until its image loads. The list's plugin loads 2 tiles per frame, only tiles inside the list: the scroller renders every row and only clips them |
 | `dialogue/impl/TextChangerPanel.java` | Description editor: one `MultilineTextField` per description, filled from `TextDataEntry.getText` or the vanilla `text1`/`text3`; Apply writes `TextDataEntry.setText` |
-| `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
-| `dialogue/panel/MultilineTextField.java` | Multiline text box (`CustomUIPanelPlugin`): own word wrap and rendering with LazyLib `LazyFont`, cursor, new lines, scroll bar, `MAX_CHARS` cap; fields sharing a focus group unfocus each other |
+| `dialogue/impl/DeleteDescriptionDialog.java` | Delete confirmation popup for edited descriptions (`InteractionDialogAPI.showCustomDialog`) |
+| `dialogue/panel/MultilineTextField.java` | Multiline text box (`CustomUIPanelPlugin`): own word wrap and rendering with LazyLib `LazyFont`, cursor and selection anchor, every edit through `replace`, copy, cut, paste, undo grouped by word, scroll bar, `MAX_CHARS` cap; fields sharing a focus group unfocus each other. Hit tests the mouse itself, `containsEvent` casts to the engine event type |
 | `dialogue/panel/*` | Custom panel plumbing adapted from Histidine's code: `VisualCustomPanel` holds the static panel, tooltip and plugin |
 
 ### `dev`
