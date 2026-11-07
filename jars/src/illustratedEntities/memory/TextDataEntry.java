@@ -4,6 +4,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.loading.Description;
 import illustratedEntities.helper.TextHandler;
+import illustratedEntities.plugins.ModPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +58,9 @@ public class TextDataEntry {
     public void apply(){
         SectorEntityToken t = Global.getSector().getEntityById(entityID);
         if (t != null) {
+            String current = t.getCustomDescriptionId();
+            if (current != null && !current.startsWith(DEFAULT_PREFIX)) t.getMemoryWithoutUpdate().set(ModPlugin.VANILLA_DESCRIPTION, current);
+
             t.getMemoryWithoutUpdate().set(ID_MEM_KEY, descriptionNum);
             getDescription().setText1(parseStringMap(stringMap1));
             getDescription().setText3(parseStringMap(stringMap2));

@@ -24,6 +24,8 @@ Adjusted - Description editor uses one scrolling text box per description
 Note - Each description holds up to 5000 characters, Enter starts a new line
 Fixed - Edited descriptions cut off after lowering "Number of text lines"
 Fixed - Rare crash when TASC upgrades a station with an edited description
+Fixed - Deleting an edited description now brings back the vanilla description
+Note - Descriptions edited before this update can't get the vanilla text back
 Removed - "Number of text lines" setting (replaced by scrolling text boxes)
 
 Development

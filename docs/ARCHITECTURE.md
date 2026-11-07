@@ -68,6 +68,7 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 | `$illustrated_entity_image` | entity tag and memory key (`ModPlugin.HAS_INTERACTION_IMAGE`) | entity has a mod image; memory value is the image id |
 | `$illustrated_entity_image_orbital` | entity tag and memory key (`ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE`) | orbital station mirrors its planet's image |
 | `$illent_vanilla_visual` | entity memory (`ModPlugin.VANILLA_VISUAL`) | vanilla illustration replaced by a mod image, restored on removal |
+| `$illent_vanilla_description` | entity memory (`ModPlugin.VANILLA_DESCRIPTION`) | vanilla description id replaced by an edited description, restored on delete |
 | `$illent_player_pick` | entity memory (`ModPlugin.PLAYER_PICK`) | image was picked in `ImageSelectorPanel`; presets skip it; cleared by `ImageDataEntry.removeFromEntity` |
 | `$illustrated_entities_data_memory` | sector memory (`ImageDataMemory.IMAGE_MEMORY`) | `ImageDataMemory` instance |
 | `$illustrated_entities_text_memory` | sector memory (`TextDataMemory.TEXT_MEMORY`) | `TextDataMemory` instance |
@@ -163,6 +164,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 - `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`.
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
 - `ImageDataEntry.addToEntity` stores a vanilla illustration it replaces in `$illent_vanilla_visual`; `removeFromEntity` puts it back. Entities overwritten before this key existed have no copy and lose the vanilla illustration on removal.
+- `TextDataEntry.apply` stores a vanilla description id it replaces in `$illent_vanilla_description`; `TextHandler.deleteDescription` puts it back. Entities edited before this key existed have no copy and lose the vanilla description on delete.
 - `TextDataEntry.stringMap1/2` are save data and TASC copies them line by line. `setText` stores a description's whole text in line 1; entries from older saves keep one entry per line until the player applies an edit. `parseStringMap` reads up to the highest line key and treats a null line as empty.
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
 - LunaLib's multiline `LunaTextfield` (`LunaLib-Kotlin.jar`, unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height. `MultilineTextField` is a Java rewrite of it without those limits; do not swap it back.
