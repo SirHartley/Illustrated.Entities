@@ -8,6 +8,7 @@ Added - Setting for presets to replace vanilla illustrations (default off)
 Note - Saves that already ran the mod keep the preset image on those planets
 Adjusted - Random images now favour images that match the planet's features
 Adjusted - Image selector lists the best matching images first
+Adjusted - Image selector shows a loading animation until an image is loaded
 Fixed - Planets now get a random image when no unused exact match exists
 Fixed - Images with a required station tag now show up on stations
 Fixed - Four images never showing up (tag typos)
@@ -20,6 +21,7 @@ Fixed - "Add images" off no longer deletes vanilla illustrations under presets
 Note - Older saves need a new game to get those illustrations back
 Fixed - Orbital stations now pick up the planet image when leaving the colony
 Fixed - Images from the selector no longer stay in memory after loading a save
+Fixed - Image selector no longer freezes the game while it loads images
 
 Description editor
 Adjusted - Description editor uses one scrolling text box per description

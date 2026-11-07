@@ -156,7 +156,8 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 |---|---|
 | `dialogue/rules/ShowDefaultVisualWithSelector.java` | Rule command; shows the image with the change button or falls back to vanilla `ShowDefaultVisual` behavior |
 | `dialogue/impl/ImageDisplayPanel.java` | Current image with change and "desc." buttons |
-| `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
+| `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply. Preview and apply load their image first |
+| `dialogue/panel/ImageListPanelPlugin.java`, `ImageTilePlugin.java` | Selector images: a tile draws a black square with a spinner until its image loads. The list's plugin loads 2 tiles per frame, only tiles inside the list: the scroller renders every row and only clips them |
 | `dialogue/impl/TextChangerPanel.java` | Description editor: one `MultilineTextField` per description, filled from `TextDataEntry.getText` or the vanilla `text1`/`text3`; Apply writes `TextDataEntry.setText` |
 | `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
 | `dialogue/panel/MultilineTextField.java` | Multiline text box (`CustomUIPanelPlugin`): own word wrap and rendering with LazyLib `LazyFont`, cursor, new lines, scroll bar, `MAX_CHARS` cap; fields sharing a focus group unfocus each other |
