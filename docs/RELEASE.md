@@ -44,6 +44,7 @@ java jars/src/illustratedEntities/tools/ReleaseBuild.java package 2.0.d    # rel
 - Ships Git-tracked files only: `mod_info.json`, `IllustratedEntities.version`, `Changelog`, `IllustratedEntities_icon.png`, licence and credit files, `data/` (`csv json shader ship wpn proj system variant skin`), `graphics/` (`png jpg jpeg`), `sounds/` (`ogg wav`) and the release jar as `jars/src.jar`. Source, docs, IDE, agent and workflow files, and any path under a dot, `unused`, `unedited`, `tools` or `docs` directory are left out.
 - Fails if a `graphics/illustrated_entities/` path named in `data/` is not packaged.
 - Output in `out/release/`: `Illustrated.Entities<version>.zip` (one `Illustrated.Entities/` folder, sorted, fixed timestamps), `release-notes.md`, the stamped version file and `version.txt`.
+- The ZIP name has no dash on purpose: every published release asset and the version file's `directDownloadURL` use `Illustrated.Entities<version>.zip`.
 
 ## Publish
 
