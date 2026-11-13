@@ -84,6 +84,7 @@ Update documents automatically as part of each relevant change. Before committin
 | `CLAUDE.md` | Task scope, workflow, commits, PRs, build gate, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
 | `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle, save data and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No release history or duplicate policy. |
 | `docs/RELEASE.md` | Version numbers, release builder, package contents and publishing | Keep the workflow and builder aligned. |
+| `.claude/agents/researcher.md` | Read-only research subagent definition | Keep its steps in line with the subagent dispatch template and the required-reading routes. |
 | `lib/` | Read-only compile jars (game, LazyLib, LunaLib, Kotlin runtime) | Replace only for a game or library update, as described in `docs/RELEASE.md`. |
 | `Changelog` and `docs/CHANGELOG.md` | Shipped change notes and how agents write them | Add or amend unreleased entries with each implementation task; preserve published entries. |
 
@@ -120,7 +121,7 @@ Write documentation in ordinary English. Use direct verbs and concrete nouns; re
 
 ## Agent behavior
 
-- Keep the user's selected model. The main agent owns planning, merging and shipped code. Delegate bounded research only when authorized.
+- Keep the user's selected model. The main agent owns planning, merging and shipped code. Delegate bounded research only when authorized, to the read-only `researcher` agent (`.claude/agents/researcher.md`).
 - Treat repository instructions as project requirements and skill guidance as scoped reference material. If a skill blocks work or changes its scope, identify the exact instruction and explain the effect.
 - Give brief progress updates and concise final results. Put detailed evidence in the pull request.
 
