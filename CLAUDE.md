@@ -62,6 +62,7 @@ After reading this file, use the task to choose the next document. Read the rele
 - A change to `data/config/LunaSettings.csv` or `helper/Setting` must pass `tools/SettingsChecks`. A change to `image_data.csv`, `ImagePicker`, `ImageTags` or `loading/Importer` must pass `tools/ImagePickerChecks`. Commands are in [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - No CI runs on pushes or pull requests. The release workflow runs only when started by hand on request; do not add triggers or check workflows.
 - Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
+- PR titles follow the commit message rules. PR bodies use the house-style `PR_BODY.md` template: `## Changes` ending with a `Changelog:` line (or `no changelog entry: <reason>`), then `## Validation`. No attribution marker, "Requested by" line or generated-by footer.
 - Use the connected GitHub app to create, inspect, and merge pull requests.
 - Fetch current remote `master` before branching and again before merging. Merge intervening changes, push the exact final commit, and verify the merged remote revision.
 - New changes and bug fixes may be committed and merged to `dev` without asking. For that work, fetch `dev` instead of `master`.
