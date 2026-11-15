@@ -15,8 +15,10 @@ import patchlib.api.match.MethodMatch;
 import patchlib.api.patch.After;
 import patchlib.api.patch.Before;
 import patchlib.api.patch.Patch;
+import patchlib.api.query.FieldQuery;
+import patchlib.api.spec.FieldQuerySpec;
 
-// test only, PatchLib 1.0.3. typeName targets so the same jar runs on 2.0.c, a class it lacks just never installs
+// test only, PatchLib 1.1.1. typeName targets so the same jar runs on 2.0.c, a class it lacks just never installs
 public final class Timers {
     private Timers() {
     }
@@ -166,6 +168,8 @@ public final class Timers {
 
     @Patch(target = @ClassMatch(typeName = "illustratedEntities.dialogue.panel.MultilineTextField"))
     public static final class Field {
+        private static final FieldQuerySpec POSITION = FieldQuery.create().fieldName("position").build();
+
         @Before(target = @MethodMatch(methodName = "advance"))
         public static void advance(BeforeContext context) { Perf.field = context.getSelf(); }
 
@@ -175,7 +179,7 @@ public final class Timers {
         @After(target = @MethodMatch(methodName = "render"))
         public static void renderAfter(AfterContext context) {
             Perf.stop(context, "MultilineTextField.render");
-            if (Perf.readText) Perf.readText(context.getSelf(), context.<PositionAPI>getField("position").get());
+            if (Perf.readText) Perf.readText(context.getSelf(), context.<PositionAPI>getField(POSITION).get());
         }
 
         @Before(target = @MethodMatch(methodName = "processInput"))
