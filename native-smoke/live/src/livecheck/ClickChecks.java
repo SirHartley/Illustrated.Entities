@@ -121,7 +121,7 @@ public final class ClickChecks {
         c.hold(done, WAIT, check);
     }
 
-    // 0.98a-RC8 lays the popup out as: our panel 10 from the top left, 150 by 25 buttons 10 from the bottom right,
+    // 0.98a-RC8 and 0.98.5a-RC6 lay the popup out as: our panel 10 from the top left, 150 by 25 buttons 10 from the bottom right,
     // cancel in the corner and confirm 10 left of it. read from the obfuscated dialog class, recheck after a game update
     private static void popupButton(Ctx c, boolean confirm, BooleanSupplier done, String check) {
         PositionAPI p = Perf.popupPanel.getPosition();
