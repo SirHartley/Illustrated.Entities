@@ -43,5 +43,8 @@ public class ImageDataMemory {
     public void forceRefresh(){
         dataMap = new HashMap<>();
         loadInitialData();
+
+        // textures outlive a save load and isLoaded does not, without this unload() skips them for good
+        for (ImageDataEntry entry : dataMap.values()) entry.isLoaded = Global.getSettings().getSprite(entry.getImagePath()).getTexWidth() > 0;
     }
 }

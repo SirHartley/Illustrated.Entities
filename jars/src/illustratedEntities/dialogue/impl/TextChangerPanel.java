@@ -119,7 +119,7 @@ public class TextChangerPanel {
         entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
             @Override
             public void onToggle() {
-                new ConfirmDialoguePanel().showPanel(dialogue);
+                new DeleteDescriptionDialog(dialogue).show();
             }
         };
 

@@ -15,8 +15,11 @@ import org.lwjgl.opengl.GL11;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.nio.IntBuffer;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,9 @@ public class MultilineTextField implements CustomUIPanelPlugin {
     private static final float MIN_THUMB_HEIGHT = 16f;
     private static final float BLINK_TIME = 0.5f;
     private static final int WHEEL_LINES = 3;
+    private static final float DRAG_SCROLL_LINES = 12f;
+    private static final float LINE_BREAK_WIDTH = 4f;
+    private static final int UNDO_LIMIT = 100;
     private static final IntBuffer SCISSOR_BOX = BufferUtils.createIntBuffer(16);
 
     private final LazyFont font;
@@ -45,15 +51,27 @@ public class MultilineTextField implements CustomUIPanelPlugin {
 
     private PositionAPI position;
     private int cursor;
+    private int anchor;
     private float preferredX = -1f;
     private float scroll;
     private boolean focused;
+    private float blink;
+
     private boolean draggingThumb;
     private float dragOffset;
-    private float blink;
+    private boolean draggingText;
+    private float mouseX;
+    private float mouseY;
+
+    private final Deque<Snapshot> undo = new ArrayDeque<>();
+    private final Deque<Snapshot> redo = new ArrayDeque<>();
+    private boolean wordOpen;
 
     private Color textColor;
     private float textAlpha = -1f;
+
+    private record Snapshot(String text, int cursor, int anchor) {
+    }
 
     public MultilineTextField(String text, List<MultilineTextField> focusGroup) {
         font = loadFont();
@@ -63,6 +81,7 @@ public class MultilineTextField implements CustomUIPanelPlugin {
         focusGroup.add(this);
         if (text != null) this.text.append(normalize(text));
         cursor = this.text.length();
+        anchor = cursor;
     }
 
     private static LazyFont loadFont() {
@@ -85,6 +104,7 @@ public class MultilineTextField implements CustomUIPanelPlugin {
     @Override
     public void advance(float amount) {
         blink = (blink + amount) % (2f * BLINK_TIME);
+        if (draggingText && position != null) dragScroll(amount);
     }
 
     @Override
@@ -98,15 +118,21 @@ public class MultilineTextField implements CustomUIPanelPlugin {
             if (draggingThumb && event.isMouseMoveEvent()) {
                 dragThumb(event.getY());
                 event.consume();
-            } else if (draggingThumb && event.isLMBUpEvent()) {
+            } else if (draggingText && event.isMouseMoveEvent()) {
+                mouseX = event.getX();
+                mouseY = event.getY();
+                select(mouseX, mouseY);
+                event.consume();
+            } else if ((draggingThumb || draggingText) && event.isLMBUpEvent()) {
                 draggingThumb = false;
+                draggingText = false;
                 event.consume();
             } else if (event.isLMBDownEvent()) {
-                if (position.containsEvent(event)) {
-                    click(event.getX(), event.getY());
+                if (contains(event)) {
+                    click(event);
                     event.consume();
                 } else focused = false;
-            } else if (event.isMouseScrollEvent() && position.containsEvent(event)) {
+            } else if (event.isMouseScrollEvent() && contains(event)) {
                 scroll -= Math.signum(event.getEventValue()) * WHEEL_LINES * lineHeight;
                 clampScroll();
                 event.consume();
@@ -118,8 +144,16 @@ public class MultilineTextField implements CustomUIPanelPlugin {
         }
     }
 
-    private void click(float x, float y) {
+    // own hit test, containsEvent casts the event to the engine's internal type
+    private boolean contains(InputEventAPI event) {
+        float x = event.getX(), y = event.getY();
+        return x >= position.getX() && x <= position.getX() + position.getWidth()
+                && y >= position.getY() && y <= position.getY() + position.getHeight();
+    }
+
+    private void click(InputEventAPI event) {
         focus();
+        float x = event.getX(), y = event.getY();
 
         if (maxScroll() > 0f && x >= barX() - BAR_GAP / 2f) {
             float top = thumbTop();
@@ -133,9 +167,19 @@ public class MultilineTextField implements CustomUIPanelPlugin {
             return;
         }
 
-        int line = (int) Math.floor((textTop() - y + scroll) / lineHeight);
-        line = Math.max(0, Math.min(lines.size() - 1, line));
-        moveTo(indexAt(line, x - textLeft()));
+        int index = indexAt(x, y);
+        if (event.isShiftDown()) {
+            moveTo(index, true);
+        } else if (event.isDoubleClick()) {
+            anchor = wordStart(index);
+            cursor = wordEnd(index);
+            preferredX = -1f;
+        } else {
+            moveTo(index, false);
+            draggingText = true;
+            mouseX = x;
+            mouseY = y;
+        }
     }
 
     private void focus() {
@@ -153,37 +197,99 @@ public class MultilineTextField implements CustomUIPanelPlugin {
         clampScroll();
     }
 
+    // the mouse rests outside the box while the text scrolls, so this runs per frame and not per mouse event
+    private void dragScroll(float amount) {
+        float step = DRAG_SCROLL_LINES * lineHeight * amount;
+        if (mouseY > textTop()) scroll -= step;
+        else if (mouseY < textTop() - viewHeight()) scroll += step;
+        else return;
+        clampScroll();
+        select(mouseX, mouseY);
+    }
+
+    private void select(float x, float y) {
+        cursor = indexAt(x, y);
+        preferredX = -1f;
+        blink = 0f;
+        wordOpen = false;
+    }
+
     private void handleKey(InputEventAPI event) {
         int key = event.getEventValue();
-        boolean ctrl = event.isCtrlDown();
+        boolean shift = event.isShiftDown();
+        // altgr reports ctrl and alt, so only plain ctrl counts as a shortcut
+        boolean ctrl = event.isCtrlDown() && !event.isAltDown();
 
         switch (key) {
-            case Keyboard.KEY_ESCAPE -> focused = false;
+            case Keyboard.KEY_ESCAPE -> {
+                focused = false;
+                anchor = cursor;
+            }
             case Keyboard.KEY_TAB -> {
             }
             case Keyboard.KEY_RETURN, Keyboard.KEY_NUMPADENTER -> insert("\n");
             case Keyboard.KEY_BACK -> {
-                if (event.isShiftDown()) delete(0, text.length());
-                else if (ctrl) delete(wordLeft(cursor), cursor);
-                else delete(cursor - 1, cursor);
+                if (hasSelection()) replace(selectionStart(), selectionEnd(), "", false);
+                else replace(ctrl ? wordLeft(cursor) : cursor - 1, cursor, "", false);
             }
-            case Keyboard.KEY_DELETE -> delete(cursor, ctrl ? wordRight(cursor) : cursor + 1);
-            case Keyboard.KEY_LEFT -> moveTo(ctrl ? wordLeft(cursor) : Math.max(0, cursor - 1));
-            case Keyboard.KEY_RIGHT -> moveTo(ctrl ? wordRight(cursor) : Math.min(text.length(), cursor + 1));
-            case Keyboard.KEY_UP -> moveLines(-1);
-            case Keyboard.KEY_DOWN -> moveLines(1);
-            case Keyboard.KEY_PRIOR -> moveLines(-visibleLines());
-            case Keyboard.KEY_NEXT -> moveLines(visibleLines());
-            case Keyboard.KEY_HOME -> moveTo(ctrl ? 0 : lines.get(lineOf(cursor))[0]);
-            case Keyboard.KEY_END -> moveTo(ctrl ? text.length() : lastPos(lineOf(cursor)));
+            case Keyboard.KEY_DELETE -> {
+                if (hasSelection()) replace(selectionStart(), selectionEnd(), "", false);
+                else replace(cursor, ctrl ? wordRight(cursor) : cursor + 1, "", false);
+            }
+            case Keyboard.KEY_LEFT -> {
+                if (hasSelection() && !shift && !ctrl) moveTo(selectionStart(), false);
+                else moveTo(ctrl ? wordLeft(cursor) : Math.max(0, cursor - 1), shift);
+            }
+            case Keyboard.KEY_RIGHT -> {
+                if (hasSelection() && !shift && !ctrl) moveTo(selectionEnd(), false);
+                else moveTo(ctrl ? wordRight(cursor) : Math.min(text.length(), cursor + 1), shift);
+            }
+            case Keyboard.KEY_UP -> moveLines(-1, shift);
+            case Keyboard.KEY_DOWN -> moveLines(1, shift);
+            case Keyboard.KEY_PRIOR -> moveLines(-visibleLines(), shift);
+            case Keyboard.KEY_NEXT -> moveLines(visibleLines(), shift);
+            case Keyboard.KEY_HOME -> moveTo(ctrl ? 0 : lines.get(lineOf(cursor))[0], shift);
+            case Keyboard.KEY_END -> moveTo(ctrl ? text.length() : lastPos(lineOf(cursor)), shift);
             default -> {
-                // altgr reports ctrl and alt, so only plain ctrl counts as a shortcut
-                if (key == Keyboard.KEY_V && ctrl && !event.isAltDown()) paste();
+                if (ctrl) shortcut(key, shift);
                 else if (event.getEventChar() != 0) {
                     String typed = clean(String.valueOf(event.getEventChar()));
-                    if (!typed.isEmpty()) insert(typed);
+                    if (!typed.isEmpty()) replace(selectionStart(), selectionEnd(), typed, !Character.isWhitespace(typed.charAt(0)));
                 }
             }
+        }
+    }
+
+    private void shortcut(int key, boolean shift) {
+        switch (key) {
+            case Keyboard.KEY_A -> {
+                anchor = 0;
+                cursor = text.length();
+                preferredX = -1f;
+            }
+            case Keyboard.KEY_C -> copy();
+            case Keyboard.KEY_X -> {
+                if (copy()) replace(selectionStart(), selectionEnd(), "", false);
+            }
+            case Keyboard.KEY_V -> paste();
+            case Keyboard.KEY_Z -> {
+                if (shift) restore(redo, undo);
+                else restore(undo, redo);
+            }
+            case Keyboard.KEY_Y -> restore(redo, undo);
+            default -> {
+            }
+        }
+    }
+
+    private boolean copy() {
+        if (!hasSelection()) return false;
+        try {
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text.substring(selectionStart(), selectionEnd())), null);
+            return true;
+        } catch (Exception ex) {
+            buzz();
+            return false;
         }
     }
 
@@ -197,26 +303,50 @@ public class MultilineTextField implements CustomUIPanelPlugin {
     }
 
     private void insert(String s) {
-        int room = MAX_CHARS - text.length();
-        if (s.isEmpty() || room <= 0) {
+        replace(selectionStart(), selectionEnd(), s, false);
+    }
+
+    // every edit comes through here. typing a word only remembers its first letter for undo
+    private void replace(int from, int to, String s, boolean wordChar) {
+        from = Math.max(0, from);
+        to = Math.min(text.length(), to);
+        int room = MAX_CHARS - text.length() + Math.max(0, to - from);
+        if (s.length() > room) s = s.substring(0, Math.max(0, room));
+        if (from >= to && s.isEmpty()) {
             buzz();
             return;
         }
-        if (s.length() > room) s = s.substring(0, room);
-        text.insert(cursor, s);
-        cursor += s.length();
+
+        if (!(wordChar && wordOpen && from == to && from == cursor)) remember();
+        text.replace(from, to, s);
+        cursor = from + s.length();
+        anchor = cursor;
+        wordOpen = wordChar;
         edited();
     }
 
-    private void delete(int from, int to) {
-        from = Math.max(0, from);
-        to = Math.min(text.length(), to);
-        if (from >= to) {
+    private void remember() {
+        undo.push(snapshot());
+        while (undo.size() > UNDO_LIMIT) undo.removeLast();
+        redo.clear();
+    }
+
+    private Snapshot snapshot() {
+        return new Snapshot(text.toString(), cursor, anchor);
+    }
+
+    private void restore(Deque<Snapshot> from, Deque<Snapshot> to) {
+        if (from.isEmpty()) {
             buzz();
             return;
         }
-        text.delete(from, to);
-        cursor = from;
+        to.push(snapshot());
+        Snapshot state = from.pop();
+        text.setLength(0);
+        text.append(state.text());
+        cursor = state.cursor();
+        anchor = state.anchor();
+        wordOpen = false;
         edited();
     }
 
@@ -228,22 +358,38 @@ public class MultilineTextField implements CustomUIPanelPlugin {
         Global.getSoundPlayer().playUISound("ui_typer_type", 1f, 1f);
     }
 
-    private void moveTo(int index) {
+    private void moveTo(int index, boolean extend) {
         cursor = index;
+        if (!extend) anchor = index;
         preferredX = -1f;
         blink = 0f;
+        wordOpen = false;
         showCursor();
     }
 
-    private void moveLines(int delta) {
+    private void moveLines(int delta, boolean extend) {
         int line = lineOf(cursor);
         if (preferredX < 0f) preferredX = width(lines.get(line)[0], cursor);
         int target = line + delta;
         if (target < 0) cursor = 0;
         else if (target >= lines.size()) cursor = text.length();
         else cursor = indexAt(target, preferredX);
+        if (!extend) anchor = cursor;
         blink = 0f;
+        wordOpen = false;
         showCursor();
+    }
+
+    private boolean hasSelection() {
+        return anchor != cursor;
+    }
+
+    private int selectionStart() {
+        return Math.min(anchor, cursor);
+    }
+
+    private int selectionEnd() {
+        return Math.max(anchor, cursor);
     }
 
     private void showCursor() {
@@ -266,10 +412,21 @@ public class MultilineTextField implements CustomUIPanelPlugin {
         return index;
     }
 
+    private int wordStart(int index) {
+        while (index > 0 && !Character.isWhitespace(text.charAt(index - 1))) index--;
+        return index;
+    }
+
+    private int wordEnd(int index) {
+        int length = text.length();
+        while (index < length && !Character.isWhitespace(text.charAt(index))) index++;
+        return index;
+    }
+
     private static String normalize(String s) {
         return s.replace("\r\n", "\n").replace('\r', '\n').replace('\t', ' ')
-                .replace('\u2018', '\'').replace('\u2019', '\'').replace('\u201C', '"').replace('\u201D', '"')
-                .replace('\u2013', '-').replace('\u2014', '-').replace("\u2026", "...");
+                .replace('‘', '\'').replace('’', '\'').replace('“', '"').replace('”', '"')
+                .replace('–', '-').replace('—', '-').replace("…", "...");
     }
 
     private String clean(String s) {
@@ -360,6 +517,11 @@ public class MultilineTextField implements CustomUIPanelPlugin {
         return wrapped ? end - 1 : end;
     }
 
+    private int indexAt(float x, float y) {
+        int line = (int) Math.floor((textTop() - y + scroll) / lineHeight);
+        return indexAt(Math.max(0, Math.min(lines.size() - 1, line)), x - textLeft());
+    }
+
     private int indexAt(int line, float x) {
         int start = lines.get(line)[0];
         int last = lastPos(line);
@@ -437,9 +599,14 @@ public class MultilineTextField implements CustomUIPanelPlugin {
 
         boolean parentClip = pushScissor(x, y + PAD, w, viewHeight());
 
-        Color color = textColor(alphaMult);
         int first = Math.max(0, (int) (scroll / lineHeight));
         int last = Math.min(lines.size() - 1, (int) ((scroll + viewHeight()) / lineHeight));
+        if (focused && hasSelection()) {
+            Color highlight = withAlpha(Misc.getBasePlayerColor(), 0.35f);
+            for (int i = first; i <= last; i++) drawSelection(i, highlight, alphaMult);
+        }
+
+        Color color = textColor(alphaMult);
         for (int i = first; i <= last; i++) {
             LazyFont.DrawableString line = drawn(i);
             line.setBaseColor(color);
@@ -459,6 +626,21 @@ public class MultilineTextField implements CustomUIPanelPlugin {
             drawQuad(barX(), y + PAD, BAR_WIDTH, viewHeight(), Misc.getDarkPlayerColor(), alphaMult);
             drawQuad(barX(), thumbTop() - thumbHeight(), BAR_WIDTH, thumbHeight(), Misc.getBasePlayerColor(), alphaMult);
         }
+    }
+
+    // a selection that runs on past the line end gets a little extra width, so selected line breaks show
+    private void drawSelection(int line, Color highlight, float alphaMult) {
+        int start = lines.get(line)[0];
+        int end = lines.get(line)[1];
+        int from = Math.max(start, selectionStart());
+        int to = Math.min(end, selectionEnd());
+        boolean pastEnd = selectionEnd() > end;
+        if (from > to || (from == to && !pastEnd)) return;
+
+        float left = textLeft() + width(start, from);
+        float right = textLeft() + width(start, to) + (pastEnd ? LINE_BREAK_WIDTH : 0f);
+        float top = textTop() + scroll - line * lineHeight;
+        drawQuad(left, top - lineHeight, right - left, lineHeight, highlight, alphaMult);
     }
 
     // vanilla scroll panels clip with their own scissor, so intersect with it and put it back after

@@ -1,6 +1,6 @@
 # Architecture
 
-Technical routing for the current implementation, checked against game `0.98a`. Code paths below are relative to `jars/src/illustratedEntities/`; data paths are repository-relative. Search the named owner before adding another implementation.
+Technical routing for the current implementation, checked against game `0.98.5a-RC6`. Code paths below are relative to `jars/src/illustratedEntities/`; data paths are repository-relative. Search the named owner before adding another implementation.
 
 | Reference | Scope |
 |---|---|
@@ -45,6 +45,34 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 
 `tools/ReleaseBuild.java` (`build`, `package`) and `tools/ReleaseBuildChecks.java` compile against `lib/` and never ship in the release jar. `tools/SettingsChecks.java` and `tools/ImagePickerChecks.java` run headless from the repository root against the classes `build` leaves in `out/release-build-*/classes`: `java -cp "out/release-build-<n>/classes:lib/*" illustratedEntities.tools.SettingsChecks` (same for `ImagePickerChecks`). They, `lib/` and `.github/workflows/release.yml` are owned by [RELEASE.md](RELEASE.md).
 
+### Live checks
+
+`native-smoke/live` is a test-only mod (id `live_checks`) from the `starsector-native-smoke` skill's `templates/live-check-mod`. It sits outside `jars/src`, so the build never compiles it, and `ReleaseBuild.package` never ships it. `Ui` holds the helpers the groups share.
+
+| Group | Class | Covers |
+|---|---|---|
+| `images`, `colony`, `text` | `IllustratedChecks` | presets, picker, colonies, descriptions through a reload |
+| `panels` | `PanelChecks` | selector and editor panels, buttons pressed with `setChecked` |
+| `stations` | `StationChecks` | orbital station sync, station images |
+| `editor` | `EditorChecks` | `MultilineTextField` keys and mouse sent to `processInput`, with Ctrl and Shift. `Timers.FakeClipboard` keeps the real clipboard out of the run |
+| `clicks` | `ClickChecks` | real mouse and keyboard: it logs `LIVE_CHECK input` lines, `clicks.sh` does them with `gamectl` |
+| `settings` | `SettingChecks` | each setting through a reload. Run it last, settings stay changed |
+| `visual` | `VisualChecks` | market image against vanilla's image visual pixel by pixel (`Grab` reads the frame, see below), what stays shown after each return, founding a colony with the core UI open |
+| `perf` | `PerfChecks` | times the same steps on any build, see below |
+| `seed` | `SeedChecks` | leaves a save for `upgrade`, run on a release zip |
+| `upgrade` | `UpgradeChecks` | loads that save, checks the changelog `Note` lines |
+
+`native-smoke/live/run.sh [groups ...]` builds the release jar, then for each argument takes a slot from the skill's `smoke-slot.sh` (`perf` takes the machine alone, the rest share it), stages the jar in `<SMOKE_WORK>/slotN` and starts the skill's `run-live-checks.sh`. Set `SMOKE_SCRIPTS` to `scripts/live` in a writable copy of the whole skill with `gamectl.exe` built there; the top of `run.sh` lists the other settings. Results and captures land in `<SMOKE_WORK>/slotN/runs/`. Look at each `check-*.png`, the checks cannot see what a dialog draws. `Grab` reads screen regions from the back buffer instead, which works with the screen off, and writes them as `live_check_grab_*` text files to `<SMOKE_WORK>/slotN/run/saves/common`.
+
+Performance: every run appends its `PERF` and `PROFILE` lines to `perf.csv` in the main work folder, so report any `PROFILE WARN` and compare with the rows before it. `Timers` holds test-only PatchLib hooks on the mod's classes and on `Display.update` and `sync`; `Perf` turns them into per-call times and frame times, with the wait inside `Display` taken off, so no frame cap has to be turned off. The baseline is the last release, not `master`:
+
+```sh
+SMOKE_ZIP=<release zip> SMOKE_WORK=/c/Modding/.smoke-work/Illustrated.Entities.2.0.c bash native-smoke/live/run.sh seed
+SMOKE_WORK=/c/Modding/.smoke-work/Illustrated.Entities.upgrade SMOKE_SAVE=/c/Modding/.smoke-work/Illustrated.Entities.2.0.c bash native-smoke/live/run.sh upgrade
+```
+
+`run.sh` swaps in `native-smoke/baseline/Groups.java` for a zip, because only `seed` and `perf` compile against the 2.0.c jar. Update the classes it removes when a group changes that.
+
 ## Image data
 
 - Each row in `image_data.csv` is one image `graphics/illustrated_entities/images/<id>.png` (`ImageDataEntry.getImagePath`). The id is the save key; never renumber.
@@ -62,6 +90,7 @@ Load order in `ModPlugin.onGameLoad`: register listeners (`DecivImageRemover -> 
 | `$illustrated_entity_image` | entity tag and memory key (`ModPlugin.HAS_INTERACTION_IMAGE`) | entity has a mod image; memory value is the image id |
 | `$illustrated_entity_image_orbital` | entity tag and memory key (`ModPlugin.ORBITAL_HAS_INTERACTION_IMAGE`) | orbital station mirrors its planet's image |
 | `$illent_vanilla_visual` | entity memory (`ModPlugin.VANILLA_VISUAL`) | vanilla illustration replaced by a mod image, restored on removal |
+| `$illent_vanilla_description` | entity memory (`ModPlugin.VANILLA_DESCRIPTION`) | vanilla description id replaced by an edited description, restored on delete |
 | `$illent_player_pick` | entity memory (`ModPlugin.PLAYER_PICK`) | image was picked in `ImageSelectorPanel`; presets skip it; cleared by `ImageDataEntry.removeFromEntity` |
 | `$illustrated_entities_data_memory` | sector memory (`ImageDataMemory.IMAGE_MEMORY`) | `ImageDataMemory` instance |
 | `$illustrated_entities_text_memory` | sector memory (`TextDataMemory.TEXT_MEMORY`) | `TextDataMemory` instance |
@@ -110,7 +139,7 @@ Use `rg --files jars/src` for the full inventory. The entries below name state a
 
 ### `listeners`
 
-Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transient listeners (`addTransientListener`) and listener manager entries registered with `true` (transient) are re-added on every load.
+Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transient listeners (`addTransientListener`) and listener manager entries registered with `true` (transient) are re-added on every load. A `BaseCampaignEventListener` needs `addTransientListener`: the listener manager only calls its own interfaces, such as `EconomyTickListener`, and would never call it.
 
 | File | Owner / connection |
 |---|---|
@@ -128,10 +157,12 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 |---|---|
 | `dialogue/rules/ShowDefaultVisualWithSelector.java` | Rule command; shows the image with the change button or falls back to vanilla `ShowDefaultVisual` behavior |
 | `dialogue/impl/ImageDisplayPanel.java` | Current image with change and "desc." buttons |
-| `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply |
+| `dialogue/panel/ImageVisualPlugin.java` | Draws an `InteractionDialogImageVisual` the way `VisualPanelAPI.showImageVisual` does, with its border: a 25 px additive glow from the `planets` `atmosphere` texture in the `buttonText` colour at 35% alpha |
+| `dialogue/impl/ImageSelectorPanel.java` | Filterable image list with preview and apply. Preview and apply load their image first |
+| `dialogue/panel/ImageListPanelPlugin.java`, `ImageTilePlugin.java` | Selector images: a tile draws a black square with a spinner until its image loads. The list's plugin loads 2 tiles per frame, only tiles inside the list: the scroller renders every row and only clips them |
 | `dialogue/impl/TextChangerPanel.java` | Description editor: one `MultilineTextField` per description, filled from `TextDataEntry.getText` or the vanilla `text1`/`text3`; Apply writes `TextDataEntry.setText` |
-| `dialogue/impl/ConfirmDialoguePanel.java` | Delete confirmation for edited descriptions |
-| `dialogue/panel/MultilineTextField.java` | Multiline text box (`CustomUIPanelPlugin`): own word wrap and rendering with LazyLib `LazyFont`, cursor, new lines, scroll bar, `MAX_CHARS` cap; fields sharing a focus group unfocus each other |
+| `dialogue/impl/DeleteDescriptionDialog.java` | Delete confirmation popup for edited descriptions (`InteractionDialogAPI.showCustomDialog`) |
+| `dialogue/panel/MultilineTextField.java` | Multiline text box (`CustomUIPanelPlugin`): own word wrap and rendering with LazyLib `LazyFont`, cursor and selection anchor, every edit through `replace`, copy, cut, paste, undo grouped by word, scroll bar, `MAX_CHARS` cap; fields sharing a focus group unfocus each other. Hit tests the mouse itself, `containsEvent` casts to the engine event type |
 | `dialogue/panel/*` | Custom panel plumbing adapted from Histidine's code: `VisualCustomPanel` holds the static panel, tooltip and plugin |
 
 ### `dev`
@@ -146,6 +177,7 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 
 - Images are loaded on demand with `SettingsAPI.loadTexture` and freed with `GL11.glDeleteTextures` plus `unloadTexture` (`Importer`). Any code that shows an image must call `ImageDataEntry.load()` first or the visual renders white.
 - The visual size is fixed at `480 x 300` in `ImageDataEntry.addToEntity` and `addToOrbitalStation`.
+- `VisualPanelAPI.showImageVisual` and `showCustomPanel` both add their panel `rightOfTop` of the text panel, so a custom panel's top left is where vanilla draws an illustration. `ImageDisplayPanel` adds its `ImageVisualPlugin` panel there directly; a tooltip would move it, it draws its first element 5 px right of its origin.
 - `VisualCustomPanel` keeps static references to the panel and plugin. They must be cleared when the dialog closes or they leak; `PostDialogueVisualPanelCleaner` does this with a `DelayedActionScript`.
 - `VisualPanelAPI.showCustomPanel` adds the custom panel to the dialog after the option list, and panels hand input to their children last added first, dropping consumed events. A focused `MultilineTextField` consumes every keyboard event, so option hotkeys (number keys, space, Esc) and the dialog never see them. Option shortcuts fire on key down.
 - The stock scroller around `VisualCustomPanel`'s tooltip (`ScrollPanelAPI`) takes the mouse wheel before its children whenever its content is taller than its view. `TextChangerPanel` builds its tooltip without a scroller (`VisualCustomPanel.createPanel(dialog, true, false)`) so the wheel always reaches a `MultilineTextField`; its page must fit `VisualCustomPanel.PANEL_HEIGHT`.
@@ -154,9 +186,10 @@ Each class has a static `register()` called from `ModPlugin.onGameLoad`. Transie
 
 ### Save data
 
-- `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`.
+- `ImageDataMemory` and `TextDataMemory` are stored in sector memory and serialized with the save. `isLoaded` and `imageId` on `ImageDataEntry` are `transient`. Textures outlive a save load, so `forceRefresh` sets `isLoaded` from the texture cache.
 - `ImageDataMemory.forceRefresh` rebuilds the map from the CSV on every game load, so `usedEntityIds` starts empty after a load. The persistent record of which entity has which image is the entity's tag, memory key and `customInteractionDialogImageVisual`; `reapplyAllImages` and `isUsed` only see entries applied since the load.
 - `ImageDataEntry.addToEntity` stores a vanilla illustration it replaces in `$illent_vanilla_visual`; `removeFromEntity` puts it back. Entities overwritten before this key existed have no copy and lose the vanilla illustration on removal.
+- `TextDataEntry.apply` stores a vanilla description id it replaces in `$illent_vanilla_description`; `TextHandler.deleteDescription` puts it back. Entities edited before this key existed have no copy and lose the vanilla description on delete.
 - `TextDataEntry.stringMap1/2` are save data and TASC copies them line by line. `setText` stores a description's whole text in line 1; entries from older saves keep one entry per line until the player applies an edit. `parseStringMap` reads up to the highest line key and treats a null line as empty.
 - The text editor has 99 description slots (`descriptions.csv`). `TextDataMemory.getNexFreetNum` does not check that limit.
 - LunaLib's multiline `LunaTextfield` (`LunaLib-Kotlin.jar`, unchanged up to 2.0.5) appends and deletes at the end only, closes on Enter and stops at its box height. `MultilineTextField` is a Java rewrite of it without those limits; do not swap it back.

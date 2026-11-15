@@ -10,6 +10,8 @@ import com.fs.starfarer.api.loading.Description;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
 import illustratedEntities.dialogue.panel.FramedCustomPanelPlugin;
+import illustratedEntities.dialogue.panel.ImageListPanelPlugin;
+import illustratedEntities.dialogue.panel.ImageTilePlugin;
 import illustratedEntities.dialogue.panel.InteractionDialogCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.NoFrameCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.VisualCustomPanel;
@@ -264,7 +266,8 @@ public class ImageSelectorPanel {
 
         float height = showFilter ? IMAGE_PANEL_HEIGHT : IMAGE_PANEL_HEIGHT + TAG_PANEL_HEGHT;
 
-        final CustomPanelAPI imagePanel = panel.createCustomPanel(PANEL_WIDTH_1, height, new FramedCustomPanelPlugin(0.1f, bgColour, false));
+        ImageListPanelPlugin loader = new ImageListPanelPlugin(0.1f, bgColour, false);
+        final CustomPanelAPI imagePanel = panel.createCustomPanel(PANEL_WIDTH_1, height, loader);
         TooltipMakerAPI imagePanelTooltip = imagePanel.createUIElement(PANEL_WIDTH_1, height, true);
 
         float imagesPerRow = 2f;
@@ -282,11 +285,10 @@ public class ImageSelectorPanel {
                 final ImageDataEntry imageData = imageDataMemory.get(imageList.get(index));
                 if (imageData == null) continue;
 
-                imageData.load();
                 final String path = imageData.getImagePath();
 
                 anchor = rowPanel.createUIElement(IMAGE_WIDTH, IMAGE_HEIGHT, false);
-                anchor.addImage(path, IMAGE_WIDTH, 0f);
+                anchor.addCustom(rowPanel.createCustomPanel(IMAGE_WIDTH, IMAGE_HEIGHT, new ImageTilePlugin(imageData, loader)), 0f);
 
                 if (j == 0) rowPanel.addUIElement(anchor).inTL(opad, 0f);
                 else rowPanel.addUIElement(anchor).rightOfTop(lastUsedAnchor, opad);
@@ -298,6 +300,7 @@ public class ImageSelectorPanel {
                 entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
                     @Override
                     public void onToggle() {
+                        imageData.load();
                         dialogue.getTextPanel().clear();
                         dialogue.getTextPanel().addImage(path);
                     }
@@ -316,6 +319,7 @@ public class ImageSelectorPanel {
                 entry = new InteractionDialogCustomPanelPlugin.ButtonEntry(button, buttonId) {
                     @Override
                     public void onToggle() {
+                        imageData.load();
                         MarketAPI market = dialogue.getInteractionTarget().getMarket();
                         SectorEntityToken primary = market.getPrimaryEntity();
                         ImageHandler.removeImageFrom(primary);

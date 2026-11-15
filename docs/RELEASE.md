@@ -11,7 +11,7 @@ How Illustrated.Entities is built, packaged and published. Nothing here runs unl
 | Version file | `IllustratedEntities.version` | Online Version Checker file on `master`; stamped at packaging, committed back after a release |
 | Release builder | `jars/src/illustratedEntities/tools/ReleaseBuild.java` | `build` and `package`, run with `java <file>` |
 | Builder checks | `jars/src/illustratedEntities/tools/ReleaseBuildChecks.java` | Headless checks of changelog parsing, stamping and file filtering |
-| Build libraries | `lib/` | Game and library jars copied from Industrial.Evolution's `lib/` |
+| Build libraries | `lib/` | Game, LazyLib and LunaLib jars copied from a `0.98.5a-RC6` install |
 | Release jar | `jars/release/IllustratedEntities.jar` | Built by `build`, gitignored, runtime classes only; shipped as `jars/src.jar` |
 | Release workflow | `.github/workflows/release.yml` | Manual only: preview without a version, publish with one |
 
@@ -29,7 +29,7 @@ java jars/src/illustratedEntities/tools/ReleaseBuild.java build
 
 - Compiles against the jars in `lib/`: `starfarer.api.jar`, `starfarer_obf.jar`, `fs.common_obf.jar`, `lwjgl.jar`, `lwjgl_util.jar`, `json.jar`, `log4j-1.2.9.jar`, `LazyLib.jar`, `LunaLib.jar` and `Kotlin-Runtime.jar` (for `org.jetbrains.annotations`). No game install is needed.
 - Builds into a fresh `out/release-build-*`, keeps only runtime classes (the `tools` package never ships), and replaces the release jar only after a clean compile.
-- After a game or library update, copy the new jars into `lib/` (Industrial.Evolution keeps the current set).
+- After a game or library update, copy the new jars into `lib/`: the game jars from `starsector-core`, `LazyLib.jar` and `jars/internal/Kotlin-Runtime.jar` from `mods/LazyLib`, `LunaLib.jar` from `mods/LunaLib`.
 
 ## Package
 
@@ -44,6 +44,7 @@ java jars/src/illustratedEntities/tools/ReleaseBuild.java package 2.0.d    # rel
 - Ships Git-tracked files only: `mod_info.json`, `IllustratedEntities.version`, `Changelog`, `IllustratedEntities_icon.png`, licence and credit files, `data/` (`csv json shader ship wpn proj system variant skin`), `graphics/` (`png jpg jpeg`), `sounds/` (`ogg wav`) and the release jar as `jars/src.jar`. Source, docs, IDE, agent and workflow files, and any path under a dot, `unused`, `unedited`, `tools` or `docs` directory are left out.
 - Fails if a `graphics/illustrated_entities/` path named in `data/` is not packaged.
 - Output in `out/release/`: `Illustrated.Entities<version>.zip` (one `Illustrated.Entities/` folder, sorted, fixed timestamps), `release-notes.md`, the stamped version file and `version.txt`.
+- The ZIP name has no dash on purpose: every published release asset and the version file's `directDownloadURL` use `Illustrated.Entities<version>.zip`.
 
 ## Publish
 

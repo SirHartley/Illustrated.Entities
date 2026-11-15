@@ -1,6 +1,6 @@
 # Illustrated.Entities
 
-Starsector mod (game `0.98a`) that adds illustrations to populated planets and stations, lets the player pick colony images and edit planet descriptions.
+Starsector mod (game `0.98.5a-RC6`) that adds illustrations to populated planets and stations, lets the player pick colony images and edit planet descriptions.
 
 ## Required workflow
 
@@ -50,7 +50,7 @@ After reading this file, use the task to choose the next document. Read the rele
 - Do not deploy or synchronize after merge unless the user explicitly requests it.
 - The mod is published and players keep long saves. Anything stored in sector memory (`ImageDataMemory`, `TextDataMemory`, entity tags and memory keys) is save data: keep field names and keys stable, and say in the PR when a change affects existing saves.
 - Image files are referenced by numeric id (`graphics/illustrated_entities/images/<id>.png`). Never renumber or reuse an id; saves store it.
-- Keep all tools and automated checks under `jars/src/illustratedEntities/tools`, in the normal module. Do not add separate test source trees or duplicate platform classes. Tools may read existing constants and types; do not change runtime classes to support them.
+- Keep all tools and automated checks under `jars/src/illustratedEntities/tools`, in the normal module. Do not add separate test source trees or duplicate platform classes. Tools may read existing constants and types; do not change runtime classes to support them. The one exception is `native-smoke`, a test-only mod that needs the running game (see [ARCHITECTURE.md](docs/ARCHITECTURE.md#live-checks)).
 - Prefer listeners and existing callbacks over polling. Before adding or retaining a polling solution, verify against the exact source that no existing callback covers the requirement. Document the missing coverage and keep the scan scope and frequency to what the behavior needs.
 
 ### Validate and merge
@@ -62,8 +62,10 @@ After reading this file, use the task to choose the next document. Read the rele
 - A change to `data/config/LunaSettings.csv` or `helper/Setting` must pass `tools/SettingsChecks`. A change to `image_data.csv`, `ImagePicker`, `ImageTags` or `loading/Importer` must pass `tools/ImagePickerChecks`. Commands are in [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - No CI runs on pushes or pull requests. The release workflow runs only when started by hand on request; do not add triggers or check workflows.
 - Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
+- PR titles follow the commit message rules. PR bodies use the house-style `PR_BODY.md` template: `## Changes` ending with a `Changelog:` line (or `no changelog entry: <reason>`), then `## Validation`. No attribution marker, "Requested by" line or generated-by footer.
 - Use the connected GitHub app to create, inspect, and merge pull requests.
 - Fetch current remote `master` before branching and again before merging. Merge intervening changes, push the exact final commit, and verify the merged remote revision.
+- New changes and bug fixes may be committed and merged to `dev` without asking. For that work, fetch `dev` instead of `master`.
 
 ### Branch cleanup
 
@@ -82,6 +84,7 @@ Update documents automatically as part of each relevant change. Before committin
 | `CLAUDE.md` | Task scope, workflow, commits, PRs, build gate, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
 | `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle, save data and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No release history or duplicate policy. |
 | `docs/RELEASE.md` | Version numbers, release builder, package contents and publishing | Keep the workflow and builder aligned. |
+| `.claude/agents/researcher.md` | Read-only research subagent definition | Keep its steps in line with the subagent dispatch template and the required-reading routes. |
 | `lib/` | Read-only compile jars (game, LazyLib, LunaLib, Kotlin runtime) | Replace only for a game or library update, as described in `docs/RELEASE.md`. |
 | `Changelog` and `docs/CHANGELOG.md` | Shipped change notes and how agents write them | Add or amend unreleased entries with each implementation task; preserve published entries. |
 
@@ -118,7 +121,7 @@ Write documentation in ordinary English. Use direct verbs and concrete nouns; re
 
 ## Agent behavior
 
-- Keep the user's selected model. The main agent owns planning, merging and shipped code. Delegate bounded research only when authorized.
+- Keep the user's selected model. The main agent owns planning, merging and shipped code. Delegate bounded research only when authorized, to the read-only `researcher` agent (`.claude/agents/researcher.md`).
 - Treat repository instructions as project requirements and skill guidance as scoped reference material. If a skill blocks work or changes its scope, identify the exact instruction and explain the effect.
 - Give brief progress updates and concise final results. Put detailed evidence in the pull request.
 

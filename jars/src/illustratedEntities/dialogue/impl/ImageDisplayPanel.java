@@ -1,10 +1,12 @@
 package illustratedEntities.dialogue.impl;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.InteractionDialogImageVisual;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.ui.*;
 import com.fs.starfarer.api.util.Misc;
+import illustratedEntities.dialogue.panel.ImageVisualPlugin;
 import illustratedEntities.dialogue.panel.InteractionDialogCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.NoFrameCustomPanelPlugin;
 import illustratedEntities.dialogue.panel.VisualCustomPanel;
@@ -15,12 +17,13 @@ import java.awt.*;
 
 public class ImageDisplayPanel {
 
-    protected static final float PANEL_WIDTH_1 = 480;
     protected static final float BUTTON_HEIGHT = 30;
     protected static final float SELECT_BUTTON_WIDTH = 80f;
+    // a tooltip draws its first element 5 right of its origin
+    protected static final float TOOLTIP_INSET = 5f;
 
     public void showPanel(InteractionDialogAPI dialogue) {
-        VisualCustomPanel.createPanel(dialogue, true);
+        VisualCustomPanel.createPanel(dialogue, true, false);
         showInitialPanel(dialogue);
     }
 
@@ -30,7 +33,6 @@ public class ImageDisplayPanel {
         float spad = 3f;
 
         final CustomPanelAPI panel = VisualCustomPanel.getPanel();
-        TooltipMakerAPI panelTooltip = VisualCustomPanel.getTooltip();
 
         Color baseColor = Color.WHITE;
         Color bgColour = Color.darkGray;
@@ -46,13 +48,14 @@ public class ImageDisplayPanel {
 
         //IMAGE PANEL
 
-        CustomPanelAPI imagePanel = panel.createCustomPanel(PANEL_WIDTH_1, 300f, new NoFrameCustomPanelPlugin());
-        TooltipMakerAPI imageAnchor = imagePanel.createUIElement(480, 310, false);
-        imageAnchor.addImage(dialogue.getInteractionTarget().getCustomInteractionDialogImageVisual().getSpriteName(), 0f);
-        imagePanel.addUIElement(imageAnchor).inTL(0f, 0f);
-        panelTooltip.addCustom(imagePanel, 0f);
+        InteractionDialogImageVisual visual = dialogue.getInteractionTarget().getCustomInteractionDialogImageVisual();
+        float imageWidth = visual.getSubImageDisplayWidth();
 
-        CustomPanelAPI selectionPanel = panel.createCustomPanel(PANEL_WIDTH_1, BUTTON_HEIGHT, new NoFrameCustomPanelPlugin());
+        // vanilla places its image visual with the same rightOfTop as this panel, so both share the top left
+        CustomPanelAPI imagePanel = panel.createCustomPanel(imageWidth, visual.getSubImageDisplayHeight(), new ImageVisualPlugin(visual));
+        panel.addComponent(imagePanel).inTL(0f, 0f);
+
+        CustomPanelAPI selectionPanel = panel.createCustomPanel(imageWidth, BUTTON_HEIGHT, new NoFrameCustomPanelPlugin());
 
         //change image button
         if (Setting.ENABLE_IMAGES.enabled()) {
@@ -71,7 +74,7 @@ public class ImageDisplayPanel {
             };
 
             VisualCustomPanel.getPlugin().addButton(entry);
-            selectionPanel.addUIElement(anchor).inTR(0f, 0f); //last in row
+            selectionPanel.addUIElement(anchor).inTR(TOOLTIP_INSET, 0f); //last in row
             lastUsedAnchor = anchor;
         }
 
@@ -89,13 +92,11 @@ public class ImageDisplayPanel {
             };
 
             VisualCustomPanel.getPlugin().addButton(entry);
-            if (lastUsedAnchor == null) selectionPanel.addUIElement(anchor).inTR(0f, 0f);
+            if (lastUsedAnchor == null) selectionPanel.addUIElement(anchor).inTR(TOOLTIP_INSET, 0f);
             else selectionPanel.addUIElement(anchor).leftOfMid(lastUsedAnchor, opad); //first in row
             lastUsedAnchor = anchor;
         }
 
-        panelTooltip.addCustom(selectionPanel, 0f); //add panel
-
-        VisualCustomPanel.addTooltipToPanel();
+        panel.addComponent(selectionPanel).belowLeft(imagePanel, 0f);
     }
 }
