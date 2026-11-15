@@ -16,7 +16,7 @@ Forum thread: [fractalsoftworks.com/forum/index.php?topic=25649](https://fractal
 
 ## Requirements
 
-- Starsector `0.98a`
+- Starsector `0.98.5a`
 - LazyLib
 - LunaLib
 
