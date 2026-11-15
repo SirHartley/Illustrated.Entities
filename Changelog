@@ -1,6 +1,7 @@
 2.0.d - UNRELEASED
 
 General
+Adjusted - 0.98.5a compatibility
 Adjusted - Settings fall back to their defaults when a saved value is invalid
 
 Images

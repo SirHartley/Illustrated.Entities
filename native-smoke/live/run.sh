@@ -17,7 +17,7 @@
 set -euo pipefail
 : "${SMOKE_SCRIPTS:?set SMOKE_SCRIPTS to the scripts/live folder of a skill copy}"
 ROOT=$(cd -- "$(dirname -- "$0")/../.." && pwd)
-GAME=${SMOKE_GAME:-E:/Games/Starsector 0.98/Starsector 098a-RC8 - Modding}
+GAME=${SMOKE_GAME:-E:/Games/Starsector 0.98.5/0.98.5a-RC6 - Modding}
 BASE_WORK=${SMOKE_WORK:-/c/Modding/.smoke-work/Illustrated.Entities}
 OWNER=${SMOKE_OWNER:-illustrated-entities.checks}
 PERF=${SMOKE_PERF:-/c/Modding/.smoke-work/Illustrated.Entities/perf.csv}

@@ -7,7 +7,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
 // test only. speedupToggle stops CampaignState resetting fastForward from the held key.
-// StarfarerSettings.ö00000(boolean) is the speedupToggle setter on 0.98a-RC8 windows: after a game update,
+// StarfarerSettings.ö00000(boolean) is the speedupToggle setter on 0.98.5a-RC6 windows: after a game update,
 // find it where launcher code reads optBoolean("speedupToggle")
 public final class Time {
     public static float mult = 60f;

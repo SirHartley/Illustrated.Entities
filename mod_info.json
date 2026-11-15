@@ -4,7 +4,7 @@
     "author": "SirHartley",
     "version": "2.0.c",
     "description": "Adds illustrations to all vanilla populated planets, adds the option to edit planet texts and to select your own planet images, and to add random images to planets without one.",
-    "gameVersion": "0.98a",
+    "gameVersion": "0.98.5a-RC6",
     "jars":["jars/src.jar"],
     "modPlugin":"illustratedEntities.plugins.ModPlugin",
     "dependencies": [

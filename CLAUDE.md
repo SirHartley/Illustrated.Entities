@@ -1,6 +1,6 @@
 # Illustrated.Entities
 
-Starsector mod (game `0.98a`) that adds illustrations to populated planets and stations, lets the player pick colony images and edit planet descriptions.
+Starsector mod (game `0.98.5a-RC6`) that adds illustrations to populated planets and stations, lets the player pick colony images and edit planet descriptions.
 
 ## Required workflow
 
